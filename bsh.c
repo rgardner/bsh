@@ -6,12 +6,12 @@
 void parse_command();
 void print_arguments(int, char**);
 void print_prompt();
+void print_login_message();
 
 
 int main(int argc, char **argv)
 {
-  printf("Welcome to Bob shell.\n");
-  print_arguments(argc, argv);
+  print_login_message();
 
   while (1) {
     /*pid_t pid;*/
@@ -59,6 +59,17 @@ void print_arguments(int argc, char **argv)
   while (argc--) {
     printf("%s\n", *argv++);
   }
+}
+
+
+void print_login_message()
+{
+  printf("                __\n");
+  printf("    ___        |  \"---.\n");
+  printf("  .\"   \". -o)  |      |\n");
+  printf("<|_______|/`   |__,---;\n");
+  printf("  UU   UU ====|_______|\n");
+  printf("Welcome to Bob shell.\n");
 }
 
 
