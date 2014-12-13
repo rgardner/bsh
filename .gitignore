@@ -28,3 +28,6 @@
 *.x86_64
 *.hex
 bsh
+
+# Debug
+*.dSYM

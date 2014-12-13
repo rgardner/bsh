@@ -9,7 +9,7 @@ void print_prompt();
 void print_login_message();
 
 
-int main(int argc, char **argv)
+int main(int __unused argc, char __unused **argv)
 {
   print_login_message();
 

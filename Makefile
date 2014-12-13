@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall
+CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2 -g
 
 all: bsh
 
