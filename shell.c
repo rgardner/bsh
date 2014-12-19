@@ -5,13 +5,15 @@
 #include <types.h>
 
 void print_prompt();
+char *read_line();
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
   parseInfo *info;
   while (TRUE) {
-    char cmdLine[100];
+    char* cmdLine = NULL;
     print_prompt();
-    fgets(cmdLine, sizeof(cmdLine), stdin);  // read from stdin
+    cmdLine = read_line();
     info = parse(cmdLine);
     print_info(info);
   }
@@ -22,4 +24,11 @@ int main(int argc, char** argv) {
 void print_prompt()
 {
   printf("shell: ");
+}
+
+char* read_line()
+{
+  char *cmdLine = malloc(100 * sizeof(char));
+  fgets(cmdLine, sizeof(cmdLine), stdin);  // read from stdin
+  return cmdLine;
 }

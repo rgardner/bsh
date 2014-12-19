@@ -1,9 +1,9 @@
-/* */
+/* The parsed command information. */
 typedef struct {
   BOOL hasInputRedirection;
   BOOL hasOutputRedirection;
-  char command[100];
-  char arguments[100];
+  char *command;
+  char *arguments;
 } parseInfo;
 
 /* Initialize parseInfo struct. */

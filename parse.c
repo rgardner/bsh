@@ -1,15 +1,18 @@
-/**
- * parse.c
- */
+#include <assert.h>
+#include <stdlib.h>
 
-void init_info(parse_info *p) {
-  // initialize parse_info struct
+#include <parse.h>
+#include <types.h>
+
+void init_info(parseInfo *p) {
+  p = malloc(sizeof(parseInfo));
 }
 
-void parse_command(char* command, struct command_type* comm) {
+void parse_command(char* command, struct commandType *comm) {
 }
 
 parseInfo* parse(char *cmd_line) {
+  assert(FALSE);
   // for each cmd in cmdline {
   //  if (cmd == command) {
   //      parse_command(cmd, type)
@@ -17,7 +20,7 @@ parseInfo* parse(char *cmd_line) {
   //  }
 }
 
-void print_info(parse_info *info) {
+void print_info(parseInfo *info) {
   foreach type in parseInfo {
     print "type_name: type"
   }
