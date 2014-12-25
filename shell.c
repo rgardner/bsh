@@ -1,34 +1,79 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <strings.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
-#include <parse.h>
-#include <types.h>
+#include "parse.h"
 
-void print_prompt();
-char *read_line();
+enum BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT,JOBS};
 
-int main(int argc, char** argv)
-{
-  parseInfo *info;
-  while (TRUE) {
-    char* cmdLine = NULL;
-    print_prompt();
-    cmdLine = read_line();
-    info = parse(cmdLine);
-    print_info(info);
+char *buildPrompt() {
+  return  "%";
+}
+ 
+int isBuiltInCommand(char * cmd) {
+  if (strncmp(cmd, "exit", strlen("exit")) == 0) {
+    return EXIT;
   }
-  free_info(info);
+  return NO_SUCH_BUILTIN;
 }
 
 
-void print_prompt()
-{
-  printf("shell: ");
-}
+int main(int argc, char **argv) {
+  char *cmdLine;
+  parseInfo *info;          // all the information returned by parser.
+  struct commandType *com;  // command name and Arg list for one command.
+  fprintf(stderr, "Until you fix the exit command press ctrl-c to exit\n");
 
-char* read_line()
-{
-  char *cmdLine = malloc(100 * sizeof(char));
-  fgets(cmdLine, sizeof(cmdLine), stdin);  // read from stdin
-  return cmdLine;
+#ifdef UNIX
+    fprintf(stdout, "This is the UNIX version\n");
+#endif
+
+#ifdef WINDOWS
+    fprintf(stdout, "This is the WINDOWS version\n");
+#endif
+
+  while (TRUE) {
+    //insert your code to print prompt here.
+
+#ifdef UNIX
+    cmdLine = readline(buildPrompt());
+    if (cmdLine == NULL) {
+      fprintf(stderr, "Unable to read command\n");
+      continue;
+    }
+#endif
+
+    //insert your code about history and !x !-x here
+
+    //calls the parser
+    info = parse(cmdLine);
+    if (info == NULL){
+      free(cmdLine);
+      continue;
+    }
+    //prints the info struct
+    print_info(info);
+
+    //com contains the info. of the command before the first "|"
+/*
+    com=&info->CommArray[0];
+    if ((com == NULL)  || (com->command == NULL)) {
+      free_info(info);
+      free(cmdLine);
+      continue;
+    }
+*/
+    //com->command tells the command name of com
+/*
+    if (isBuiltInCommand(com->command) == EXIT){
+      exit(1);
+    }
+*/
+    //insert your code here.
+
+    free_info(info);
+    free(cmdLine);
+  }/* while(1) */
 }
