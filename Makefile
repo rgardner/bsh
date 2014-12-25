@@ -1,5 +1,6 @@
 CC=gcc
-CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2
+CFLAGS=-DUNIX -lreadline -lcurses
+#CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2
 DEBUG=-g
 
 all: shell

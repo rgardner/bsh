@@ -6,12 +6,12 @@
 
 #include "parse.h"
 
-enum BUILTIN_COMMANDS { NO_SUCH_BUILTIN=0, EXIT,JOBS};
+enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS };
 
 char *buildPrompt() {
   return  "%";
 }
- 
+
 int isBuiltInCommand(char * cmd) {
   if (strncmp(cmd, "exit", strlen("exit")) == 0) {
     return EXIT;
