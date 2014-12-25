@@ -43,6 +43,13 @@ int main(int argc, char **argv) {
       fprintf(stderr, "Unable to read command\n");
       continue;
     }
+
+    // check command line length
+    if (strlen(cmdLine) > MAXLINE) {
+      fprintf(stderr, "The command you entered is too long.");
+      free(cmdLine);
+      continue;
+    }
 #endif
 
     //insert your code about history and !x !-x here

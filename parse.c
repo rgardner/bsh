@@ -9,14 +9,14 @@
 
 #include "parse.h"
 
-#define MAXLINE 81
-
 void init_info(parseInfo *p) {
   printf("init_info: initializing parseInfo\n");
+  assert(FALSE);
 }
 
 void parse_command(char *command, commandType *comm) {
   printf("parse_command: parsing a single command\n");
+  assert(FALSE);
 }
 
 parseInfo* parse(char *cmdline) {
@@ -44,8 +44,10 @@ parseInfo* parse(char *cmdline) {
 
 void print_info(parseInfo *info) {
   printf("print_info: printing info about parseInfo struct\n");
+  assert(FALSE);
 }
 
 void free_info(parseInfo *info) {
   printf("free_info: freeing memory associated to parseInfo struct\n");
+  assert(FALSE);
 }
