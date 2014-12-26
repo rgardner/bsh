@@ -9,7 +9,7 @@
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS };
 
 char *buildPrompt() {
-  return  "%";
+  return  "%: ";
 }
 
 int isBuiltInCommand(char * cmd) {
@@ -22,8 +22,8 @@ int isBuiltInCommand(char * cmd) {
 
 int main(int argc, char **argv) {
   char *cmdLine;
-  parseInfo *info;          // all the information returned by parser.
-  struct commandType *com;  // command name and Arg list for one command.
+  parseInfo *info;   // all the information returned by parser.
+  commandType *com;  // command name and Arg list for one command.
   fprintf(stderr, "Until you fix the exit command press ctrl-c to exit\n");
 
 #ifdef UNIX
@@ -64,20 +64,17 @@ int main(int argc, char **argv) {
     print_info(info);
 
     //com contains the info. of the command before the first "|"
-/*
     com=&info->CommArray[0];
     if ((com == NULL)  || (com->command == NULL)) {
       free_info(info);
       free(cmdLine);
       continue;
     }
-*/
+
     //com->command tells the command name of com
-/*
     if (isBuiltInCommand(com->command) == EXIT){
       exit(1);
     }
-*/
     //insert your code here.
 
     free_info(info);
