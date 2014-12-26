@@ -11,7 +11,7 @@
 
 void init_info(parseInfo *p) {
   printf("init_info: initializing parseInfo\n");
-  assert(FALSE);
+  *p = (parseInfo){ FALSE, FALSE, FALSE, NULL, "", "", "" };
 }
 
 void parse_command(char *command, commandType *comm) {
@@ -44,7 +44,21 @@ parseInfo* parse(char *cmdline) {
 
 void print_info(parseInfo *info) {
   printf("print_info: printing info about parseInfo struct\n");
-  assert(FALSE);
+  /*printf("prog: %s\n", info->);*/
+  // iterate through program arguments.
+  /*printf("arg%d: %s\n");*/
+  if (info->hasInputRedirection) {
+    printf("inpipe: %s\n", info->inFile);
+  } else {
+    printf("inpipe: no\n");
+  }
+
+  if (info->hasOutputRedirection) {
+    printf("outpipe: %s\n", info->outFile);
+  } else {
+    printf("outpipe: no\n");
+  }
+  printf("background: %s\n", (info->runInBackground) ? "yes" : "no");
 }
 
 void free_info(parseInfo *info) {
