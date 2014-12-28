@@ -16,6 +16,7 @@ void init_info(parseInfo *p) {
 
 void parse_command(char *command, commandType *comm) {
   printf("parse_command: parsing a single command\n");
+  printf("command: '%s'\n", command);
   assert(FALSE);
 }
 
@@ -32,8 +33,21 @@ parseInfo* parse(char *cmdline) {
   init_info(Result);
   com_pos = 0;
   int i = 0;
+
+  // find command position.
+  BOOL start_of_word_found = FALSE;
   while (cmdline[i] != '\n' && cmdline[i] != '\0') {
-    // find command position.
+    // command1 < infile | command > outfile &
+    if (!start_of_word_found && cmdline[i] == ' ') {
+      i++;
+      continue;
+    }
+    start_of_word_found = TRUE;
+    if (cmdline[i] == ' ') {
+      break;
+    }
+    command[com_pos] = cmdline[i];
+    com_pos++;
     i++;
   }
 
