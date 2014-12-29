@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "parse.h"
 
@@ -50,6 +51,7 @@ parseInfo* parse(char *cmdline) {
       com_pos++;
     } else if (!finished_infile && Result->hasInputRedirection) {
       if (cmdline[i] == ' ') {
+        if (strcmp(Result->inFile, "") == 0) continue;
         finished_infile = TRUE;
         continue;
       }
@@ -57,6 +59,7 @@ parseInfo* parse(char *cmdline) {
       infile_pos++;
     } else if (!finished_outfile && Result->hasOutputRedirection) {
       if (cmdline[i] == ' ') {
+        if (strcmp(Result->outFile, "") == 0) continue;
         finished_outfile = TRUE;
         continue;
       }
