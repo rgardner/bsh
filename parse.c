@@ -42,6 +42,8 @@ parseInfo* parse(char *cmdline) {
   for (; cmdline[i] == ' ' && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
 
   BOOL finished_command = FALSE;
+  BOOL finished_infile = FALSE;
+  BOOL finished_outfile = FALSE;
   for (int i = 0; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
     if (!finished_command) {
@@ -51,10 +53,18 @@ parseInfo* parse(char *cmdline) {
         command[com_pos] = cmdline[i];
         com_pos++;
       }
-    } else if (Result->hasInputRedirection) {
+    } else if (!finished_infile && Result->hasInputRedirection) {
+      if (cmdline[i] == ' ') {
+        finished_infile = TRUE;
+        continue;
+      }
       Result->inFile[inFile_pos] = cmdline[i];
       inFile_pos++;
-    } else if (Result->hasOutputRedirection) {
+    } else if (!finished_outfile && Result->hasOutputRedirection) {
+      if (cmdline[i] == ' ') {
+        finished_outfile = TRUE;
+        continue;
+      }
       Result->outFile[outFile_pos] = cmdline[i];
       outFile_pos++;
     } else {
