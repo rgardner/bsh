@@ -10,20 +10,20 @@
 #include "parse.h"
 
 void init_info(parseInfo *p) {
-  printf("init_info: initializing parseInfo\n");
   *p = (parseInfo){ FALSE, FALSE, FALSE, NULL, "", "", "" };
 }
 
 void parse_command(char *command, commandType *comm) {
-  printf("parse_command: parsing a single command\n");
-  printf("command: '%s'\n", command);
-  assert(FALSE);
+  /*assert(FALSE);*/
 }
 
 parseInfo* parse(char *cmdline) {
   parseInfo *Result;
   char command[MAXLINE];
+  int i = 0;
   int com_pos = -1;
+  int inFile_pos = 0;
+  int outFile_pos = 0;
 
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') {
     return NULL;
@@ -33,25 +33,45 @@ parseInfo* parse(char *cmdline) {
   init_info(Result);
   com_pos = 0;
 
-  // find command position.
-  // refact find command
   // add infile
   // add outfile
   // add background
   // add pipe
-  BOOL start_of_command_found = FALSE;
+
+  // skip blank characters at the start of the cmdline
+  for (; cmdline[i] == ' ' && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
+
+  BOOL finished_command = FALSE;
   for (int i = 0; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
-    if (!start_of_command_found && cmdline[i] == ' ') continue;
-    start_of_command_found = TRUE;
-    if (cmdline[i] == ' ') {
-      break;
+    if (!finished_command) {
+      if (cmdline[i] == ' ') {
+        finished_command = TRUE;
+      } else {
+        command[com_pos] = cmdline[i];
+        com_pos++;
+      }
+    } else if (Result->hasInputRedirection) {
+      Result->inFile[inFile_pos] = cmdline[i];
+      inFile_pos++;
+    } else if (Result->hasOutputRedirection) {
+      Result->outFile[outFile_pos] = cmdline[i];
+      outFile_pos++;
+    } else {
+      if (cmdline[i] == '<') {
+        Result->hasInputRedirection = TRUE;
+      } else if (cmdline[i] == '>') {
+        Result->hasOutputRedirection = TRUE;
+      } else if (cmdline[i] == '&') {
+        Result->runInBackground = TRUE;
+      }
     }
-    command[com_pos] = cmdline[i];
-    com_pos++;
   }
 
   command[com_pos] = '\0';
+  if (Result->hasInputRedirection) Result->inFile[inFile_pos] = '\0';
+  if (Result->hasOutputRedirection) Result->outFile[outFile_pos] = '\0';
+
   parse_command(command, 0);
   return Result;
 }
@@ -77,5 +97,5 @@ void print_info(parseInfo *info) {
 
 void free_info(parseInfo *info) {
   printf("free_info: freeing memory associated to parseInfo struct\n");
-  assert(FALSE);
+  /*assert(FALSE);*/
 }
