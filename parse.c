@@ -33,11 +33,6 @@ parseInfo* parse(char *cmdline) {
   init_info(Result);
   com_pos = 0;
 
-  // add infile
-  // add outfile
-  // add background
-  // add pipe
-
   // skip blank characters at the start of the cmdline
   for (; cmdline[i] == ' ' && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
 
@@ -49,10 +44,10 @@ parseInfo* parse(char *cmdline) {
     if (!finished_command) {
       if (cmdline[i] == ' ') {
         finished_command = TRUE;
-      } else {
-        command[com_pos] = cmdline[i];
-        com_pos++;
+        continue;
       }
+      command[com_pos] = cmdline[i];
+      com_pos++;
     } else if (!finished_infile && Result->hasInputRedirection) {
       if (cmdline[i] == ' ') {
         finished_infile = TRUE;
