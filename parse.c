@@ -85,7 +85,6 @@ parseInfo* parse(char *cmdline) {
 }
 
 void print_info(parseInfo *info) {
-  printf("print_info: printing info about parseInfo struct\n");
   /*printf("prog: %s\n", info->);*/
   // iterate through program arguments.
   /*printf("arg%d: %s\n");*/
@@ -104,6 +103,5 @@ void print_info(parseInfo *info) {
 }
 
 void free_info(parseInfo *info) {
-  printf("free_info: freeing memory associated to parseInfo struct\n");
-  /*assert(FALSE);*/
+  free(info);
 }
