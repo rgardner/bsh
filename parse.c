@@ -22,8 +22,8 @@ parseInfo* parse(char *cmdline) {
   char command[MAXLINE];
   int i = 0;
   int com_pos = -1;
-  int inFile_pos = 0;
-  int outFile_pos = 0;
+  int infile_pos = 0;
+  int outfile_pos = 0;
 
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') {
     return NULL;
@@ -53,15 +53,15 @@ parseInfo* parse(char *cmdline) {
         finished_infile = TRUE;
         continue;
       }
-      Result->inFile[inFile_pos] = cmdline[i];
-      inFile_pos++;
+      Result->inFile[infile_pos] = cmdline[i];
+      infile_pos++;
     } else if (!finished_outfile && Result->hasOutputRedirection) {
       if (cmdline[i] == ' ') {
         finished_outfile = TRUE;
         continue;
       }
-      Result->outFile[outFile_pos] = cmdline[i];
-      outFile_pos++;
+      Result->outFile[outfile_pos] = cmdline[i];
+      outfile_pos++;
     } else {
       if (cmdline[i] == '<') {
         Result->hasInputRedirection = TRUE;
@@ -74,8 +74,8 @@ parseInfo* parse(char *cmdline) {
   }
 
   command[com_pos] = '\0';
-  if (Result->hasInputRedirection) Result->inFile[inFile_pos] = '\0';
-  if (Result->hasOutputRedirection) Result->outFile[outFile_pos] = '\0';
+  if (Result->hasInputRedirection) Result->inFile[infile_pos] = '\0';
+  if (Result->hasOutputRedirection) Result->outFile[outfile_pos] = '\0';
 
   parse_command(command, 0);
   return Result;
