@@ -32,23 +32,23 @@ parseInfo* parse(char *cmdline) {
   Result = malloc(sizeof(parseInfo));
   init_info(Result);
   com_pos = 0;
-  int i = 0;
 
   // find command position.
-  BOOL start_of_word_found = FALSE;
-  while (cmdline[i] != '\n' && cmdline[i] != '\0') {
+  // refact find command
+  // add infile
+  // add outfile
+  // add background
+  // add pipe
+  BOOL start_of_command_found = FALSE;
+  for (int i = 0; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
-    if (!start_of_word_found && cmdline[i] == ' ') {
-      i++;
-      continue;
-    }
-    start_of_word_found = TRUE;
+    if (!start_of_command_found && cmdline[i] == ' ') continue;
+    start_of_command_found = TRUE;
     if (cmdline[i] == ' ') {
       break;
     }
     command[com_pos] = cmdline[i];
     com_pos++;
-    i++;
   }
 
   command[com_pos] = '\0';
