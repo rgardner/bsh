@@ -4,6 +4,7 @@
  *************************************************************************/
 
 #include <assert.h>
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -35,7 +36,7 @@ parseInfo* parse(char *cmdline) {
   com_pos = 0;
 
   // skip blank characters at the start of the cmdline
-  for (; cmdline[i] == ' ' && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
+  for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
 
   BOOL finished_command = FALSE;
   BOOL finished_infile = FALSE;
@@ -43,14 +44,14 @@ parseInfo* parse(char *cmdline) {
   for (int i = 0; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
     if (!finished_command) {
-      if (cmdline[i] == ' ') {
+      if (isspace(cmdline[i])) {
         finished_command = TRUE;
         continue;
       }
       command[com_pos] = cmdline[i];
       com_pos++;
     } else if (!finished_infile && Result->hasInputRedirection) {
-      if (cmdline[i] == ' ') {
+      if (isspace(cmdline[i])) {
         if (strcmp(Result->inFile, "") == 0) continue;
         finished_infile = TRUE;
         continue;
@@ -58,7 +59,7 @@ parseInfo* parse(char *cmdline) {
       Result->inFile[infile_pos] = cmdline[i];
       infile_pos++;
     } else if (!finished_outfile && Result->hasOutputRedirection) {
-      if (cmdline[i] == ' ') {
+      if (isspace(cmdline[i])) {
         if (strcmp(Result->outFile, "") == 0) continue;
         finished_outfile = TRUE;
         continue;
