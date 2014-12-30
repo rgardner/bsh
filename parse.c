@@ -12,7 +12,7 @@
 #include "parse.h"
 
 void init_info(parseInfo *p) {
-  *p = (parseInfo){ FALSE, FALSE, FALSE, NULL, "", "", "" };
+  *p = (parseInfo){ FALSE, FALSE, FALSE, {"", {""}, 0}, 1, "", "" };
 }
 
 void parse_command(char *command, commandType *comm) {
