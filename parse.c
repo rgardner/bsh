@@ -55,12 +55,25 @@ parseInfo* parse(char *cmdline) {
   commandType *Command = malloc(sizeof(commandType));
   init_command(Command);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
+    // Parse command.
     if (strcmp(Command->command, "") == 0) {
-      // Parse command.
       int j = i;
       for (; !isspace(cmdline[j]) && cmdline[j] != '\n' && cmdline[j] != '\0'; j++);
       strncpy(Command->command, cmdline + i, j - i);
       Command->command[j - i] = '\0';
+      i = j;
+    }
+
+    // Parse Arguments.
+    else {
+      char *arg = malloc(MAXLINE * sizeof(char));
+      int j = i;
+      for (; !isspace(cmdline[j]) && cmdline[j] != '\n' && cmdline[j] != '\0'; j++);
+      strncpy(arg, cmdline + i, j - i);
+      arg[j - i] = '\0';
+      Command->VarList[Command->VarNum] = arg;
+      Command->VarNum++;
+      i = j;
     }
 
     /*} else {*/
