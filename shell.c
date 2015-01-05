@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -6,12 +7,18 @@
 
 #include "parse.h"
 
-void handle_builtin_command(int);
+#define MAX_PROMPT_LENGTH 1024
 
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, KILL, HISTORY, HELP };
 
 char *buildPrompt() {
-  return  "%: ";
+  char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
+  char cwd[1024];
+  if (getcwd(cwd, sizeof(cwd)) == NULL) {
+    fprintf(stderr, "Error. Could not obtain current working directory.");
+  }
+  snprintf(prompt, MAX_PROMPT_LENGTH, "%s$ ", cwd);
+  return prompt;
 }
 
 int isBuiltInCommand(char * cmd) {
@@ -25,6 +32,11 @@ int isBuiltInCommand(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
+void handle_builtin_command(int command) {
+  if (command == EXIT) {
+    exit(EXIT_SUCCESS);
+  }
+}
 
 int main(int argc, char **argv) {
   char *cmdLine;
@@ -85,11 +97,5 @@ int main(int argc, char **argv) {
 
     free_info(info);
     free(cmdLine);
-  }
-}
-
-void handle_builtin_command(int command) {
-  if (command == EXIT) {
-    exit(0);
   }
 }
