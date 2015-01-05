@@ -6,16 +6,20 @@
 
 #include "parse.h"
 
-enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS };
+enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, KILL, HISTORY, HELP };
 
 char *buildPrompt() {
   return  "%: ";
 }
 
 int isBuiltInCommand(char * cmd) {
-  if (strncmp(cmd, "exit", strlen("exit")) == 0) {
-    return EXIT;
-  }
+  if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
+  if (strncmp(cmd, "help", strlen("help")) == 0) return HELP;
+  if (strncmp(cmd, "exit", strlen("exit")) == 0) return EXIT;
+  if (strncmp(cmd, "jobs", strlen("jobs")) == 0) return JOBS;
+  if (strncmp(cmd, "kill", strlen("kill")) == 0) return KILL;
+  if (strncmp(cmd, "history", strlen("history")) == 0) return HISTORY;
+
   return NO_SUCH_BUILTIN;
 }
 
