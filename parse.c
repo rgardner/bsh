@@ -48,7 +48,6 @@ parseInfo* parse(char *cmdline) {
   init_info(Result);
   com_pos = 0;
 
-  BOOL finished_command = FALSE;
   BOOL finished_argument = FALSE;
   BOOL finished_infile = FALSE;
   BOOL finished_outfile = FALSE;
@@ -56,19 +55,18 @@ parseInfo* parse(char *cmdline) {
   commandType *Command = malloc(sizeof(commandType));
   init_command(Command);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
-    if (!finished_command) {
-      if (isspace(cmdline[i])) {
-        finished_command = TRUE;
-        Command->command[com_pos] = '\0';
-        Result->CommArray[Result->pipeNum] = *Command;
-      } else {
-        Command->command[com_pos] = cmdline[i];
-        com_pos++;
-      }
-    } else {
-      // Skip blank spaces.
-      if (isspace(cmdline[i]) && finished_argument) continue;
+    if (strcmp(Command->command, "") == 0) {
+      // Parse command.
+      int j = i;
+      for (; !isspace(cmdline[j]) && cmdline[j] != '\n' && cmdline[j] != '\0'; j++);
+      strncpy(Command->command, cmdline + i, j - i);
+      Command->command[j - i] = '\0';
     }
+
+    /*} else {*/
+      /*// Skip blank spaces.*/
+      /*if (isspace(cmdline[i]) && finished_argument) continue;*/
+/*    }*/
     /*// command1 < infile | command > outfile &*/
     /*if (!finished_command) {*/
       /*if (isspace(cmdline[i])) {*/
@@ -107,7 +105,6 @@ parseInfo* parse(char *cmdline) {
       /*}*/
     /*}*/
   }
-  Command->command[com_pos] = '\0';
   Result->CommArray[Result->pipeNum] = *Command;
   Result->pipeNum++;
 
