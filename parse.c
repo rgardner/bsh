@@ -46,26 +46,26 @@ parseInfo* parse(char *cmdline) {
     if (!finished_command) {
       if (isspace(cmdline[i])) {
         finished_command = TRUE;
-        continue;
+      } else {
+        command[com_pos] = cmdline[i];
+        com_pos++;
       }
-      command[com_pos] = cmdline[i];
-      com_pos++;
     } else if (!finished_infile && Result->hasInputRedirection) {
       if (isspace(cmdline[i])) {
         if (strcmp(Result->inFile, "") == 0) continue;
         finished_infile = TRUE;
-        continue;
+      } else {
+        Result->inFile[infile_pos] = cmdline[i];
+        infile_pos++;
       }
-      Result->inFile[infile_pos] = cmdline[i];
-      infile_pos++;
     } else if (!finished_outfile && Result->hasOutputRedirection) {
       if (isspace(cmdline[i])) {
         if (strcmp(Result->outFile, "") == 0) continue;
         finished_outfile = TRUE;
-        continue;
+      } else {
+        Result->outFile[outfile_pos] = cmdline[i];
+        outfile_pos++;
       }
-      Result->outFile[outfile_pos] = cmdline[i];
-      outfile_pos++;
     } else {
       if (cmdline[i] == '<') {
         Result->hasInputRedirection = TRUE;
