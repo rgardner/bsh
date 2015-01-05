@@ -49,6 +49,7 @@ parseInfo* parse(char *cmdline) {
   com_pos = 0;
 
   BOOL finished_command = FALSE;
+  BOOL finished_argument = FALSE;
   BOOL finished_infile = FALSE;
   BOOL finished_outfile = FALSE;
 
@@ -60,11 +61,13 @@ parseInfo* parse(char *cmdline) {
         finished_command = TRUE;
         Command->command[com_pos] = '\0';
         Result->CommArray[Result->pipeNum] = *Command;
-        Result->pipeNum++;
       } else {
         Command->command[com_pos] = cmdline[i];
         com_pos++;
       }
+    } else {
+      // Skip blank spaces.
+      if (isspace(cmdline[i]) && finished_argument) continue;
     }
     /*// command1 < infile | command > outfile &*/
     /*if (!finished_command) {*/
