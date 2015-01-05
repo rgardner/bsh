@@ -64,10 +64,10 @@ parseInfo* parse(char *cmdline) {
       } else if (cmdline[i] == '&') {
         Result->runInBackground = TRUE;
       } else if (cmdline[i] == '|') {
-          Result->CommArray[Result->pipeNum] = *Command;
-          Result->pipeNum++;
-          Command = malloc(sizeof(commandType));
-          init_command(Command);
+        Result->CommArray[Result->pipeNum] = *Command;
+        Result->pipeNum++;
+        Command = malloc(sizeof(commandType));
+        init_command(Command);
       } else if (!isspace(cmdline[i])) {
         char *arg = malloc(MAXLINE * sizeof(char));
         i = copy_substring(arg, cmdline, i);
@@ -93,7 +93,7 @@ int copy_substring(char *dest, char *src, int begin) {
   strncpy(dest, src + begin, end - begin);
   dest[end] = '\0';
   return end;
-  }
+}
 
 void print_info(parseInfo *info) {
   for (int i = 0; i < info->pipeNum; i++) {
