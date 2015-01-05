@@ -6,6 +6,8 @@
 
 #include "parse.h"
 
+void handle_builtin_command(int);
+
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, KILL, HISTORY, HELP };
 
 char *buildPrompt() {
@@ -75,12 +77,19 @@ int main(int argc, char **argv) {
     }
 
     //com->command tells the command name of com
-    if (isBuiltInCommand(com->command) == EXIT){
-      exit(0);
+    int command;
+    if ((command = isBuiltInCommand(com->command)) != 0) {
+      handle_builtin_command(command);
     }
     //insert your code here.
 
     free_info(info);
     free(cmdLine);
-  }/* while(1) */
+  }
+}
+
+void handle_builtin_command(int command) {
+  if (command == EXIT) {
+    exit(0);
+  }
 }
