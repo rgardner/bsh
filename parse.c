@@ -63,6 +63,11 @@ parseInfo* parse(char *cmdline) {
         Result->hasOutputRedirection = TRUE;
       } else if (cmdline[i] == '&') {
         Result->runInBackground = TRUE;
+      } else if (cmdline[i] == '|') {
+          Result->CommArray[Result->pipeNum] = *Command;
+          Result->pipeNum++;
+          Command = malloc(sizeof(commandType));
+          init_command(Command);
       } else if (!isspace(cmdline[i])) {
         char *arg = malloc(MAXLINE * sizeof(char));
         i = copy_substring(arg, cmdline, i);
