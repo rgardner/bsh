@@ -11,7 +11,7 @@
 
 #include "parse.h"
 
-int copy_substring(char *, char *, int);
+int copy_substring(char *, char *, int, int);
 
 void init_info(parseInfo *p) {
   *p = (parseInfo){ .hasInputRedirection = FALSE,
@@ -51,11 +51,30 @@ parseInfo* parse(char *cmdline) {
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
     if (strcmp(Command->command, "") == 0) {
-      i = copy_substring(Command->command, cmdline, i);
+      i = copy_substring(Command->command, cmdline, i, MAXLINE);
+      if (i == -1) {
+        fprintf(stderr,
+                "Error. The command exceeds the %d character limit.\n",
+                MAXLINE);
+        free_info(Result);
+        return NULL;
+      }
     } else if (Result->hasInputRedirection && strcmp(Result->inFile, "") == 0) {
-      i = copy_substring(Result->inFile, cmdline, i);
+      i = copy_substring(Result->inFile, cmdline, i, FILE_MAX_SIZE);
+      if (i == -1) {
+        fprintf(stderr, "Error. The input redirection filename exceeds the " \
+                        "%d character limit.\n", FILE_MAX_SIZE);
+        free_info(Result);
+        return NULL;
+      }
     } else if (Result->hasOutputRedirection && strcmp(Result->outFile, "") == 0) {
-      i = copy_substring(Result->outFile, cmdline, i);
+      i = copy_substring(Result->outFile, cmdline, i, FILE_MAX_SIZE);
+      if (i == -1) {
+        fprintf(stderr, "Error. The output redirection filename exceeds the " \
+                        "%d character limit.\n", FILE_MAX_SIZE);
+        free_info(Result);
+        return NULL;
+      }
     } else {
       if (cmdline[i] == '<') {
         Result->hasInputRedirection = TRUE;
@@ -63,6 +82,7 @@ parseInfo* parse(char *cmdline) {
         Result->hasOutputRedirection = TRUE;
       } else if (cmdline[i] == '&') {
         Result->runInBackground = TRUE;
+        break;  // '&' should be the last character
       } else if (cmdline[i] == '|') {
         Result->CommArray[Result->pipeNum] = *Command;
         Result->pipeNum++;
@@ -70,7 +90,14 @@ parseInfo* parse(char *cmdline) {
         init_command(Command);
       } else if (!isspace(cmdline[i])) {
         char *arg = malloc(MAXLINE * sizeof(char));
-        i = copy_substring(arg, cmdline, i);
+        i = copy_substring(arg, cmdline, i, MAXLINE);
+        if (i == -1) {
+          fprintf(stderr,
+                  "Error. The variable exceeds the %d character limit.\n",
+                  MAXLINE);
+          free_info(Result);
+          return NULL;
+        }
         Command->VarList[Command->VarNum] = arg;
         Command->VarNum++;
       }
@@ -85,11 +112,13 @@ parseInfo* parse(char *cmdline) {
 
 /**
  * Copy characters from src to dest until space, newline, or null-byte
- * is encountered. Returns the index of the last valid character found.
+ * is encountered. Returns the index of the last valid character found. Returns
+ * -1 if the length of the new string is greater than the supplied limit.
  */
-int copy_substring(char *dest, char *src, int begin) {
+int copy_substring(char *dest, char *src, int begin, int limit) {
   int end = begin;
   for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++);
+  if (end - begin > limit) return -1;  // length of string to copy too large
   strncpy(dest, src + begin, end - begin);
   dest[end] = '\0';
   return end;
