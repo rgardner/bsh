@@ -11,6 +11,8 @@
 
 #include "parse.h"
 
+int copy_substring(char *, char *, int);
+
 void init_info(parseInfo *p) {
   *p = (parseInfo){ .hasInputRedirection = FALSE,
                     .hasOutputRedirection = FALSE,
@@ -33,9 +35,6 @@ void parse_command(char *command, commandType *comm) {
 parseInfo* parse(char *cmdline) {
   parseInfo *Result;
   int i = 0;
-  int com_pos = -1;
-  int infile_pos = 0;
-  int outfile_pos = 0;
 
   // Is cmdline empty?
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
@@ -46,88 +45,50 @@ parseInfo* parse(char *cmdline) {
 
   Result = malloc(sizeof(parseInfo));
   init_info(Result);
-  com_pos = 0;
-
-  BOOL finished_argument = FALSE;
-  BOOL finished_infile = FALSE;
-  BOOL finished_outfile = FALSE;
 
   commandType *Command = malloc(sizeof(commandType));
   init_command(Command);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
-    // Parse command.
+    // command1 < infile | command > outfile &
     if (strcmp(Command->command, "") == 0) {
-      int j = i;
-      for (; !isspace(cmdline[j]) && cmdline[j] != '\n' && cmdline[j] != '\0'; j++);
-      strncpy(Command->command, cmdline + i, j - i);
-      Command->command[j - i] = '\0';
-      i = j;
+      i = copy_substring(Command->command, cmdline, i);
+    } else if (Result->hasInputRedirection && strcmp(Result->inFile, "") == 0) {
+      i = copy_substring(Result->inFile, cmdline, i);
+    } else if (Result->hasOutputRedirection && strcmp(Result->outFile, "") == 0) {
+      i = copy_substring(Result->outFile, cmdline, i);
+    } else {
+      if (cmdline[i] == '<') {
+        Result->hasInputRedirection = TRUE;
+      } else if (cmdline[i] == '>') {
+        Result->hasOutputRedirection = TRUE;
+      } else if (cmdline[i] == '&') {
+        Result->runInBackground = TRUE;
+      } else if (!isspace(cmdline[i])) {
+        char *arg = malloc(MAXLINE * sizeof(char));
+        i = copy_substring(arg, cmdline, i);
+        Command->VarList[Command->VarNum] = arg;
+        Command->VarNum++;
+      }
     }
-
-    // Parse Arguments.
-    else {
-      char *arg = malloc(MAXLINE * sizeof(char));
-      int j = i;
-      for (; !isspace(cmdline[j]) && cmdline[j] != '\n' && cmdline[j] != '\0'; j++);
-      strncpy(arg, cmdline + i, j - i);
-      arg[j - i] = '\0';
-      Command->VarList[Command->VarNum] = arg;
-      Command->VarNum++;
-      i = j;
-    }
-
-    /*} else {*/
-      /*// Skip blank spaces.*/
-      /*if (isspace(cmdline[i]) && finished_argument) continue;*/
-/*    }*/
-    /*// command1 < infile | command > outfile &*/
-    /*if (!finished_command) {*/
-      /*if (isspace(cmdline[i])) {*/
-        /*finished_command = TRUE;*/
-      /*} else {*/
-        /*command[com_pos] = cmdline[i];*/
-        /*com_pos++;*/
-      /*}*/
-    /*} else if (!finished_infile && Result->hasInputRedirection) {*/
-      /*if (isspace(cmdline[i])) {*/
-        /*if (strcmp(Result->inFile, "") == 0) continue;*/
-        /*finished_infile = TRUE;*/
-      /*} else {*/
-        /*Result->inFile[infile_pos] = cmdline[i];*/
-        /*infile_pos++;*/
-      /*}*/
-    /*} else if (!finished_outfile && Result->hasOutputRedirection) {*/
-      /*if (isspace(cmdline[i])) {*/
-        /*if (strcmp(Result->outFile, "") == 0) continue;*/
-        /*finished_outfile = TRUE;*/
-      /*} else {*/
-        /*Result->outFile[outfile_pos] = cmdline[i];*/
-        /*outfile_pos++;*/
-      /*}*/
-    /*} else {*/
-      /*if (cmdline[i] == '<') {*/
-        /*Result->hasInputRedirection = TRUE;*/
-      /*} else if (cmdline[i] == '>') {*/
-        /*Result->hasOutputRedirection = TRUE;*/
-      /*} else if (cmdline[i] == '&') {*/
-        /*Result->runInBackground = TRUE;*/
-      /*} else if (isspace(cmdline[i])) {*/
-        /*// end argument*/
-      /*} else {*/
-        /*// argument*/
-      /*}*/
-    /*}*/
   }
   Result->CommArray[Result->pipeNum] = *Command;
   Result->pipeNum++;
 
-  if (Result->hasInputRedirection) Result->inFile[infile_pos] = '\0';
-  if (Result->hasOutputRedirection) Result->outFile[outfile_pos] = '\0';
-
-  Result->pipeNum = 1;
   parse_command(Result->CommArray[0].command, &Result->CommArray[0]);
   return Result;
 }
+
+/**
+ * Copy characters from src to dest until space, newline, or null-byte
+ * is encountered. Returns the index of the last valid character found.
+ */
+int copy_substring(char *dest, char *src, int begin) {
+  int end = begin;
+  for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++);
+  strncpy(dest, src + begin, end - begin);
+  dest[end] = '\0';
+  return end;
+  }
 
 void print_info(parseInfo *info) {
   for (int i = 0; i < info->pipeNum; i++) {
