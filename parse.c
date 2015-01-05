@@ -118,5 +118,13 @@ void print_info(parseInfo *info) {
 }
 
 void free_info(parseInfo *info) {
+  if (info == NULL) return;
+  for (int i = 0; i < info->pipeNum; i++) {
+    commandType Command = info->CommArray[i];
+    if (Command.command != NULL) free(Command.command);
+    for (int j = 0; j < Command.VarNum; j++) {
+      free(Command.VarList[j]);
+    }
+  }
   free(info);
 }
