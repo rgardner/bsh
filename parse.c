@@ -13,6 +13,10 @@
 
 int copy_substring(char *, char *, int, int);
 
+BOOL isBackgroundJob(parseInfo *info) {
+  return info->runInBackground == TRUE;
+}
+
 void init_info(parseInfo *p) {
   *p = (parseInfo){ .hasInputRedirection = FALSE,
                     .hasOutputRedirection = FALSE,

@@ -32,16 +32,28 @@ int isBuiltInCommand(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
-void handle_builtin_command(int command) {
+void execute_builtin_command(int command) {
   if (command == EXIT) {
     exit(EXIT_SUCCESS);
   }
 }
 
+void execute_command(parseInfo *info, commandType cmd) {
+  // construct args
+  char *args[cmd.VarNum+2];  // command, *args, NULL
+  args[0] = cmd.command;
+  for (int i = 0; i < cmd.VarNum; i++) {
+    args[i + 1] = cmd.VarList[i];
+  }
+  args[cmd.VarNum+1] = NULL;
+  execvp(args[0], args);
+}
+
 int main(int argc, char **argv) {
+  pid_t child_pid;
   char *cmdLine;
   parseInfo *info;   // all the information returned by parser.
-  commandType *com;  // command name and Arg list for one command.
+  commandType *cmd;  // command name and Arg list for one command.
 
 #ifdef UNIX
     fprintf(stdout, "This is the UNIX version\n");
@@ -81,8 +93,8 @@ int main(int argc, char **argv) {
     print_info(info);
 
     //com contains the info. of the command before the first "|"
-    com=&info->CommArray[0];
-    if ((com == NULL)  || (com->command == NULL)) {
+    cmd=&info->CommArray[0];
+    if ((cmd == NULL)  || (cmd->command == NULL)) {
       free_info(info);
       free(cmdLine);
       continue;
@@ -90,10 +102,20 @@ int main(int argc, char **argv) {
 
     //com->command tells the command name of com
     int command;
-    if ((command = isBuiltInCommand(com->command)) != 0) {
-      handle_builtin_command(command);
+    if ((command = isBuiltInCommand(cmd->command)) != 0) {
+      execute_builtin_command(command);
+    } else {
+      if ((child_pid = fork()) == 0) {
+        execute_command(info, *cmd);
+      } else {
+        if (isBackgroundJob(info)) {
+          // save to background jobs
+        } else {
+          int status;
+          waitpid(child_pid, &status, 0);
+        }
+      }
     }
-    //insert your code here.
 
     free_info(info);
     free(cmdLine);
