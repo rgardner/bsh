@@ -1,3 +1,4 @@
+#include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +41,18 @@ void execute_builtin_command(int command) {
 
 void execute_command(parseInfo *info, commandType cmd) {
   // construct args
+  if (info->hasInputRedirection) {
+    int fd = open(info->inFile, O_RDONLY);
+    dup2(fd, fileno(stdin));
+  }
+  if (info->hasOutputRedirection) {
+    FILE *f = fopen(info->outFile, "w");
+    if (f == NULL) {
+      fprintf(stderr, "Error opening file!\n");
+      exit(EXIT_FAILURE);
+    }
+    dup2(fileno(f), fileno(stdout));
+  }
   char *args[cmd.VarNum+2];  // command, *args, NULL
   args[0] = cmd.command;
   for (int i = 0; i < cmd.VarNum; i++) {
