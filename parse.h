@@ -13,9 +13,9 @@ typedef struct {
 
 /* The parsed command information. */
 typedef struct {
-  BOOL hasInputRedirection;   // infile specified
-  BOOL hasOutputRedirection;  // outfile specified
-  BOOL runInBackground;       // run in background
+  BOOL hasInputRedirection;   // infile specified?
+  BOOL hasOutputRedirection;  // outfile specified?
+  BOOL runInBackground;       // run in background?
   commandType CommArray[PIPE_MAX_NUM];
   int pipeNum;
   char inFile[FILE_MAX_SIZE];   // file to be piped from
