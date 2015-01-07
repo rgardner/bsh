@@ -33,9 +33,12 @@ int isBuiltInCommand(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
-void execute_builtin_command(int command) {
+void execute_builtin_command(int command, commandType cmd) {
   if (command == EXIT) {
     exit(EXIT_SUCCESS);
+  } else if (command == CD) {
+    char *path = cmd.VarList[0];
+    chdir(path);
   }
 }
 
@@ -116,7 +119,7 @@ int main(int argc, char **argv) {
     //com->command tells the command name of com
     int command;
     if ((command = isBuiltInCommand(cmd->command)) != 0) {
-      execute_builtin_command(command);
+      execute_builtin_command(command, *cmd);
     } else {
       if ((child_pid = fork()) == 0) {
         execute_command(info, *cmd);
