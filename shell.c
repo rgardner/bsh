@@ -9,8 +9,19 @@
 #include "parse.h"
 
 #define MAX_PROMPT_LENGTH 1024
+#define MAX_BG_JOBS 10
 
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, KILL, HISTORY, HELP };
+
+/* Background Jobs */
+typedef struct {
+  parseInfo *info;
+  commandType *cmd;
+  pid_t pid;
+} BackgroundJob;
+
+int num_bg_jobs;
+BackgroundJob **background_jobs;
 
 char *buildPrompt() {
   char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
@@ -33,12 +44,34 @@ int isBuiltInCommand(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
+void check_bg_jobs() {
+  for (int i = 0; i < num_bg_jobs; i++) {
+    BackgroundJob job = *background_jobs[i];
+    int status;
+
+    pid_t result = waitpid(job.pid, &status, WNOHANG);
+    if (result == 0) {
+      printf("[%d]\tRunning\t%s\n", i+1, job.cmd->command);
+      continue;
+    }
+
+    if (result == -1) {
+      fprintf(stderr, "Job %d (%s) encountered an error.\n", i+1, job.cmd->command);
+    } else {
+      printf("[%d]\tDone\t%s\n", i+1, job.cmd->command);
+    }
+    free_info(job.info);
+  }
+}
+
 void execute_builtin_command(int command, commandType cmd) {
   if (command == EXIT) {
     exit(EXIT_SUCCESS);
   } else if (command == CD) {
     char *path = cmd.VarList[0];
     chdir(path);
+  } else if (command == JOBS) {
+    check_bg_jobs();
   }
 }
 
@@ -66,17 +99,17 @@ void execute_command(parseInfo *info, commandType cmd) {
 }
 
 int main(int argc, char **argv) {
+  num_bg_jobs = 0;
+  background_jobs = (BackgroundJob **) malloc(MAX_BG_JOBS * sizeof(BackgroundJob *));
   pid_t child_pid;
   char *cmdLine;
   parseInfo *info;   // all the information returned by parser.
   commandType *cmd;  // command name and Arg list for one command.
 
 #ifdef UNIX
-    fprintf(stdout, "This is the UNIX version\n");
-#endif
-
-#ifdef WINDOWS
-    fprintf(stdout, "This is the WINDOWS version\n");
+  printf("This is the UNIX version.\n");
+#elif WINDOWS
+  printf("This is the WINDOWS version.\n");
 #endif
 
   while (TRUE) {
@@ -88,6 +121,7 @@ int main(int argc, char **argv) {
       fprintf(stderr, "Unable to read command\n");
       continue;
     }
+#endif
 
     // check command line length
     if (strlen(cmdLine) > MAXLINE) {
@@ -95,7 +129,6 @@ int main(int argc, char **argv) {
       free(cmdLine);
       continue;
     }
-#endif
 
     //insert your code about history and !x !-x here
 
@@ -125,7 +158,10 @@ int main(int argc, char **argv) {
         execute_command(info, *cmd);
       } else {
         if (isBackgroundJob(info)) {
-          // save to background jobs
+          printf("[%d] %d\n", num_bg_jobs, child_pid);
+          BackgroundJob job = { .cmd = cmd, .pid = child_pid };
+          background_jobs[num_bg_jobs] = &job;
+          num_bg_jobs++;
         } else {
           int status;
           waitpid(child_pid, &status, 0);
@@ -133,7 +169,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    free_info(info);
+    if (!isBackgroundJob(info)) free_info(info);
     free(cmdLine);
   }
 }
