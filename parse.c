@@ -13,12 +13,12 @@
 
 int copy_substring(char *, char *, int, int);
 
-bool isBackgroundJob(parseInfo *info) {
+bool is_bg_job(parse_info_t *info) {
   return info->runInBackground == true;
 }
 
-void init_info(parseInfo *p) {
-  *p = (parseInfo){ .hasInputRedirection = false,
+void init_info(parse_info_t *p) {
+  *p = (parse_info_t){ .hasInputRedirection = false,
                     .hasOutputRedirection = false,
                     .runInBackground = false,
                     .pipeNum = 0,
@@ -26,18 +26,18 @@ void init_info(parseInfo *p) {
                     .outFile = "" };
 }
 
-void init_command(commandType *p) {
-  *p = (commandType){ .command = malloc(MAXLINE*sizeof(char)),
+void init_command(command_t *p) {
+  *p = (command_t){ .command = malloc(MAXLINE*sizeof(char)),
                       .VarList = NULL,
                       .VarNum = 0};
 }
 
-void parse_command(char *command, commandType *comm) {
+void parse_command(char *command, command_t *comm) {
   /*assert(FALSE);*/
 }
 
-parseInfo* parse(char *cmdline) {
-  parseInfo *Result;
+parse_info_t* parse(char *cmdline) {
+  parse_info_t *Result;
   int i = 0;
 
   // Is cmdline empty?
@@ -47,10 +47,10 @@ parseInfo* parse(char *cmdline) {
   for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
   if (cmdline[i] == '\n' && cmdline[i] == '\0') return NULL;
 
-  Result = malloc(sizeof(parseInfo));
+  Result = malloc(sizeof(parse_info_t));
   init_info(Result);
 
-  commandType *Command = malloc(sizeof(commandType));
+  command_t *Command = malloc(sizeof(command_t));
   init_command(Command);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
@@ -90,7 +90,7 @@ parseInfo* parse(char *cmdline) {
       } else if (cmdline[i] == '|') {
         Result->CommArray[Result->pipeNum] = *Command;
         Result->pipeNum++;
-        Command = malloc(sizeof(commandType));
+        Command = malloc(sizeof(command_t));
         init_command(Command);
       } else if (!isspace(cmdline[i])) {
         char *arg = malloc(MAXLINE * sizeof(char));
@@ -128,7 +128,7 @@ int copy_substring(char *dest, char *src, int begin, int limit) {
   return end;
 }
 
-void print_info(parseInfo *info) {
+void print_info(parse_info_t *info) {
   for (int i = 0; i < info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
     for (int j = 0; j < info->CommArray[i].VarNum; j++) {
@@ -150,13 +150,13 @@ void print_info(parseInfo *info) {
   printf("background: %s\n", (info->runInBackground) ? "yes" : "no");
 }
 
-void free_info(parseInfo *info) {
+void free_info(parse_info_t *info) {
   if (info == NULL) return;
   for (int i = 0; i < info->pipeNum; i++) {
-    commandType Command = info->CommArray[i];
-    if (Command.command != NULL) free(Command.command);
-    for (int j = 0; j < Command.VarNum; j++) {
-      free(Command.VarList[j]);
+    command_t cmd = info->CommArray[i];
+    if (cmd.command != NULL) free(cmd.command);
+    for (int j = 0; j < cmd.VarNum; j++) {
+      free(cmd.VarList[j]);
     }
   }
   free(info);

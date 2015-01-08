@@ -9,21 +9,21 @@ typedef struct {
   char *command;
   char *VarList[MAX_VAR_NUM];
   int VarNum;
-} commandType;
+} command_t;
 
 /* The parsed command information. */
 typedef struct {
   bool hasInputRedirection;   // infile specified?
   bool hasOutputRedirection;  // outfile specified?
   bool runInBackground;       // run in background?
-  commandType CommArray[PIPE_MAX_NUM];
+  command_t CommArray[PIPE_MAX_NUM];
   int pipeNum;
   char inFile[FILE_MAX_SIZE];   // file to be piped from
   char outFile[FILE_MAX_SIZE];  // file to pipe into
-} parseInfo;
+} parse_info_t;
 
 /* Function prototypes. */
-parseInfo *parse(char *);
-void free_info(parseInfo *);
-void print_info(parseInfo *);
-bool isBackgroundJob(parseInfo *);
+parse_info_t *parse(char *);
+void free_info(parse_info_t *);
+void print_info(parse_info_t *);
+bool is_bg_job(parse_info_t *);

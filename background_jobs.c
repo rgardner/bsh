@@ -6,13 +6,13 @@
 #include "background_jobs.h"
 
 int num_bg_jobs;
-BackgroundJob *background_jobs[MAX_BG_JOBS];
+bg_job_t *background_jobs[MAX_BG_JOBS];
 
 static void handle_sigchld(int signum) {
   pid_t pid = waitpid((pid_t)-1, 0, WNOHANG);
 
   // find the bg job that exited.
-  BackgroundJob *job;
+  bg_job_t *job;
   int i;
   for (i = 0; i < num_bg_jobs; i++) {
     job = background_jobs[i];
@@ -30,7 +30,7 @@ static void handle_sigchld(int signum) {
 void check_bg_jobs() {
   bool remaining_bg_jobs = false;
   for (int i = 0; i < num_bg_jobs; i++) {
-    BackgroundJob *job = background_jobs[i];
+    bg_job_t *job = background_jobs[i];
     if (job == NULL) continue;
     int status;
 
@@ -52,7 +52,7 @@ void check_bg_jobs() {
   if (!remaining_bg_jobs) num_bg_jobs = 0;
 }
 
-void free_job(BackgroundJob *job) {
+void free_job(bg_job_t *job) {
   free_info(job->info);
   free(job);
 }

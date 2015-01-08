@@ -34,7 +34,7 @@ int isBuiltInCommand(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
-void execute_builtin_command(int command, commandType cmd) {
+void execute_builtin_command(int command, command_t cmd) {
   if (command == EXIT) {
     // check to see if there are background jobs.
     exit(EXIT_SUCCESS);
@@ -49,7 +49,7 @@ void execute_builtin_command(int command, commandType cmd) {
   }
 }
 
-void execute_command(parseInfo *info, commandType cmd) {
+void execute_command(parse_info_t *info, command_t cmd) {
   // setup file input/output redirection.
   if (info->hasInputRedirection) {
     int fd = open(info->inFile, O_RDONLY);
@@ -78,8 +78,8 @@ int main(int argc, char **argv) {
   num_bg_jobs = 0;
   pid_t child_pid;
   char *cmdLine;
-  parseInfo *info;   // all the information returned by parser.
-  commandType *cmd;  // command name and Arg list for one command.
+  parse_info_t *info;   // all the information returned by parser.
+  command_t *cmd;  // command name and Arg list for one command.
 
 /*  if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {*/
     /*perror("An error occurred while setting the SIGCHLD signal handler.");*/
@@ -135,8 +135,8 @@ int main(int argc, char **argv) {
       if ((child_pid = fork()) == 0) {
         execute_command(info, *cmd);
       } else {
-        if (isBackgroundJob(info)) {
-          BackgroundJob *job = malloc(sizeof(BackgroundJob));
+        if (is_bg_job(info)) {
+          bg_job_t *job = malloc(sizeof(bg_job_t));
           job->cmd = cmd;
           job->pid = child_pid;
           background_jobs[num_bg_jobs] = job;
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
     }
     check_bg_jobs();
 
-    if (!isBackgroundJob(info)) free_info(info);
+    if (!is_bg_job(info)) free_info(info);
     free(cmdLine);
   }
 }
