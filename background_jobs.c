@@ -28,6 +28,7 @@ static void handle_sigchld(int signum) {
 }
 
 void check_bg_jobs() {
+  bool remaining_bg_jobs = false;
   for (int i = 0; i < num_bg_jobs; i++) {
     BackgroundJob *job = background_jobs[i];
     if (job == NULL) continue;
@@ -36,6 +37,7 @@ void check_bg_jobs() {
     pid_t result = waitpid(job->pid, &status, WNOHANG);
     if (result == 0) {
       printf("[%d]\tRunning\t%s\n", i+1, job->cmd->command);
+      remaining_bg_jobs = true;
       continue;
     }
 
@@ -47,6 +49,7 @@ void check_bg_jobs() {
     free_job(job);
     background_jobs[i] = NULL;
   }
+  if (!remaining_bg_jobs) num_bg_jobs = 0;
 }
 
 void free_job(BackgroundJob *job) {
