@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -21,7 +22,31 @@ typedef struct {
 } BackgroundJob;
 
 int num_bg_jobs;
-BackgroundJob **background_jobs;
+BackgroundJob *background_jobs[MAX_BG_JOBS];
+
+void free_job(BackgroundJob *job) {
+  free_info(job->info);
+  free(job);
+}
+
+static void handle_sigchld(int signum) {
+  pid_t pid = waitpid((pid_t)-1, 0, WNOHANG);
+
+  // find the bg job that exited.
+  BackgroundJob *job;
+  int i;
+  for (i = 0; i < num_bg_jobs; i++) {
+    job = background_jobs[i];
+    if (job != NULL && job->pid == pid) break;
+  }
+
+  // bg job not found.
+  if (i >= num_bg_jobs) return;
+
+  printf("[%d]\tDone\t%s\n", i+1, job->cmd->command);
+  free_job(job);
+  background_jobs[i] = NULL;
+}
 
 char *buildPrompt() {
   char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
@@ -46,37 +71,43 @@ int isBuiltInCommand(char * cmd) {
 
 void check_bg_jobs() {
   for (int i = 0; i < num_bg_jobs; i++) {
-    BackgroundJob job = *background_jobs[i];
+    BackgroundJob *job = background_jobs[i];
+    if (job == NULL) continue;
     int status;
 
-    pid_t result = waitpid(job.pid, &status, WNOHANG);
+    pid_t result = waitpid(job->pid, &status, WNOHANG);
     if (result == 0) {
-      printf("[%d]\tRunning\t%s\n", i+1, job.cmd->command);
+      printf("[%d]\tRunning\t%s\n", i+1, job->cmd->command);
       continue;
     }
 
     if (result == -1) {
-      fprintf(stderr, "Job %d (%s) encountered an error.\n", i+1, job.cmd->command);
+      fprintf(stderr, "Job %d (%s) encountered an error.\n", i+1, job->cmd->command);
     } else {
-      printf("[%d]\tDone\t%s\n", i+1, job.cmd->command);
+      printf("[%d]\tDone\t%s\n", i+1, job->cmd->command);
     }
-    free_info(job.info);
+    free_job(job);
+    background_jobs[i] = NULL;
   }
 }
 
 void execute_builtin_command(int command, commandType cmd) {
   if (command == EXIT) {
+    // check to see if there are background jobs.
     exit(EXIT_SUCCESS);
   } else if (command == CD) {
     char *path = cmd.VarList[0];
     chdir(path);
   } else if (command == JOBS) {
     check_bg_jobs();
+  } else if (command == KILL) {
+    pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
+    kill(pid, SIGKILL);
   }
 }
 
 void execute_command(parseInfo *info, commandType cmd) {
-  // construct args
+  // setup file input/output redirection.
   if (info->hasInputRedirection) {
     int fd = open(info->inFile, O_RDONLY);
     dup2(fd, fileno(stdin));
@@ -89,6 +120,7 @@ void execute_command(parseInfo *info, commandType cmd) {
     }
     dup2(fileno(f), fileno(stdout));
   }
+  // construct args
   char *args[cmd.VarNum+2];  // command, *args, NULL
   args[0] = cmd.command;
   for (int i = 0; i < cmd.VarNum; i++) {
@@ -99,12 +131,16 @@ void execute_command(parseInfo *info, commandType cmd) {
 }
 
 int main(int argc, char **argv) {
+  /* Initialization. */
   num_bg_jobs = 0;
-  background_jobs = (BackgroundJob **) malloc(MAX_BG_JOBS * sizeof(BackgroundJob *));
   pid_t child_pid;
   char *cmdLine;
   parseInfo *info;   // all the information returned by parser.
   commandType *cmd;  // command name and Arg list for one command.
+
+/*  if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {*/
+    /*perror("An error occurred while setting the SIGCHLD signal handler.");*/
+  /*}*/
 
 #ifdef UNIX
   printf("This is the UNIX version.\n");
@@ -158,16 +194,19 @@ int main(int argc, char **argv) {
         execute_command(info, *cmd);
       } else {
         if (isBackgroundJob(info)) {
-          printf("[%d] %d\n", num_bg_jobs, child_pid);
-          BackgroundJob job = { .cmd = cmd, .pid = child_pid };
-          background_jobs[num_bg_jobs] = &job;
+          BackgroundJob *job = malloc(sizeof(BackgroundJob));
+          job->cmd = cmd;
+          job->pid = child_pid;
+          background_jobs[num_bg_jobs] = job;
           num_bg_jobs++;
+          printf("[%d] %d\n", num_bg_jobs, child_pid);
         } else {
           int status;
           waitpid(child_pid, &status, 0);
         }
       }
     }
+    check_bg_jobs();
 
     if (!isBackgroundJob(info)) free_info(info);
     free(cmdLine);
