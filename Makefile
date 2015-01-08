@@ -8,8 +8,8 @@ all: shell
 bsh: bsh.c
 	$(CC) $(CFLAGS) bsh.c -o bsh
 
-shell: shell.c parse.c parse.h
-	$(CC) $(CFLAGS) $(DEBUG) shell.c parse.c -o shell
+shell: shell.c background_jobs.c background_jobs.h parse.c parse.h
+	$(CC) $(CFLAGS) $(DEBUG) shell.c background_jobs.c parse.c -o shell
 
 clean:
 	rm -r bsh *.o

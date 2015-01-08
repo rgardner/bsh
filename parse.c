@@ -13,14 +13,14 @@
 
 int copy_substring(char *, char *, int, int);
 
-BOOL isBackgroundJob(parseInfo *info) {
-  return info->runInBackground == TRUE;
+bool isBackgroundJob(parseInfo *info) {
+  return info->runInBackground == true;
 }
 
 void init_info(parseInfo *p) {
-  *p = (parseInfo){ .hasInputRedirection = FALSE,
-                    .hasOutputRedirection = FALSE,
-                    .runInBackground = FALSE,
+  *p = (parseInfo){ .hasInputRedirection = false,
+                    .hasOutputRedirection = false,
+                    .runInBackground = false,
                     .pipeNum = 0,
                     .inFile = "",
                     .outFile = "" };
@@ -81,11 +81,11 @@ parseInfo* parse(char *cmdline) {
       }
     } else {
       if (cmdline[i] == '<') {
-        Result->hasInputRedirection = TRUE;
+        Result->hasInputRedirection = true;
       } else if (cmdline[i] == '>') {
-        Result->hasOutputRedirection = TRUE;
+        Result->hasOutputRedirection = true;
       } else if (cmdline[i] == '&') {
-        Result->runInBackground = TRUE;
+        Result->runInBackground = true;
         break;  // '&' should be the last character
       } else if (cmdline[i] == '|') {
         Result->CommArray[Result->pipeNum] = *Command;

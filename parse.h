@@ -1,4 +1,4 @@
-#include "types.h"
+#include <stdbool.h>
 
 #define MAXLINE 81
 #define MAX_VAR_NUM 10
@@ -13,9 +13,9 @@ typedef struct {
 
 /* The parsed command information. */
 typedef struct {
-  BOOL hasInputRedirection;   // infile specified?
-  BOOL hasOutputRedirection;  // outfile specified?
-  BOOL runInBackground;       // run in background?
+  bool hasInputRedirection;   // infile specified?
+  bool hasOutputRedirection;  // outfile specified?
+  bool runInBackground;       // run in background?
   commandType CommArray[PIPE_MAX_NUM];
   int pipeNum;
   char inFile[FILE_MAX_SIZE];   // file to be piped from
@@ -26,4 +26,4 @@ typedef struct {
 parseInfo *parse(char *);
 void free_info(parseInfo *);
 void print_info(parseInfo *);
-BOOL isBackgroundJob(parseInfo *);
+bool isBackgroundJob(parseInfo *);
