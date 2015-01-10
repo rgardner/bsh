@@ -23,7 +23,7 @@ char *buildPrompt() {
   return prompt;
 }
 
-int isBuiltInCommand(char * cmd) {
+int is_builtin_command(char * cmd) {
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
   if (strncmp(cmd, "help", strlen("help")) == 0) return HELP;
   if (strncmp(cmd, "exit", strlen("exit")) == 0) return EXIT;
@@ -36,13 +36,15 @@ int isBuiltInCommand(char * cmd) {
 
 void execute_builtin_command(int command, command_t cmd) {
   if (command == EXIT) {
-    // check to see if there are background jobs.
-    exit(EXIT_SUCCESS);
+    if (!has_bg_jobs(true /* print running */)) {
+      exit(EXIT_SUCCESS);
+    }
+    printf("There are background processes.\n");
   } else if (command == CD) {
     char *path = cmd.VarList[0];
     chdir(path);
   } else if (command == JOBS) {
-    check_bg_jobs();
+    has_bg_jobs(true /* print running */);
   } else if (command == KILL) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
@@ -81,9 +83,9 @@ int main(int argc, char **argv) {
   parse_info_t *info;   // all the information returned by parser.
   command_t *cmd;  // command name and Arg list for one command.
 
-/*  if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {*/
-    /*perror("An error occurred while setting the SIGCHLD signal handler.");*/
-  /*}*/
+  if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
+      perror("An error occurred while setting the SIGCHLD signal handler.");
+   }
 
 #ifdef UNIX
   printf("This is the UNIX version.\n");
@@ -103,7 +105,7 @@ int main(int argc, char **argv) {
 
     // check command line length
     if (strlen(cmdLine) > MAXLINE) {
-      fprintf(stderr, "The command you entered is too long.");
+      fprintf(stderr, "The command you entered is too long.\n");
       free(cmdLine);
       continue;
     }
@@ -129,7 +131,7 @@ int main(int argc, char **argv) {
 
     //com->command tells the command name of com
     int command;
-    if ((command = isBuiltInCommand(cmd->command)) != 0) {
+    if ((command = is_builtin_command(cmd->command)) != 0) {
       execute_builtin_command(command, *cmd);
     } else {
       if ((child_pid = fork()) == 0) {
@@ -137,8 +139,9 @@ int main(int argc, char **argv) {
       } else {
         if (is_bg_job(info)) {
           bg_job_t *job = malloc(sizeof(bg_job_t));
-          job->cmd = cmd;
           job->pid = child_pid;
+          job->info = info;
+          job->cmd = cmd;
           background_jobs[num_bg_jobs] = job;
           num_bg_jobs++;
           printf("[%d] %d\n", num_bg_jobs, child_pid);
@@ -148,7 +151,7 @@ int main(int argc, char **argv) {
         }
       }
     }
-    check_bg_jobs();
+    has_bg_jobs(false /* print running */);
 
     if (!is_bg_job(info)) free_info(info);
     free(cmdLine);
