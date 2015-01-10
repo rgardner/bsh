@@ -40,8 +40,11 @@ parse_info_t* parse(char *cmdline) {
   parse_info_t *Result;
   int i = 0;
 
-  // Is cmdline empty?
+  // Check if this is a valid string.
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
+
+  // Ensure string is nonempty.
+  if (cmdline[0] == '\0') return NULL;
 
   // Skip blank characters at the start of the cmdline
   for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
