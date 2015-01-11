@@ -31,8 +31,20 @@ void handle_sigchld(int signum) {
   background_jobs[i] = NULL;
 }
 
-bool has_bg_jobs(bool print_running) {
-  bool has_bg_jobs = false;
+bool has_bg_jobs() {
+  for (int i = 0; i < num_bg_jobs; i++) {
+    bg_job_t *job = background_jobs[i];
+    if (job == NULL) continue;
+
+    int status;
+    pid_t result = waitpid(job->pid, &status, WNOHANG);
+    if (result == 0) return true;
+  }
+  num_bg_jobs = 0;  // reset the number of jobs
+  return false;
+}
+
+void print_running_jobs() {
   for (int i = 0; i < num_bg_jobs; i++) {
     bg_job_t *job = background_jobs[i];
     if (job == NULL) continue;
@@ -40,14 +52,9 @@ bool has_bg_jobs(bool print_running) {
     int status;
     pid_t result = waitpid(job->pid, &status, WNOHANG);
     if (result == 0) {
-      if (print_running) printf("[%d]\tRunning\t%s\n", i+1, job->cmd->command);
-      has_bg_jobs = true;
-      continue;
+      printf("[%d]\tRunning\t%s\n", i+1, job->cmd->command);
     }
   }
-  // Reset num_bg_jobs if no running jobs found.
-  if (!has_bg_jobs) num_bg_jobs = 0;
-  return has_bg_jobs;
 }
 
 void free_job(bg_job_t *job) {

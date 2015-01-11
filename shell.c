@@ -1,13 +1,14 @@
 #include <fcntl.h>
-#include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <unistd.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
 #include "background_jobs.h"
+#include "history.h"
 
 #define MAX_PROMPT_LENGTH 1024
 
@@ -36,7 +37,7 @@ int is_builtin_command(char * cmd) {
 
 void execute_builtin_command(int command, command_t cmd) {
   if (command == EXIT) {
-    if (!has_bg_jobs(true /* print running */)) {
+    if (!has_bg_jobs) {
       exit(EXIT_SUCCESS);
     }
     printf("There are background processes.\n");
@@ -44,10 +45,12 @@ void execute_builtin_command(int command, command_t cmd) {
     char *path = cmd.VarList[0];
     chdir(path);
   } else if (command == JOBS) {
-    has_bg_jobs(true /* print running */);
+    print_running_jobs();
   } else if (command == KILL) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
+  } else if (command == HISTORY) {
+    print_history();
   }
 }
 
@@ -82,6 +85,7 @@ int main(int argc, char **argv) {
   char *cmdLine;
   parse_info_t *info;   // all the information returned by parser.
   command_t *cmd;  // command name and Arg list for one command.
+  init_history();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
       perror("An error occurred while setting the SIGCHLD signal handler.");
@@ -110,7 +114,16 @@ int main(int argc, char **argv) {
       continue;
     }
 
-    //insert your code about history and !x !-x here
+    // Look up in history.
+    char *expansion;
+    int result = history_expand(cmdLine, &expansion);
+    if (result < 0 || result == 2) {  // error or should not execute.
+      free(expansion);
+      continue;
+    }
+    add_history(expansion);
+    strncpy(cmdLine, expansion, sizeof(cmdLine) - 1);
+    free(expansion);
 
     //calls the parser
     info = parse(cmdLine);
@@ -151,7 +164,6 @@ int main(int argc, char **argv) {
         }
       }
     }
-    has_bg_jobs(false /* print running */);
 
     if (!is_bg_job(info)) free_info(info);
     free(cmdLine);

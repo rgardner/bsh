@@ -13,5 +13,6 @@ extern bg_job_t *background_jobs[MAX_BG_JOBS];
 
 /* Function prototypes. */
 void handle_sigchld(int signum);
-bool has_bg_jobs(bool print_running);
+bool has_bg_jobs();
+void print_running_jobs();
 void free_job(bg_job_t *job);
