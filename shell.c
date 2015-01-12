@@ -5,7 +5,6 @@
 #include <strings.h>
 #include <unistd.h>
 #include <readline/readline.h>
-#include <readline/history.h>
 
 #include "background_jobs.h"
 #include "history.h"
@@ -50,7 +49,7 @@ void execute_builtin_command(int command, command_t cmd) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
   } else if (command == HISTORY) {
-    print_history();
+    history_print();
   }
 }
 
@@ -85,7 +84,7 @@ int main(int argc, char **argv) {
   char *cmdLine;
   parse_info_t *info;   // all the information returned by parser.
   command_t *cmd;  // command name and Arg list for one command.
-  init_history();
+  history_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
       perror("An error occurred while setting the SIGCHLD signal handler.");
@@ -116,13 +115,14 @@ int main(int argc, char **argv) {
 
     // Look up in history.
     char *expansion;
-    int result = history_expand(cmdLine, &expansion);
+    int result = history_exp(cmdLine, &expansion);
     if (result < 0 || result == 2) {  // error or should not execute.
       free(expansion);
       continue;
     }
-    add_history(expansion);
-    strncpy(cmdLine, expansion, sizeof(cmdLine) - 1);
+    history_add(expansion);
+    int cmd_len = strlen(cmdLine) + 1;
+    strncpy(cmdLine, expansion, cmd_len);
     free(expansion);
 
     //calls the parser
@@ -166,6 +166,5 @@ int main(int argc, char **argv) {
     }
 
     if (!is_bg_job(info)) free_info(info);
-    free(cmdLine);
   }
 }
