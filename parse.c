@@ -154,10 +154,10 @@ void print_info(parse_info_t *info) {
 }
 
 void free_info(parse_info_t *info) {
-  if (info == NULL) return;
+  if (!info) return;
   for (int i = 0; i < info->pipeNum; i++) {
     command_t cmd = info->CommArray[i];
-    if (cmd.command != NULL) free(cmd.command);
+    if (cmd.command) free(cmd.command);
     for (int j = 0; j < cmd.VarNum; j++) {
       free(cmd.VarList[j]);
     }

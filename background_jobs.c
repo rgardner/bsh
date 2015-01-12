@@ -18,7 +18,7 @@ void handle_sigchld(int signum) {
   int i;
   for (i = 0; i < num_bg_jobs; i++) {
     job = background_jobs[i];
-    if (job != NULL && job->pid == pid) break;
+    if (job && job->pid == pid) break;
   }
 
   // bg job not found.
@@ -34,7 +34,7 @@ void handle_sigchld(int signum) {
 bool has_bg_jobs() {
   for (int i = 0; i < num_bg_jobs; i++) {
     bg_job_t *job = background_jobs[i];
-    if (job == NULL) continue;
+    if (!job) continue;
 
     int status;
     pid_t result = waitpid(job->pid, &status, WNOHANG);
@@ -47,7 +47,7 @@ bool has_bg_jobs() {
 void print_running_jobs() {
   for (int i = 0; i < num_bg_jobs; i++) {
     bg_job_t *job = background_jobs[i];
-    if (job == NULL) continue;
+    if (!job) continue;
 
     int status;
     pid_t result = waitpid(job->pid, &status, WNOHANG);

@@ -70,9 +70,9 @@ int history_exp(char *string, char **output) {
 void history_add(char *string) {
   state.count++;
   HIST_ENTRY *entry = state.entries[state.count % state.size];
-  if (entry != NULL) {
+  if (entry) {
     histdata_t data = free_hist_entry(entry);
-    if (data != NULL) free(data);
+    if (data) free(data);
   } else {
     state.length++;
   }
@@ -85,7 +85,7 @@ void history_add(char *string) {
 }
 
 histdata_t free_hist_entry(HIST_ENTRY *histent) {
-  if (histent->line != NULL) free(histent->line);
+  if (histent->line) free(histent->line);
   histdata_t data = histent->data;
   free(histent);
   return data;
@@ -94,7 +94,7 @@ histdata_t free_hist_entry(HIST_ENTRY *histent) {
 void history_print() {
   for (int i = 0; i < state.length; i++) {
     HIST_ENTRY *entry = state.entries[i];
-    if (entry == NULL) continue;
+    if (!entry) continue;
 
     printf("\t%d\t%s\n", entry->timestamp, entry->line);
   }

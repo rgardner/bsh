@@ -16,7 +16,7 @@ enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, JOBS, CD, KILL, HISTORY, HELP };
 char *buildPrompt() {
   char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
   char cwd[1024];
-  if (getcwd(cwd, sizeof(cwd)) == NULL) {
+  if (!getcwd(cwd, sizeof(cwd))) {
     fprintf(stderr, "Error. Could not obtain current working directory.");
   }
   snprintf(prompt, MAX_PROMPT_LENGTH, "%s$ ", cwd);
@@ -61,7 +61,7 @@ void execute_command(parse_info_t *info, command_t cmd) {
   }
   if (info->hasOutputRedirection) {
     FILE *f = fopen(info->outFile, "w");
-    if (f == NULL) {
+    if (!f) {
       fprintf(stderr, "Error opening file!\n");
       exit(EXIT_FAILURE);
     }
@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 
 #ifdef UNIX
     cmdLine = readline(buildPrompt());
-    if (cmdLine == NULL) {
+    if (!cmdLine) {
       fprintf(stderr, "Unable to read command\n");
       continue;
     }
@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 
     //calls the parser
     info = parse(cmdLine);
-    if (info == NULL){
+    if (!info){
       free(cmdLine);
       continue;
     }
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
 
     //com contains the info. of the command before the first "|"
     cmd=&info->CommArray[0];
-    if ((cmd == NULL)  || (cmd->command == NULL)) {
+    if ((!cmd)  || (!cmd->command)) {
       free_info(info);
       free(cmdLine);
       continue;
