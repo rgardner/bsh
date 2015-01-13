@@ -68,6 +68,10 @@ int history_exp(char *string, char **output) {
 
 
 void history_add(char *string) {
+  // Copy string.
+  int length = strlen(string) + 1;
+  char *dup_string = strndup(string, sizeof(char) * length);
+
   state.count++;
   HIST_ENTRY *entry = state.entries[state.count % state.size];
   if (entry) {
@@ -78,7 +82,7 @@ void history_add(char *string) {
   }
   entry = malloc(sizeof(HIST_ENTRY));
 
-  entry->line = string;
+  entry->line = dup_string;
   entry->timestamp = state.count;
   entry->data = NULL;
   state.entries[state.count % state.size] = entry;

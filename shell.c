@@ -121,8 +121,7 @@ int main(int argc, char **argv) {
       continue;
     }
     history_add(expansion);
-    int cmd_len = strlen(cmdLine) + 1;
-    strncpy(cmdLine, expansion, cmd_len);
+    strncpy(cmdLine, expansion, strlen(cmdLine) + 1);
     free(expansion);
 
     //calls the parser
@@ -136,7 +135,7 @@ int main(int argc, char **argv) {
 
     //com contains the info. of the command before the first "|"
     cmd=&info->CommArray[0];
-    if ((!cmd)  || (!cmd->command)) {
+    if (!cmd  || !cmd->command) {
       free_info(info);
       free(cmdLine);
       continue;
