@@ -96,7 +96,17 @@ histdata_t free_hist_entry(HIST_ENTRY *histent) {
 }
 
 void history_print() {
-  for (int i = 0; i < state.length; i++) {
+  int start = state.count % state.size + 1;
+  if (start >= state.size) start = 0;
+
+  for (int i = start; i < state.length; i++) {
+    HIST_ENTRY *entry = state.entries[i];
+    if (!entry) continue;
+
+    printf("\t%d\t%s\n", entry->timestamp, entry->line);
+  }
+
+  for (int i = 0; i < start; i++) {
     HIST_ENTRY *entry = state.entries[i];
     if (!entry) continue;
 
