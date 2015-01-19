@@ -30,8 +30,8 @@ void help(int command) {
            "change the working directory to <directory>.\n"
            "<directory> can be an absolute or relative path.\n");
   } else if (command == HELP) {
-      printf("shell: a simple alternative to every other shell.\n\n"
-             "usage: shell\n"
+      printf("shell: a simple alternative to every other shell.\n"
+             "usage: shell\n\n"
              "builtin commands: cd, help, exit, jobs, kill, history\n"
              "use `help <command>` to learn more about a specific command.\n");
   } else if (command == EXIT) {
