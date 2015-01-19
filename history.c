@@ -146,7 +146,8 @@ void history_print(int num) {
       printf("\t%d\t%s\n", entry->timestamp, entry->line);
     }
   }
-} 
+}
+
 void history_help() {
   printf("usage: history [num] [-s num]\n\n"
          "history: print the list of previously executed commands.\n"
