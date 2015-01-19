@@ -15,5 +15,8 @@ int history_exp(char *string, char **output);
 /* Place string at the end of the history list. */
 void history_add(char *string);
 
+/* Stifle the history list, remembering only the last max entries. */
+void history_stifle(int max);
+
 /* Print out history list. */
 void history_print();

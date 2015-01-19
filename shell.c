@@ -84,7 +84,16 @@ void execute_builtin_command(int command, command_t cmd) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
   } else if (command == HISTORY) {
-    history_print();
+    if (!cmd.VarList[0]) {
+      // if no arguments are given, just print history and return.
+      history_print();
+      return;
+    }
+
+    if (strncmp(cmd.VarList[0], "-s", strlen("-s")) == 0) {
+      int hist_size = strtol(cmd.VarList[1], (char **)NULL, 10);
+      history_stifle(hist_size);
+    }
   }
 }
 

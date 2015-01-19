@@ -94,6 +94,24 @@ void history_add(char *string) {
   state.entries[state.count % state.size] = entry;
 }
 
+void history_stifle(int max) {
+  if (max < 0) return;  // can't record a negative number of commands.
+
+  if (state.size <= max) {
+    state.size = max;
+    return;
+  }
+
+  // Need to remove state.size - max entries.
+  for (int i = 1; i <= (state.size - max); i++) {
+    HIST_ENTRY *entry = state.entries[(state.count + i) % state.size];
+    if (!entry) continue;
+    histdata_t data = free_hist_entry(entry);
+    if (data) free(data);
+  }
+  state.size = max;
+}
+
 histdata_t free_hist_entry(HIST_ENTRY *histent) {
   if (histent->line) free(histent->line);
   histdata_t data = histent->data;
