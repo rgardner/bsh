@@ -53,16 +53,22 @@ int history_exp(char *string, char **output) {
   if (string[i] != '!') return 0;
 
   // Start of expansion.
-  int *command;
-  int ret = sscanf(string + i, "!%d", command);
+  int command;
+  int ret = sscanf(string + i, "!%d", &command);
   if (ret != 1) return -1;
 
   // Ensure command is within the bounds of the size of the history.
-  if (*command <= -HISTSIZE || *command > HISTSIZE) return -1;
+  if (command < 0) {
+    if (command <= -HISTSIZE) return -1;
+    command = state.count + command + 1;
+  } else {
+    if (command < (state.count - HISTSIZE) || command > state.count) return -1;
+  }
 
-  // Convert negative indices to their equivalent array index.
-  // TODO(rgardner): insert here.
-  output = &state.entries[*command]->line;
+  char *line = state.entries[command]->line;
+  length = strlen(line) + 1;
+  *output = realloc(*output, sizeof(char) * length);
+  strncpy(*output, line, length);
   return 1;
 }
 

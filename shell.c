@@ -121,7 +121,11 @@ int main(int argc, char **argv) {
       continue;
     }
     history_add(expansion);
-    strncpy(cmdLine, expansion, strlen(cmdLine) + 1);
+
+    // Copy expansion into cmdLine.
+    int length = strlen(expansion) + 1;
+    cmdLine = realloc(cmdLine, sizeof(char) * length);
+    strncpy(cmdLine, expansion, length);
     free(expansion);
 
     //calls the parser
