@@ -38,20 +38,13 @@ void help(int command) {
     printf("usage: exit\n\n"
            "terminate the shell process unless there are background processes.\n");
   } else if (command == JOBS) {
-    printf("usage: jobs\n\n"
-           "list the processes currently executing in the background.\n");
+    jobs_help();
   } else if (command == KILL) {
     printf("usage: kill %%num\n\n"
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
   } else if (command == HISTORY) {
-    printf("usage: history [num] [-s num]\n\n"
-           "history: print the list of previously executed commands.\n"
-           "history num: return the last `num` commands.\n"
-           "history -s num: set the size of the history buffer.\n"
-           "!1 repeats the command numbered `1` in the list of commands "
-           "return by history.\n"
-           "!-1 repeats the last command.\n");
+    history_help();
   }
 }
 

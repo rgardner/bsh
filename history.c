@@ -146,4 +146,13 @@ void history_print(int num) {
       printf("\t%d\t%s\n", entry->timestamp, entry->line);
     }
   }
+} 
+void history_help() {
+  printf("usage: history [num] [-s num]\n\n"
+         "history: print the list of previously executed commands.\n"
+         "history num: return the last `num` commands.\n"
+         "history -s num: set the size of the history buffer.\n"
+         "!1 repeats the command numbered `1` in the list of commands "
+         "return by history.\n"
+         "!-1 repeats the last command.\n");
 }

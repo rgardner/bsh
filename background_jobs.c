@@ -61,3 +61,8 @@ void free_job(bg_job_t *job) {
   free_info(job->info);
   free(job);
 }
+
+void jobs_help() {
+  printf("usage: jobs\n\n"
+         "list the processes currently executing in the background.\n");
+}

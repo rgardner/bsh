@@ -21,6 +21,8 @@ void history_stifle(int max);
 /* Print out history list. */
 void history_print(int num);
 
+void history_help();
+
 /* History Variables. */
 /* The number of entries currently stored in the history list. */
 extern int history_length;
