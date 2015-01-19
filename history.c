@@ -1,9 +1,9 @@
+#include "history.h"
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "history.h"
 
 typedef void *histdata_t;
 

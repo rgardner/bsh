@@ -1,3 +1,5 @@
+#include "background_jobs.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -5,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "background_jobs.h"
+#include "parse.h"
 
 int num_bg_jobs;
 bg_job_t *background_jobs[MAX_BG_JOBS];

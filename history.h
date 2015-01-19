@@ -1,3 +1,5 @@
+#ifndef HISTORY_H
+#define HISTORY_H
 #define HISTSIZE 10
 
 /* Required before using history functions. */
@@ -30,3 +32,4 @@ extern int history_length;
 /* The maximum number of history entries. This must be changed using
  *   history_stifle() */
 extern int history_max_entries;
+#endif

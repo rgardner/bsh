@@ -1,3 +1,5 @@
+#ifndef PARSE_H
+#define PARSE_H
 #include <stdbool.h>
 
 #define MAXLINE 81
@@ -5,14 +7,14 @@
 #define PIPE_MAX_NUM 10
 #define FILE_MAX_SIZE 40
 
-typedef struct {
+typedef struct command_ {
   char *command;
   char *VarList[MAX_VAR_NUM];
   int VarNum;
 } command_t;
 
 /* The parsed command information. */
-typedef struct {
+typedef struct parse_info_ {
   bool hasInputRedirection;   // infile specified?
   bool hasOutputRedirection;  // outfile specified?
   bool runInBackground;       // run in background?
@@ -27,3 +29,4 @@ parse_info_t *parse(char *);
 void free_info(parse_info_t *);
 void print_info(parse_info_t *);
 bool is_bg_job(parse_info_t *);
+#endif
