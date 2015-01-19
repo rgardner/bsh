@@ -26,27 +26,29 @@ char *buildPrompt() {
 /* Print helpful information. */
 void help(int command) {
   if (command == CD) {
-    printf("usage: cd <directory>\n"
+    printf("usage: cd <directory>\n\n"
            "change the working directory to <directory>.\n"
            "<directory> can be an absolute or relative path.\n");
   } else if (command == HELP) {
-      printf("shell: a simple alternative to every other shell.\n"
+      printf("shell: a simple alternative to every other shell.\n\n"
              "usage: shell\n"
              "builtin commands: cd, help, exit, jobs, kill, history\n"
              "use `help <command>` to learn more about a specific command.\n");
   } else if (command == EXIT) {
-    printf("usage: exit\n"
+    printf("usage: exit\n\n"
            "terminate the shell process unless there are background processes.\n");
   } else if (command == JOBS) {
-    printf("usage: jobs\n"
+    printf("usage: jobs\n\n"
            "list the processes currently executing in the background.\n");
   } else if (command == KILL) {
-    printf("usage: kill %%num\n"
+    printf("usage: kill %%num\n\n"
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
   } else if (command == HISTORY) {
-    printf("usage: history\n"
-           "print the list of previously executed commands.\n"
+    printf("usage: history [num] [-s num]\n\n"
+           "history: print the list of previously executed commands.\n"
+           "history num: return the last `num` commands.\n"
+           "history -s num: set the size of the history buffer.\n"
            "!1 repeats the command numbered `1` in the list of commands "
            "return by history.\n"
            "!-1 repeats the last command.\n");
