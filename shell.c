@@ -69,7 +69,7 @@ void execute_builtin_command(int command, command_t cmd) {
     if (cmd.VarList[0]) command = is_builtin_command(cmd.VarList[0]);
     help(command);
   } else if (command == EXIT) {
-    if (!has_bg_jobs) {
+    if (!has_bg_jobs()) {
       exit(EXIT_SUCCESS);
     }
     printf("There are background processes.\n");
