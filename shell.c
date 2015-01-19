@@ -27,7 +27,7 @@ char *buildPrompt() {
 void help(int command) {
   if (command == CD) {
     printf("usage: cd <directory>\n"
-           "change the working directory to <directory>\n"
+           "change the working directory to <directory>.\n"
            "<directory> can be an absolute or relative path.\n");
   } else if (command == HELP) {
       printf("shell: a simple alternative to every other shell.\n"
@@ -36,20 +36,20 @@ void help(int command) {
              "use `help <command>` to learn more about a specific command.\n");
   } else if (command == EXIT) {
     printf("usage: exit\n"
-           "terminate the shell process unless there are background processes\n");
+           "terminate the shell process unless there are background processes.\n");
   } else if (command == JOBS) {
     printf("usage: jobs\n"
            "list the processes currently executing in the background.\n");
   } else if (command == KILL) {
     printf("usage: kill %%num\n"
            "terminate the process numbered `num` in the list of background "
-           "processes return by `jobs` (by sending it SIGKILL)\n");
+           "processes return by `jobs` (by sending it SIGKILL).\n");
   } else if (command == HISTORY) {
     printf("usage: history\n"
            "print the list of previously executed commands.\n"
            "!1 repeats the command numbered `1` in the list of commands "
-           "return by history\n"
-           "!-1 repeats the last command\n");
+           "return by history.\n"
+           "!-1 repeats the last command.\n");
   }
 }
 
