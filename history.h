@@ -19,4 +19,12 @@ void history_add(char *string);
 void history_stifle(int max);
 
 /* Print out history list. */
-void history_print();
+void history_print(int num);
+
+/* History Variables. */
+/* The number of entries currently stored in the history list. */
+extern int history_length;
+
+/* The maximum number of history entries. This must be changed using
+ *   history_stifle() */
+extern int history_max_entries;

@@ -22,14 +22,23 @@ typedef struct _hist_state {
   int size;             /* Number of slots allocated to this array. */
 } HISTORY_STATE;
 
-HISTORY_STATE state;
-
+/* Function prototypes. */
 histdata_t free_hist_entry(HIST_ENTRY *);
+
+/* Global variables. */
+/* Public global variables. */
+int history_length;
+int history_max_entries;
+
+/* Private global variables. */
+HISTORY_STATE state;
 
 void history_init() {
   state.count = -1;
   state.length = 0;
+  history_length = state.length;
   state.size = HISTSIZE;
+  history_max_entries = state.size;
   state.entries = malloc(sizeof(HIST_ENTRY) * state.size);
   for (int i = 0; i < state.size; i++) {
     state.entries[i] = NULL;
@@ -85,6 +94,7 @@ void history_add(char *string) {
     if (data) free(data);
   } else {
     state.length++;
+    history_length++;
   }
   entry = malloc(sizeof(HIST_ENTRY));
 
@@ -97,19 +107,19 @@ void history_add(char *string) {
 void history_stifle(int max) {
   if (max < 0) return;  // can't record a negative number of commands.
 
-  if (state.size <= max) {
-    state.size = max;
-    return;
-  }
+  if (state.size > max) {
+    state.length = max;
 
-  // Need to remove state.size - max entries.
-  for (int i = 1; i <= (state.size - max); i++) {
-    HIST_ENTRY *entry = state.entries[(state.count + i) % state.size];
-    if (!entry) continue;
-    histdata_t data = free_hist_entry(entry);
-    if (data) free(data);
+    // Need to remove state.size - max entries.
+    for (int i = 1; i <= (state.size - max); i++) {
+      HIST_ENTRY *entry = state.entries[(state.count + i) % state.size];
+      if (!entry) continue;
+      histdata_t data = free_hist_entry(entry);
+      if (data) free(data);
+    }
   }
   state.size = max;
+  history_max_entries = state.size;
 }
 
 histdata_t free_hist_entry(HIST_ENTRY *histent) {
@@ -119,21 +129,21 @@ histdata_t free_hist_entry(HIST_ENTRY *histent) {
   return data;
 }
 
-void history_print() {
+void history_print(int num) {
   int start = state.count % state.size + 1;
   if (start >= state.size) start = 0;
 
-  for (int i = start; i < state.length; i++) {
-    HIST_ENTRY *entry = state.entries[i];
-    if (!entry) continue;
+  for (int i = 0; i < num; i++) {
+    for (int j = start; j < state.length; j++) {
+      HIST_ENTRY *entry = state.entries[j];
+      if (!entry) continue;
+      printf("\t%d\t%s\n", entry->timestamp, entry->line);
+    }
+    for (int j = 0; i < start; i++) {
+      HIST_ENTRY *entry = state.entries[j];
+      if (!entry) continue;
 
-    printf("\t%d\t%s\n", entry->timestamp, entry->line);
-  }
-
-  for (int i = 0; i < start; i++) {
-    HIST_ENTRY *entry = state.entries[i];
-    if (!entry) continue;
-
-    printf("\t%d\t%s\n", entry->timestamp, entry->line);
+      printf("\t%d\t%s\n", entry->timestamp, entry->line);
+    }
   }
 }

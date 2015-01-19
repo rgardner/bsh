@@ -86,15 +86,18 @@ void execute_builtin_command(int command, command_t cmd) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
   } else if (command == HISTORY) {
-    if (!cmd.VarList[0]) {
-      // if no arguments are given, just print history and return.
-      history_print();
-      return;
-    }
-
-    if (strncmp(cmd.VarList[0], "-s", strlen("-s")) == 0) {
-      int hist_size = strtol(cmd.VarList[1], (char **)NULL, 10);
-      history_stifle(hist_size);
+    if (cmd.VarList[0] && cmd.VarList[1]) {  // set the history_size
+      if (strncmp(cmd.VarList[0], "-s", strlen("-s")) == 0) {
+        int hist_size = strtol(cmd.VarList[1], (char **)NULL, 10);
+        history_stifle(hist_size);
+      } else {
+        help(HISTORY);
+      }
+     } else if (cmd.VarList[0]) {  // return the last num commands
+      int num = strtol(cmd.VarList[0], (char **)NULL, 10);
+      history_print(num);
+    } else {  // print the entire history
+      history_print(history_length);
     }
   }
 }
