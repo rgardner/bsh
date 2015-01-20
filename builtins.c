@@ -13,30 +13,30 @@
 
 /* Print helpful information. */
 void help(int command) {
-  if (command == CD) {
+  if (command == BG) {
+    bg_help();
+  } else if (command == CD) {
     printf("usage: cd <directory>\n\n"
            "change the working directory to <directory>.\n"
            "<directory> can be an absolute or relative path.\n");
-  } else if (command == HELP) {
-      printf("bsh: a simple alternative to every other shell.\n"
-             "usage: bsh\n\n"
-             "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
-             "use `help <command>` to learn more about a specific command.\n");
   } else if (command == EXIT) {
     printf("usage: exit\n\n"
            "terminate the shell process unless there are background processes.\n");
-  } else if (command == JOBS) {
-    jobs_help();
-  } else if (command == BG) {
-    bg_help();
   } else if (command == FG) {
     fg_help();
+  } else if (command == HELP) {
+    printf("bsh: a simple alternative to every other shell.\n"
+           "usage: bsh\n\n"
+           "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
+           "use `help <command>` to learn more about a specific command.\n");
+  } else if (command == HISTORY) {
+    history_help();
+  } else if (command == JOBS) {
+    jobs_help();
   } else if (command == KILL) {
     printf("usage: kill %%num\n\n"
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
-  } else if (command == HISTORY) {
-    history_help();
   }
 }
 

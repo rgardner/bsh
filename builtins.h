@@ -2,8 +2,8 @@
 #define BUILTINS_H
 #include "parse.h"
 
-enum BuiltinCommands { NO_SUCH_BUILTIN=0, EXIT, CD, KILL, HISTORY, HELP,
-                       JOBS, BG, FG };
+enum BuiltinCommands { NO_SUCH_BUILTIN=0, BG, CD, EXIT, FG, HELP, HISTORY,
+                       JOBS, KILL };
 
 /* Print help about a specific builtin command. */
 void help(int command);
