@@ -21,4 +21,6 @@ bool has_bg_jobs();
 void print_running_jobs();
 void free_job(bg_job_t *job);
 void jobs_help();
+void bg_help();
+void fg_help();
 #endif

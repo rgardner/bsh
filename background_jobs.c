@@ -68,3 +68,13 @@ void jobs_help() {
   printf("usage: jobs\n\n"
          "list the processes currently executing in the background.\n");
 }
+
+void bg_help() {
+  printf("usage: bg [job]\n\n"
+         "resume suspended jobs without bringing them to the foreground.\n");
+}
+
+void fg_help() {
+  printf("usage: fg [ %%job_id ]\n\n"
+         "continues a stopped job by running it in the foreground.\n");
+}

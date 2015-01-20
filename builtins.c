@@ -20,13 +20,17 @@ void help(int command) {
   } else if (command == HELP) {
       printf("bsh: a simple alternative to every other shell.\n"
              "usage: bsh\n\n"
-             "builtin commands: cd, help, exit, jobs, kill, history\n"
+             "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
              "use `help <command>` to learn more about a specific command.\n");
   } else if (command == EXIT) {
     printf("usage: exit\n\n"
            "terminate the shell process unless there are background processes.\n");
   } else if (command == JOBS) {
     jobs_help();
+  } else if (command == BG) {
+    bg_help();
+  } else if (command == FG) {
+    fg_help();
   } else if (command == KILL) {
     printf("usage: kill %%num\n\n"
            "terminate the process numbered `num` in the list of background "
@@ -37,12 +41,14 @@ void help(int command) {
 }
 
 int is_builtin_command(char * cmd) {
+  if (strncmp(cmd, "bg", strlen("bg")) == 0) return BG;
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
-  if (strncmp(cmd, "help", strlen("help")) == 0) return HELP;
   if (strncmp(cmd, "exit", strlen("exit")) == 0) return EXIT;
+  if (strncmp(cmd, "fg", strlen("fg")) == 0) return FG;
+  if (strncmp(cmd, "help", strlen("help")) == 0) return HELP;
+  if (strncmp(cmd, "history", strlen("history")) == 0) return HISTORY;
   if (strncmp(cmd, "jobs", strlen("jobs")) == 0) return JOBS;
   if (strncmp(cmd, "kill", strlen("kill")) == 0) return KILL;
-  if (strncmp(cmd, "history", strlen("history")) == 0) return HISTORY;
 
   return NO_SUCH_BUILTIN;
 }
