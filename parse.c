@@ -28,12 +28,8 @@ void init_info(parse_info_t *p) {
 
 void init_command(command_t *p) {
   *p = (command_t){ .command = malloc(MAXLINE*sizeof(char)),
-                      .VarList = NULL,
+                      .VarList = {NULL},
                       .VarNum = 0};
-}
-
-void parse_command(char *command, command_t *comm) {
-  /*assert(FALSE);*/
 }
 
 parse_info_t* parse(char *cmdline) {
@@ -113,7 +109,6 @@ parse_info_t* parse(char *cmdline) {
   Result->CommArray[Result->pipeNum] = *Command;
   Result->pipeNum++;
 
-  parse_command(Result->CommArray[0].command, &Result->CommArray[0]);
   return Result;
 }
 

@@ -1,12 +1,23 @@
 CC=gcc
-CFLAGS=-DUNIX -lreadline -lcurses
-#CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2
-DEBUG=-g
+CFLAGS=-g -Wextra -Wall -Wunreachable-code -Wformat=2 -DUNIX
+FLAGS = -lreadline -lcurses
 
-all: bsh
+TARGET=bsh
 
-bsh: bsh.c background_jobs.c background_jobs.h builtins.c builtins.h env.c env.h history.c history.h parse.c parse.h
-	$(CC) $(CFLAGS) $(DEBUG) bsh.c background_jobs.c builtins.c env.c history.c parse.c -o bsh
+OBJS = main.o            \
+			 background_jobs.o \
+			 builtins.o        \
+			 env.o             \
+			 history.o         \
+			 parse.o
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(FLAGS) $(CFLAGS) $(OBJS) -o $@
+
+.c.o:
+	$(CC) -c $(CFLAGS) $<
 
 clean:
-	rm -r bsh *.o
+	rm $(OBJS) $(TARGET)

@@ -13,6 +13,8 @@ int num_bg_jobs;
 bg_job_t *background_jobs[MAX_BG_JOBS];
 
 void handle_sigchld(int signum) {
+  if (signum != SIGCHLD) return;
+
   pid_t pid = waitpid((pid_t)-1, 0, WNOHANG);
 
   // find the bg job that exited.

@@ -10,6 +10,7 @@
 #include "history.h"
 
 #define MAX_PROMPT_LENGTH 1024
+#define UNUSED(x) (void)(x)
 
 char *buildPrompt() {
   char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
@@ -56,6 +57,10 @@ void execute_command(parse_info_t *info, command_t cmd) {
 }
 
 int main(int argc, char **argv) {
+  // Ignore argc and argv until we add command line arguments.
+  UNUSED(argc);
+  UNUSED(argv);
+
   /* Initialization. */
   num_bg_jobs = 0;
   pid_t child_pid;
