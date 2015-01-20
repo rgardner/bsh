@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "background_jobs.h"
+#include "env.h"
 #include "history.h"
 #include "parse.h"
 
@@ -37,7 +38,11 @@ void help(int command) {
     printf("usage: kill %%num\n\n"
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
-  }
+  } else if (command == PRINTENV) {
+    bsh_printenv_help();
+  } else if (command == SETENV) {
+    bsh_setenv_help();
+ }
 }
 
 int is_builtin_command(char * cmd) {
@@ -49,6 +54,8 @@ int is_builtin_command(char * cmd) {
   if (strncmp(cmd, "history", strlen("history")) == 0) return HISTORY;
   if (strncmp(cmd, "jobs", strlen("jobs")) == 0) return JOBS;
   if (strncmp(cmd, "kill", strlen("kill")) == 0) return KILL;
+  if (strncmp(cmd, "printenv", strlen("printenv")) == 0) return PRINTENV;
+  if (strncmp(cmd, "setenv", strlen("setenv")) == 0) return SETENV;
 
   return NO_SUCH_BUILTIN;
 }

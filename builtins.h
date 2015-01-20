@@ -3,7 +3,7 @@
 #include "parse.h"
 
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, BG, CD, EXIT, FG, HELP, HISTORY,
-                       JOBS, KILL };
+                       JOBS, KILL, PRINTENV, SETENV };
 
 /* Print help about a specific builtin command. */
 void help(int command);

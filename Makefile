@@ -5,8 +5,8 @@ DEBUG=-g
 
 all: bsh
 
-bsh: bsh.c background_jobs.c background_jobs.h builtins.c builtins.h history.c history.h parse.c parse.h
-	$(CC) $(CFLAGS) $(DEBUG) bsh.c background_jobs.c builtins.c history.c parse.c -o bsh
+bsh: bsh.c background_jobs.c background_jobs.h builtins.c builtins.h env.c env.h history.c history.h parse.c parse.h
+	$(CC) $(CFLAGS) $(DEBUG) bsh.c background_jobs.c builtins.c env.c history.c parse.c -o bsh
 
 clean:
 	rm -r bsh *.o
