@@ -1,6 +1,7 @@
 CC=gcc
-CFLAGS=-g -Wextra -Wall -Wunreachable-code -Wformat=2 -DUNIX
+CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2 -DUNIX
 FLAGS = -lreadline -lcurses
+DEBUG =-g -DDEBUG
 
 TARGET=bsh
 
@@ -14,7 +15,7 @@ OBJS = main.o            \
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) $(FLAGS) $(CFLAGS) $(OBJS) -o $@
+	$(CC) $(FLAGS) $(CFLAGS) $(DEBUG) $(OBJS) -o $@
 
 .c.o:
 	$(CC) -c $(CFLAGS) $<

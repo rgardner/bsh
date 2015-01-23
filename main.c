@@ -119,7 +119,9 @@ int main(int argc, char **argv) {
       continue;
     }
     //prints the info struct
+#ifdef DEBUG
     print_info(info);
+#endif
 
     //com contains the info. of the command before the first "|"
     cmd=&info->CommArray[0];
