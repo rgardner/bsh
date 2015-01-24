@@ -17,7 +17,7 @@ Welcome to Bob shell.
   - ~~http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html~~
 3. ~~Extra history features~~
   - ~~`history -s num` and `history num`~~
-4. `which`
+4. ~~`which`~~
 5. `pushd, popd`
 6. `alias`
 7. `pipe`
