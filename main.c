@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
 
     //calls the parser
     info = parse(cmdLine);
-    if (!info){
+    if (!info) {
       free(cmdLine);
       continue;
     }

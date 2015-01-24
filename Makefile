@@ -18,7 +18,7 @@ $(TARGET): $(OBJS)
 	$(CC) $(FLAGS) $(CFLAGS) $(DEBUG) $(OBJS) -o $@
 
 .c.o:
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) $(DEBUG) $<
 
 clean:
 	rm $(OBJS) $(TARGET)
