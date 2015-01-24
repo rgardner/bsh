@@ -98,8 +98,12 @@ void history_add(char *string) {
   }
   entry = malloc(sizeof(HIST_ENTRY));
 
+  int pre = (state.count-1) % state.size;
+  if (pre < 0) pre = state.size;
+  int timestamp = (state.entries[pre]) ? state.entries[pre]->timestamp : 0;
+
   entry->line = dup_string;
-  entry->timestamp = state.count;
+  entry->timestamp = timestamp + 1;
   entry->data = NULL;
   state.entries[state.count % state.size] = entry;
 }
