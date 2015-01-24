@@ -45,8 +45,12 @@ void help(int command) {
     printf("usage: kill %%num\n\n"
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
+  } else if (command == POPD) {
+
   } else if (command == PRINTENV) {
     bsh_printenv_help();
+  } else if (command == POPD) {
+
   } else if (command == SETENV) {
     bsh_setenv_help();
  } else if (command == WHICH) {
@@ -63,7 +67,9 @@ int is_builtin_command(char * cmd) {
   if (strncmp(cmd, "history", strlen("history")) == 0) return HISTORY;
   if (strncmp(cmd, "jobs", strlen("jobs")) == 0) return JOBS;
   if (strncmp(cmd, "kill", strlen("kill")) == 0) return KILL;
+  if (strncmp(cmd, "popd", strlen("popd")) == 0) return POPD;
   if (strncmp(cmd, "printenv", strlen("printenv")) == 0) return PRINTENV;
+  if (strncmp(cmd, "pushd", strlen("pushd")) == 0) return PUSHD;
   if (strncmp(cmd, "setenv", strlen("setenv")) == 0) return SETENV;
   if (strncmp(cmd, "which", strlen("which")) == 0) return WHICH;
 

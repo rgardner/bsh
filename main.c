@@ -22,8 +22,7 @@ char *buildPrompt() {
   return prompt;
 }
 
-void print_login_message()
-{
+void print_login_message() {
   printf("                __\n");
   printf("    ___        |  \"---.\n");
   printf("  .\"   \". -o)  |      |\n");
@@ -156,4 +155,5 @@ int main(int argc, char **argv) {
 
     if (!is_bg_job(info)) free_info(info);
   }
+  exit(EXIT_SUCCESS);
 }
