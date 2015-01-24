@@ -107,16 +107,18 @@ void history_add(char *string) {
 void history_stifle(int max) {
   if (max < 0) return;  // can't record a negative number of commands.
 
-  if (state.size > max) {
-    state.length = max;
-
-    // Need to remove state.size - max entries.
-    for (int i = 1; i <= (state.size - max); i++) {
-      HIST_ENTRY *entry = state.entries[(state.count + i) % state.size];
-      if (!entry) continue;
-      histdata_t data = free_hist_entry(entry);
-      if (data) free(data);
+  if (state.length > max) {
+    int start = state.count - max + 1;
+    HIST_ENTRY **list = malloc(sizeof(HIST_ENTRY) * max);
+    for (int i = 0; i < max; i++) {
+      HIST_ENTRY *entry = state.entries[(start + i) % state.size];
+      list[i] = entry;
     }
+
+    free(state.entries);
+    state.entries = list;
+    state.length = max;
+    state.count = max - 1;
   }
   state.size = max;
   history_max_entries = state.size;

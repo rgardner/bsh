@@ -91,7 +91,6 @@ void execute_builtin_command(int command, command_t cmd) {
   }
 }
 
-
 void history_wrapper(char *arg1, char *arg2) {
   if (arg1 && arg2) {  // set the history_size
     if (strncmp(arg1, "-s", strlen("-s")) == 0) {
@@ -101,7 +100,7 @@ void history_wrapper(char *arg1, char *arg2) {
       help(HISTORY);
     }
    } else if (arg1) {  // return the last num commands
-    int num = strtol(arg1, (char **)NULL, 10);
+    int num = strtol(arg1, (char **)NULL, history_length);
     history_print(num);
   } else {  // print the entire history
     history_print(history_length);
