@@ -11,6 +11,9 @@
 #include "history.h"
 #include "parse.h"
 
+/* Function prototypes. */
+void history_wrapper();
+void which();
 
 /* Print helpful information. */
 void help(int command) {
@@ -77,23 +80,34 @@ void execute_builtin_command(int command, command_t cmd) {
     }
     printf("There are background processes.\n");
   } else if (command == HISTORY) {
-    if (cmd.VarList[0] && cmd.VarList[1]) {  // set the history_size
-      if (strncmp(cmd.VarList[0], "-s", strlen("-s")) == 0) {
-        int hist_size = strtol(cmd.VarList[1], (char **)NULL, 10);
-        history_stifle(hist_size);
-      } else {
-        help(HISTORY);
-      }
-     } else if (cmd.VarList[0]) {  // return the last num commands
-      int num = strtol(cmd.VarList[0], (char **)NULL, 10);
-      history_print(num);
-    } else {  // print the entire history
-      history_print(history_length);
-    }
+    history_wrapper(cmd.VarList[0], cmd.VarList[1]);
   } else if (command == JOBS) {
     print_running_jobs();
   } else if (command == KILL) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
+  } else if (command == WHICH) {
+    which();
   }
+}
+
+
+void history_wrapper(char *arg1, char *arg2) {
+  if (arg1 && arg2) {  // set the history_size
+    if (strncmp(arg1, "-s", strlen("-s")) == 0) {
+      int hist_size = strtol(arg2, (char **)NULL, 10);
+      history_stifle(hist_size);
+    } else {
+      help(HISTORY);
+    }
+   } else if (arg1) {  // return the last num commands
+    int num = strtol(arg1, (char **)NULL, 10);
+    history_print(num);
+  } else {  // print the entire history
+    history_print(history_length);
+  }
+}
+
+void which() {
+
 }
