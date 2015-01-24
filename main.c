@@ -85,8 +85,8 @@ int main(int argc, char **argv) {
 #ifdef UNIX
     cmdLine = readline(buildPrompt());
     if (!cmdLine) {
-      fprintf(stderr, "Unable to read command\n");
-      continue;
+      printf("\n");
+      exit(EXIT_SUCCESS);
     }
 #endif
 
