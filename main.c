@@ -67,6 +67,7 @@ int main(int argc, char **argv) {
   parse_info_t *info;   // all the information returned by parser.
   command_t *cmd;  // command name and Arg list for one command.
   history_init();
+  directory_stack = stack_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
       perror("An error occurred while setting the SIGCHLD signal handler.");

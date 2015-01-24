@@ -12,12 +12,21 @@
 #include "background_jobs.h"
 #include "env.h"
 #include "history.h"
+#include "stack.h"
 #include "parse.h"
 
+#define UNUSED(x) (void)(x)
+
 /* Function prototypes. */
-void history_wrapper();
-void which(int, char **);
-static int print_matches(char *, char *);
+static void history_wrapper(int, char**);
+static int popd(int, char**);
+static int pushd(int, char**);
+static void which(int, char **);
+static bool which_is_there();
+static int which_print_matches(char *, char *);
+
+/* Global variables */
+struct node *directory_stack;
 
 /* Print helpful information. */
 void help(int command) {
@@ -46,11 +55,9 @@ void help(int command) {
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
   } else if (command == POPD) {
-
   } else if (command == PRINTENV) {
     bsh_printenv_help();
   } else if (command == POPD) {
-
   } else if (command == SETENV) {
     bsh_setenv_help();
  } else if (command == WHICH) {
@@ -90,34 +97,40 @@ void execute_builtin_command(int command, command_t cmd) {
     }
     printf("There are background processes.\n");
   } else if (command == HISTORY) {
-    history_wrapper(cmd.VarList[0], cmd.VarList[1]);
+    history_wrapper(cmd.VarNum, cmd.VarList);
   } else if (command == JOBS) {
     print_running_jobs();
   } else if (command == KILL) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
+  } else if (command == POPD) {
+    popd(cmd.VarNum, cmd.VarList);
+  } else if (command == PUSHD) {
+    pushd(cmd.VarNum, cmd.VarList);
   } else if (command == WHICH) {
     which(cmd.VarNum, cmd.VarList);
   }
 }
 
-void history_wrapper(char *arg1, char *arg2) {
-  if (arg1 && arg2) {  // set the history_size
-    if (strncmp(arg1, "-s", strlen("-s")) == 0) {
-      int hist_size = strtol(arg2, (char **)NULL, 10);
+static void
+history_wrapper(int argc, char **argv) {
+  if (argc == 2) {  // set the history size
+    if (strncmp(argv[0], "-s", strlen("-s")) == 0) {
+      int hist_size = strtol(argv[1], (char **)NULL, 10);
       history_stifle(hist_size);
     } else {
       help(HISTORY);
     }
-   } else if (arg1) {  // return the last num commands
-    int num = strtol(arg1, (char **)NULL, history_length);
+   } else if (argc == 1) {  // return the last num commands
+    int num = strtol(argv[0], (char **)NULL, history_length);
     history_print(num);
   } else {  // print the entire history
     history_print(history_length);
   }
 }
 
-void which(int argc, char **argv) {
+static void
+which(int argc, char **argv) {
   char *p, *path;
   ssize_t pathlen;
 
@@ -127,14 +140,14 @@ void which(int argc, char **argv) {
   while (argc > 0) {
     memcpy(path, p, pathlen);
     if (strlen(*argv) >= FILE_MAX_SIZE) continue;
-    print_matches(path, *argv);
+    which_print_matches(path, *argv);
     argv++;
     argc--;
   }
 }
 
 static bool
-is_there(char *candidate) {
+which_is_there(char *candidate) {
   struct stat fin;
 
   /* XXX work around access(2) false positives for superuser */
@@ -150,13 +163,13 @@ is_there(char *candidate) {
 }
 
 static int
-print_matches(char *path, char *filename) {
+which_print_matches(char *path, char *filename) {
   char candidate[PATH_MAX];
   const char *d;
   bool found;
 
   if (strchr(filename, '/')) {
-    return is_there(filename) ? 0 : -1;
+    return which_is_there(filename) ? 0 : -1;
   }
   found = false;
   while ((d = strsep(&path, ":")) != NULL) {
@@ -167,10 +180,35 @@ print_matches(char *path, char *filename) {
         filename) >= (int)sizeof(candidate)) {
           continue;
     }
-    if (is_there(candidate)) {
+    if (which_is_there(candidate)) {
       found = true;
       break;
     }
   }
   return (found ? 0 : -1);
+}
+
+static int
+popd(int argc, char** argv) {
+  UNUSED(argc);
+  UNUSED(argv);
+
+  if (!directory_stack->data) {
+    printf("-bsh: popd: directory stack empty\n");
+    return -1;
+  }
+  char *dir = stack_pop(directory_stack);
+  chdir(dir);
+  return 0;
+}
+
+static int
+pushd(int argc, char** argv) {
+  if (argc < 1) {
+    printf("-bsh: pushd: no other directory\n");
+    return -1;
+  }
+  stack_push(directory_stack, argv[0]);
+  chdir(argv[0]);
+  return 0;
 }

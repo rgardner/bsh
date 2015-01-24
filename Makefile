@@ -10,6 +10,7 @@ OBJS = main.o            \
 			 builtins.o        \
 			 env.o             \
 			 history.o         \
+			 stack.o           \
 			 parse.o
 
 all: $(TARGET)
