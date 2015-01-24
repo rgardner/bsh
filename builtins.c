@@ -1,5 +1,8 @@
 #include "builtins.h"
 
+#include <sys/stat.h>
+#include <sys/param.h>
+
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +16,8 @@
 
 /* Function prototypes. */
 void history_wrapper();
-void which();
+void which(int, char **);
+static int print_matches(char *, char *);
 
 /* Print helpful information. */
 void help(int command) {
@@ -87,7 +91,7 @@ void execute_builtin_command(int command, command_t cmd) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
   } else if (command == WHICH) {
-    which();
+    which(cmd.VarNum, cmd.VarList);
   }
 }
 
@@ -107,6 +111,60 @@ void history_wrapper(char *arg1, char *arg2) {
   }
 }
 
-void which() {
+void which(int argc, char **argv) {
+  char *p, *path;
+  ssize_t pathlen;
 
+  p = getenv("PATH");
+  pathlen = strlen(p) + 1;
+  path = malloc(pathlen);
+  while (argc > 0) {
+    memcpy(path, p, pathlen);
+    if (strlen(*argv) >= FILE_MAX_SIZE) continue;
+    print_matches(path, *argv);
+    argv++;
+    argc--;
+  }
+}
+
+static bool
+is_there(char *candidate) {
+  struct stat fin;
+
+  /* XXX work around access(2) false positives for superuser */
+  if (access(candidate, X_OK) == 0 &&
+      stat(candidate, &fin) == 0 &&
+      S_ISREG(fin.st_mode) &&
+      (getuid() != 0 ||
+      (fin.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)) {
+        printf("%s\n", candidate);
+        return true;
+  }
+  return false;
+}
+
+static int
+print_matches(char *path, char *filename) {
+  char candidate[PATH_MAX];
+  const char *d;
+  bool found;
+
+  if (strchr(filename, '/')) {
+    return is_there(filename) ? 0 : -1;
+  }
+  found = false;
+  while ((d = strsep(&path, ":")) != NULL) {
+    if (*d == '\0') {
+      d = ".";
+    }
+    if (snprintf(candidate, sizeof(candidate), "%s/%s", d,
+        filename) >= (int)sizeof(candidate)) {
+          continue;
+    }
+    if (is_there(candidate)) {
+      found = true;
+      break;
+    }
+  }
+  return (found ? 0 : -1);
 }
