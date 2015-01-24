@@ -42,6 +42,8 @@ void help(int command) {
     bsh_printenv_help();
   } else if (command == SETENV) {
     bsh_setenv_help();
+ } else if (command == WHICH) {
+   printf("usage: which program ...\n");
  }
 }
 
@@ -56,6 +58,7 @@ int is_builtin_command(char * cmd) {
   if (strncmp(cmd, "kill", strlen("kill")) == 0) return KILL;
   if (strncmp(cmd, "printenv", strlen("printenv")) == 0) return PRINTENV;
   if (strncmp(cmd, "setenv", strlen("setenv")) == 0) return SETENV;
+  if (strncmp(cmd, "which", strlen("which")) == 0) return WHICH;
 
   return NO_SUCH_BUILTIN;
 }
@@ -73,11 +76,6 @@ void execute_builtin_command(int command, command_t cmd) {
       exit(EXIT_SUCCESS);
     }
     printf("There are background processes.\n");
-  } else if (command == JOBS) {
-    print_running_jobs();
-  } else if (command == KILL) {
-    pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
-    kill(pid, SIGKILL);
   } else if (command == HISTORY) {
     if (cmd.VarList[0] && cmd.VarList[1]) {  // set the history_size
       if (strncmp(cmd.VarList[0], "-s", strlen("-s")) == 0) {
@@ -92,5 +90,10 @@ void execute_builtin_command(int command, command_t cmd) {
     } else {  // print the entire history
       history_print(history_length);
     }
+  } else if (command == JOBS) {
+    print_running_jobs();
+  } else if (command == KILL) {
+    pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
+    kill(pid, SIGKILL);
   }
 }
