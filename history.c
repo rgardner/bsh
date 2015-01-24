@@ -98,6 +98,7 @@ void history_add(char *string) {
   }
   entry = malloc(sizeof(HIST_ENTRY));
 
+  // Calculate timestamp.
   int pre = (state.count-1) % state.size;
   if (pre < 0) pre = state.size;
   int timestamp = (state.entries[pre]) ? state.entries[pre]->timestamp : 0;
@@ -109,7 +110,8 @@ void history_add(char *string) {
 }
 
 void history_stifle(int max) {
-  if (max < 0) return;  // can't record a negative number of commands.
+  if (max < 0) return;  // can't record a negative number of commands
+  if (state.size == max) return;  // nothing to change
 
   if (state.length > max) {
     int start = state.count - max + 1;
@@ -123,6 +125,8 @@ void history_stifle(int max) {
     state.entries = list;
     state.length = max;
     state.count = max - 1;
+  } else if (state.length < max) {
+    state.entries = realloc(state.entries, sizeof(HIST_ENTRY)*max);
   }
   state.size = max;
   history_max_entries = state.size;
