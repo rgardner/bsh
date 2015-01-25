@@ -1,7 +1,9 @@
 #ifndef STACK_H
 #define STACK_H
 
-struct stack;
+struct stack {
+  void *head;
+};
 
 /* Return a pointer to a new stack. */
 struct stack *

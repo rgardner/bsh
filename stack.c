@@ -7,20 +7,24 @@ struct node {
   struct node *next;
 };
 
-struct stack {
-  struct node *head;
-};
-
 struct stack*
 stack_init()
 {
-  return (struct stack*) malloc(sizeof(struct node));
+  return (struct stack*) malloc(sizeof(struct stack));
 }
 
 void *
 stack_pop(struct stack *s)
 {
   void *data;
+  struct node *head;
+
+  head = s->head;
+  if (!(head)) return NULL;
+  data = head->data;
+
+  s->head = head->next;
+  free(head);
 
   return data;
 }
@@ -28,10 +32,13 @@ stack_pop(struct stack *s)
 void
 stack_push(struct stack *s, void *data)
 {
-  struct node *current = s->head;
-  while (current->next) current = current->next;
+  struct node *element;
+  struct node *head;
 
-  struct node *element = malloc(sizeof(struct node));
+  head = s->head;
+  element = malloc(sizeof(struct node));
   element->data = data;
-  current->next = element;
+  element->next = head;
+
+  s->head = element;
 }

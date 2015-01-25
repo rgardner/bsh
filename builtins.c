@@ -26,7 +26,7 @@ static bool which_is_there();
 static int which_print_matches(char *, char *);
 
 /* Global variables */
-struct node *directory_stack;
+struct stack *directory_stack;
 
 /* Print helpful information. */
 void help(int command) {
@@ -193,11 +193,11 @@ popd(int argc, char** argv) {
   UNUSED(argc);
   UNUSED(argv);
 
-  if (!directory_stack->data) {
+  if (!directory_stack->head) {
     printf("-bsh: popd: directory stack empty\n");
     return -1;
   }
-  char *dir = stack_pop(directory_stack);
+  char *dir = (char *)stack_pop(directory_stack);
   chdir(dir);
   return 0;
 }
