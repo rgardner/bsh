@@ -1,18 +1,17 @@
 #ifndef STACK_H
 #define STACK_H
 
-struct node {
-  void *data;
-  struct node *next;
-};
+struct stack;
 
 /* Return a pointer to a new stack. */
-struct node *
+struct stack *
 stack_init();
 
 /* Pop an element from the stack. */
-void *stack_pop(struct node *);
+void *
+stack_pop(struct stack *);
 
 /* Push an element on the stack. */
-void stack_push(struct node *, void *);
+void
+stack_push(struct stack *, void *);
 #endif
