@@ -18,6 +18,7 @@
 #define UNUSED(x) (void)(x)
 
 /* Function prototypes. */
+static char *cd(int, char**);
 static void history_wrapper(int, char**);
 static int popd(int, char**);
 static int pushd(int, char**);
@@ -60,7 +61,7 @@ void help(int command) {
   } else if (command == POPD) {
   } else if (command == SETENV) {
     bsh_setenv_help();
- } else if (command == WHICH) {
+  } else if (command == WHICH) {
    printf("usage: which program ...\n");
  }
 }
@@ -85,8 +86,7 @@ int is_builtin_command(char * cmd) {
 
 void execute_builtin_command(int command, command_t cmd) {
   if (command == CD) {
-    char *path = cmd.VarList[0];
-    chdir(path);
+    cd(cmd.VarNum, cmd.VarList);
   } else if (command == HELP) {
     int command = HELP;
     if (cmd.VarList[0]) command = is_builtin_command(cmd.VarList[0]);
@@ -110,6 +110,30 @@ void execute_builtin_command(int command, command_t cmd) {
   } else if (command == WHICH) {
     which(cmd.VarNum, cmd.VarList);
   }
+}
+
+static char *
+cd(int argc, char **argv) {
+  char cwd[1024];
+  char *dir;
+
+  if (argc == 0) {
+    dir = getenv("HOME");
+  } else if (strncmp(argv[0], "~", strlen("~")) == 0) {
+    dir = getenv("HOME");
+  } else if (strncmp(argv[0], "-", strlen("-")) == 0) {
+    dir = bsh_getenv("OLDPWD");
+  } else {
+    dir = argv[0];
+  }
+
+  if (!getcwd(cwd, sizeof(cwd))) {
+    fprintf(stderr, "Error. Could not obtain current working directory.\n");
+  }
+  bsh_setenv("OLDPWD", cwd, 1);
+
+  chdir(dir);
+  return dir;
 }
 
 static void
@@ -190,25 +214,28 @@ which_print_matches(char *path, char *filename) {
 
 static int
 popd(int argc, char** argv) {
-  UNUSED(argc);
-  UNUSED(argv);
-
   if (!directory_stack->head) {
     printf("-bsh: popd: directory stack empty\n");
     return -1;
   }
+
   char *dir = (char *)stack_pop(directory_stack);
-  chdir(dir);
+  argc = 1;
+  argv[0] = dir;
+  cd(argc, argv);
   return 0;
 }
 
 static int
 pushd(int argc, char** argv) {
+  char *dir;
+
   if (argc < 1) {
     printf("-bsh: pushd: no other directory\n");
     return -1;
   }
-  stack_push(directory_stack, argv[0]);
-  chdir(argv[0]);
+
+  dir = cd(argc, argv);
+  stack_push(directory_stack, dir);
   return 0;
 }

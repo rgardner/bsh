@@ -24,3 +24,8 @@ int bsh_setenv(const char *name, const char *value, int overwrite) {
 int bsh_unsetenv(const char *name) {
   return -1;
 }
+
+char *
+bsh_getenv(const char *name) {
+  return NULL;
+}

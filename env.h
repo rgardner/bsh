@@ -6,4 +6,5 @@ void bsh_setenv_help();
 void bsh_printenv(const char *name);
 int bsh_setenv(const char *name, const char *value, int overwrite);
 int bsh_unsetenv(const char *name);
+char * bsh_getenv(const char *name);
 #endif
