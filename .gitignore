@@ -3,7 +3,7 @@
 
 # Executables
 bsh
-shell
+test
 
 # Debug
 *.dSYM
