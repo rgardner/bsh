@@ -20,7 +20,7 @@ stack_peak(struct stack *s)
   struct node *head;
 
   head = s->head;
-  if (!(head)) return NULL;
+  if (!head) return NULL;
   return head->data;
 }
 
@@ -31,7 +31,7 @@ stack_pop(struct stack *s)
   struct node *head;
 
   head = s->head;
-  if (!(head)) return NULL;
+  if (!head) return NULL;
   data = head->data;
 
   s->head = head->next;
