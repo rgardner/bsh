@@ -1,12 +1,11 @@
 CC=gcc
-CFLAGS=
+CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2 -DUNIX
 FLAGS=-lm
-DEBUG=
 
 TARGET=test
 
 OBJS = test_stack.o \
-			 ../stack.o      \
+			 ../stack.o   \
 
 
 all: $(TARGET)

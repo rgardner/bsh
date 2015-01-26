@@ -56,9 +56,13 @@ MU_TEST_SUITE(test_suite) {
   MU_SUITE_CONFIGURE(&test_setup, &test_teardown);
 
   MU_RUN_TEST(test_init_normal);
+  printf("1\n");
   MU_RUN_TEST(test_push_normal);
+  printf("2\n");
   MU_RUN_TEST(test_pop_normal);
+  printf("3\n");
   MU_RUN_TEST(test_push_pop);
+  printf("4\n");
 }
 
 int
