@@ -5,9 +5,10 @@
 #include <readline/readline.h>
 #include <unistd.h>
 
-#include "builtins.h"
 #include "background_jobs.h"
+#include "builtins.h"
 #include "history.h"
+#include "parse.h"
 
 #define MAX_PROMPT_LENGTH 1024
 #define UNUSED(x) (void)(x)
@@ -156,5 +157,4 @@ int main(int argc, char **argv) {
 
     if (!is_bg_job(info)) free_info(info);
   }
-  exit(EXIT_SUCCESS);
 }
