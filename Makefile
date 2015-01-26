@@ -1,25 +1,29 @@
+TARGET=bsh
+
 CC=gcc
 CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2 -DUNIX
 FLAGS = -lreadline -lcurses
 DEBUG =-g -DDEBUG
 
-TARGET=bsh
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
 
-OBJS = main.o            \
-			 background_jobs.o \
-			 builtins.o        \
-			 env.o             \
-			 history.o         \
-			 stack.o           \
-			 parse.o
+SRCS := $(wildcard $(SRCDIR)/*.c)
+INCS := $(wildcard $(SRCDIR)/*.h)
+OBJS := $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
+rm = rm -f
 
-all: $(TARGET)
+$(BINDIR)/$(TARGET): $(OBJS)
+	@$(CC) -o $@ $(FLAGS) $(OBJS)
 
-$(TARGET): $(OBJS)
-	$(CC) $(FLAGS) $(CFLAGS) $(DEBUG) $(OBJS) -o $@
+$(OBJS): $(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@$(CC) $(CFLAGS) -c $< -o $@
 
-.c.o:
-	$(CC) -c $(CFLAGS) $(DEBUG) $<
-
+.PHONEY: clean
 clean:
-	rm $(OBJS) $(TARGET)
+	@$(rm) $(OBJS)
+
+.PHONEY: remove
+remove: clean
+	@$(rm) $(BINDIR)/$(TARGET)
