@@ -18,6 +18,8 @@
 #define UNUSED(x) (void)(x)
 
 /* Function prototypes. */
+static int alias(int, char**);
+struct Alias *alias_search(char *);
 static char *cd(int, char**);
 static void history_wrapper(int, char**);
 static int dirs(int, char**);
@@ -28,11 +30,24 @@ static bool which_is_there();
 static int which_print_matches(char *, char *);
 
 /* Global variables */
+
+struct linked_list *aliases;
 struct stack *directory_stack;
+
+/* Private structs. */
+struct Alias {
+  char *name;
+  char *value;
+};
 
 /* Print helpful information. */
 void help(int command) {
-  if (command == BG) {
+  if (command == ALIAS) {
+    printf("usage: alias [name[=value] ... ]\n\n"
+           "`alias`: print all existing aliases.\n"
+           "`alias name`: print the value associated with name.\n"
+           "`alias name=value`: create / modify name to be an alias for value.\n");
+  } else if (command == BG) {
     bg_help();
   } else if (command == CD) {
     printf("usage: cd <directory>\n\n"
@@ -71,6 +86,7 @@ void help(int command) {
 }
 
 int is_builtin_command(char * cmd) {
+  if (strncmp(cmd, "alias", strlen("alias")) == 0) return ALIAS;
   if (strncmp(cmd, "bg", strlen("bg")) == 0) return BG;
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
   if (strncmp(cmd, "dirs", strlen("dirs")) == 0) return DIRS;
@@ -90,7 +106,9 @@ int is_builtin_command(char * cmd) {
 }
 
 void execute_builtin_command(int command, command_t cmd) {
-  if (command == CD) {
+  if (command == ALIAS) {
+
+  } else if (command == CD) {
     cd(cmd.VarNum, cmd.VarList);
   } else if (command == HELP) {
     int command = HELP;
@@ -117,6 +135,62 @@ void execute_builtin_command(int command, command_t cmd) {
   } else if (command == WHICH) {
     which(cmd.VarNum, cmd.VarList);
   }
+}
+
+static int
+alias(int argc, char **argv)
+{
+  if (argc == 0) {
+    int len = ll_size(aliases);
+    for (int i = 0; i < len; i++) {
+      struct Alias *al = ll_get(aliases, i);
+      printf("alias %s = %s\n", al->name, al->value);
+    }
+  } else if (argc == 1) {
+    struct Alias *al = alias_search(argv[0]);
+    if (al) {
+      printf("alias %s = %s\n", al->name, al->value);
+    } else {
+      printf("bsh: alias: %s not found.\n", argv[0]);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+struct Alias *
+alias_search(char *name)
+{
+  int len = ll_size(aliases);
+  for (int i = 0; i < len; i++) {
+    struct Alias *al = ll_get(aliases, i);
+    if (!al) break;
+
+    if (strncmp(al->name, name, strlen(al->name)) == 0) return al;
+  }
+  return NULL;
+}
+
+bool
+alias_add(char *name, char *value, bool overwrite)
+{
+  int len = ll_size(aliases);
+  for (int i = 0; i < len; i++) {
+    struct Alias *al = ll_get(aliases, i);
+    if (!al) break;
+
+    if (strncmp(al->name, name, strlen(al->name)) != 0) continue;
+    if (!overwrite) return false;
+    al->value = value;
+    return true;
+  }
+  struct Alias *new = malloc(sizeof(struct Alias));
+  new->name = name;
+  new->value = value;
+  for (int i = 0; i < len; i++) {
+    struct Alias *al = ll_get(aliases, i);
+  }
+  return true;
 }
 
 static char *
@@ -163,12 +237,9 @@ history_wrapper(int argc, char **argv) {
 
 static void
 which(int argc, char **argv) {
-  char *p, *path;
-  ssize_t pathlen;
-
-  p = getenv("PATH");
-  pathlen = strlen(p) + 1;
-  path = malloc(pathlen);
+  char *p = getenv("PATH");
+  size_t pathlen = strlen(p) + 1;
+  char *path = malloc(pathlen);
   while (argc > 0) {
     memcpy(path, p, pathlen);
     if (strlen(*argv) >= FILE_MAX_SIZE) continue;
@@ -196,14 +267,13 @@ which_is_there(char *candidate) {
 
 static int
 which_print_matches(char *path, char *filename) {
-  char candidate[PATH_MAX];
-  const char *d;
-  bool found;
-
   if (strchr(filename, '/')) {
     return which_is_there(filename) ? 0 : -1;
   }
-  found = false;
+
+  const char *d;
+  char candidate[PATH_MAX];
+  bool found = false;
   while ((d = strsep(&path, ":")) != NULL) {
     if (*d == '\0') {
       d = ".";

@@ -4,13 +4,14 @@
 #include "stack.h"
 #include "parse.h"
 
-enum BuiltinCommands { NO_SUCH_BUILTIN=0, BG, CD, DIRS, EXIT, FG, HELP, HISTORY,
-                       JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV, WHICH };
+enum BuiltinCommands { NO_SUCH_BUILTIN=0, ALIAS, BG, CD, DIRS, EXIT, FG, HELP,
+                       HISTORY, JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV,
+                       WHICH };
 
 /* Directories saved for `dirs`, `pushd`, and `popd`. */
 extern struct stack *directory_stack;
 /* Sorted list of aliases. */
-extern struct linked_list *alias;
+extern struct linked_list *aliases;
 
 /* Print help about a specific builtin command. */
 void

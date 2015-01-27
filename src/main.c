@@ -63,12 +63,9 @@ int main(int argc, char **argv) {
 
   /* Initialization. */
   num_bg_jobs = 0;
-  pid_t child_pid;
-  char *cmdLine;
-  parse_info_t *info;   // all the information returned by parser.
-  command_t *cmd;  // command name and Arg list for one command.
-  history_init();
+  aliases = ll_init();
   directory_stack = stack_init();
+  history_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
       perror("An error occurred while setting the SIGCHLD signal handler.");
@@ -82,7 +79,7 @@ int main(int argc, char **argv) {
   print_login_message();
 
   while (true) {
-
+    char *cmdLine;
 #ifdef UNIX
     cmdLine = readline(buildPrompt());
     if (!cmdLine) {
@@ -114,7 +111,7 @@ int main(int argc, char **argv) {
     free(expansion);
 
     //calls the parser
-    info = parse(cmdLine);
+    parse_info_t *info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
       continue;
@@ -125,7 +122,7 @@ int main(int argc, char **argv) {
 #endif
 
     //com contains the info. of the command before the first "|"
-    cmd=&info->CommArray[0];
+    command_t *cmd=&info->CommArray[0];
     if (!cmd  || !cmd->command) {
       free_info(info);
       free(cmdLine);
@@ -137,6 +134,7 @@ int main(int argc, char **argv) {
     if ((command = is_builtin_command(cmd->command)) != 0) {
       execute_builtin_command(command, *cmd);
     } else {
+      pid_t child_pid;
       if ((child_pid = fork()) == 0) {
         execute_command(info, *cmd);
       } else {
