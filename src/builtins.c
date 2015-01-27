@@ -20,8 +20,8 @@
 
 /* Function prototypes. */
 static int alias(int, char**);
+bool alias_add(char *name, char *value, bool overwrite);
 struct Alias *alias_search(char *);
-void alias_insert(char *name, char *value);
 static char *cd(int, char**);
 static void history_wrapper(int, char**);
 static int dirs(int, char**);
@@ -155,7 +155,8 @@ alias(int argc, char **argv)
   /* Create an alias between a name/value pair. */
   char *value;
   if ((value = strsep(&argv[0], "="))) {
-    alias_insert(argv[0], value);
+    char *name = strdup(argv[0]);
+    alias_add(name, value, 1);
     return 0;
   }
 
@@ -211,13 +212,6 @@ alias_add(char *name, char *value, bool overwrite)
   }
   ll_add(aliases, i, new);
   return true;
-}
-
-void
-alias_insert(char *name, char *value)
-{
-  struct Alias *new = malloc(sizeof(struct Alias));
-  *new = (struct Alias) { .name = name, .value = value };
 }
 
 static char *
