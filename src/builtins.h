@@ -8,10 +8,12 @@ enum BuiltinCommands { NO_SUCH_BUILTIN=0, ALIAS, BG, CD, DIRS, EXIT, FG, HELP,
                        HISTORY, JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV,
                        WHICH };
 
-/* Directories saved for `dirs`, `pushd`, and `popd`. */
-extern struct stack *directory_stack;
 /* Sorted list of aliases. */
-extern struct linked_list *aliases;
+extern struct LinkedList *aliases;
+
+/* Directories saved for `dirs`, `pushd`, and `popd`. */
+extern struct Stack *directory_stack;
+
 
 /* Print help about a specific builtin command. */
 void
@@ -22,5 +24,5 @@ int
 is_builtin_command(char *cmd);
 
 void
-execute_builtin_command(int command, command_t cmd);
+execute_builtin_command(int command, struct Command cmd);
 #endif

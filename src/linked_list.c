@@ -3,25 +3,25 @@
 #include <stdlib.h>
 #include "node.h"
 
-struct linked_list {
-  struct node *head;
+struct LinkedList {
+  struct Node *head;
   int size;
 };
 
-struct linked_list *
+struct LinkedList *
 ll_init()
 {
-  struct linked_list *list = malloc(sizeof(struct linked_list));
+  struct LinkedList *list = malloc(sizeof(struct LinkedList));
   list->size = 0;
   return list;
 }
 
 void
-ll_free(struct linked_list *list)
+ll_free(struct LinkedList *list)
 {
-  struct node *current = list->head;
+  struct Node *current = list->head;
   while (current) {
-    struct node *cp = current->next;
+    struct Node *cp = current->next;
     free(current);
     current = cp;
   }
@@ -29,9 +29,9 @@ ll_free(struct linked_list *list)
 }
 
 int
-ll_add(struct linked_list *list, int index, void *element)
+ll_add(struct LinkedList *list, int index, void *element)
 {
-  struct node *new = malloc(sizeof(struct node));
+  struct Node *new = malloc(sizeof(struct Node));
   new->data = element;
   list->size++;
 
@@ -41,7 +41,7 @@ ll_add(struct linked_list *list, int index, void *element)
     return 0;
   }
 
-  struct node *current = list->head;
+  struct Node *current = list->head;
   int i;
   for (i = 0; (i < index) && (current->next); i++) current = current->next;
   if (current->next) new->next = current->next->next;
@@ -50,15 +50,15 @@ ll_add(struct linked_list *list, int index, void *element)
 }
 
 void
-ll_add_first(struct linked_list *list, void *element)
+ll_add_first(struct LinkedList *list, void *element)
 {
   ll_add(list, 0, element);
 }
 
 void *
-ll_get(struct linked_list *list, int index)
+ll_get(struct LinkedList *list, int index)
 {
-  struct node *current = list->head;
+  struct Node *current = list->head;
   if (index == 0) {
     if (current) return current->data;
     return NULL;
@@ -69,9 +69,9 @@ ll_get(struct linked_list *list, int index)
 }
 
 void *
-ll_remove(struct linked_list *list)
+ll_remove(struct LinkedList *list)
 {
-  struct node *n = list->head;
+  struct Node *n = list->head;
   if (n == NULL) return NULL;
 
   list->head = n->next;
@@ -80,7 +80,7 @@ ll_remove(struct linked_list *list)
 }
 
 int
-ll_size(struct linked_list *list)
+ll_size(struct LinkedList *list)
 {
   return list->size;
 }

@@ -13,12 +13,12 @@
 
 int copy_substring(char *, char *, int, int);
 
-bool is_bg_job(parse_info_t *info) {
+bool is_bg_job(struct ParseInfo *info) {
   return info->runInBackground == true;
 }
 
-void init_info(parse_info_t *p) {
-  *p = (parse_info_t){ .hasInputRedirection = false,
+void init_info(struct ParseInfo *p) {
+  *p = (struct ParseInfo){ .hasInputRedirection = false,
                     .hasOutputRedirection = false,
                     .runInBackground = false,
                     .pipeNum = 0,
@@ -26,14 +26,14 @@ void init_info(parse_info_t *p) {
                     .outFile = "" };
 }
 
-void init_command(command_t *p) {
-  *p = (command_t){ .command = malloc(MAXLINE*sizeof(char)),
+void init_command(struct Command *p) {
+  *p = (struct Command){ .command = malloc(MAXLINE*sizeof(char)),
                       .VarList = {NULL},
                       .VarNum = 0};
 }
 
-parse_info_t* parse(char *cmdline) {
-  parse_info_t *Result;
+struct ParseInfo* parse(char *cmdline) {
+  struct ParseInfo *Result;
   int i = 0;
 
   // Check if this is a valid string.
@@ -46,15 +46,15 @@ parse_info_t* parse(char *cmdline) {
   for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
   if (cmdline[i] == '\n' && cmdline[i] == '\0') return NULL;
 
-  Result = malloc(sizeof(parse_info_t));
+  Result = malloc(sizeof(struct ParseInfo));
   init_info(Result);
 
-  command_t *Command = malloc(sizeof(command_t));
-  init_command(Command);
+  struct Command *cmd = malloc(sizeof(struct Command));
+  init_command(cmd);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
-    if (strcmp(Command->command, "") == 0) {
-      i = copy_substring(Command->command, cmdline, i, MAXLINE);
+    if (strcmp(cmd->command, "") == 0) {
+      i = copy_substring(cmd->command, cmdline, i, MAXLINE);
       if (i == -1) {
         fprintf(stderr,
                 "Error. The command exceeds the %d character limit.\n",
@@ -87,10 +87,10 @@ parse_info_t* parse(char *cmdline) {
         Result->runInBackground = true;
         break;  // '&' should be the last character
       } else if (cmdline[i] == '|') {
-        Result->CommArray[Result->pipeNum] = *Command;
+        Result->CommArray[Result->pipeNum] = *cmd;
         Result->pipeNum++;
-        Command = malloc(sizeof(command_t));
-        init_command(Command);
+        cmd = malloc(sizeof(struct Command));
+        init_command(cmd);
       } else if (!isspace(cmdline[i])) {
         char *arg = malloc(MAXLINE * sizeof(char));
         i = copy_substring(arg, cmdline, i, MAXLINE);
@@ -101,12 +101,12 @@ parse_info_t* parse(char *cmdline) {
           free_info(Result);
           return NULL;
         }
-        Command->VarList[Command->VarNum] = arg;
-        Command->VarNum++;
+        cmd->VarList[cmd->VarNum] = arg;
+        cmd->VarNum++;
       }
     }
   }
-  Result->CommArray[Result->pipeNum] = *Command;
+  Result->CommArray[Result->pipeNum] = *cmd;
   Result->pipeNum++;
 
   return Result;
@@ -126,7 +126,7 @@ int copy_substring(char *dest, char *src, int begin, int limit) {
   return end;
 }
 
-void print_info(parse_info_t *info) {
+void print_info(struct ParseInfo *info) {
   for (int i = 0; i < info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
     for (int j = 0; j < info->CommArray[i].VarNum; j++) {
@@ -148,10 +148,10 @@ void print_info(parse_info_t *info) {
   printf("background: %s\n", (info->runInBackground) ? "yes" : "no");
 }
 
-void free_info(parse_info_t *info) {
+void free_info(struct ParseInfo *info) {
   if (!info) return;
   for (int i = 0; i < info->pipeNum; i++) {
-    command_t cmd = info->CommArray[i];
+    struct Command cmd = info->CommArray[i];
     if (cmd.command) free(cmd.command);
     for (int j = 0; j < cmd.VarNum; j++) {
       free(cmd.VarList[j]);

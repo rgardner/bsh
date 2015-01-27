@@ -2,37 +2,37 @@
 #define STACK_H
 #include <stdbool.h>
 
-struct stack;
+struct Stack;
 
 /* Return a pointer to a new stack. */
-struct stack *
+struct Stack *
 stack_init();
 
 /* Free the stack. */
 void
-stack_free(struct stack *);
+stack_free(struct Stack *);
 
 /* Tests if the stack is empty. */
 bool
-stack_empty(struct stack *);
+stack_empty(struct Stack *);
 
 /* Get an element at index i from the stack. */
 void *
-stack_get(struct stack *, int);
+stack_get(struct Stack *, int);
 
 /* Return the data on the top of the stack without removing it. */
 void *
-stack_peak(struct stack *);
+stack_peak(struct Stack *);
 
 /* Pop an element from the stack. */
 void *
-stack_pop(struct stack *);
+stack_pop(struct Stack *);
 
 /* Push an element on the stack. */
 void
-stack_push(struct stack *, void *);
+stack_push(struct Stack *, void *);
 
 /* Returns the number of elements in the list. */
 int
-stack_size(struct stack *);
+stack_size(struct Stack *);
 #endif

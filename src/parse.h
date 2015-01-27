@@ -7,26 +7,26 @@
 #define PIPE_MAX_NUM 10
 #define FILE_MAX_SIZE 40
 
-typedef struct command_ {
+struct Command {
   char *command;
   char *VarList[MAX_VAR_NUM];
   int VarNum;
-} command_t;
+};
 
 /* The parsed command information. */
-typedef struct parse_info_ {
+struct ParseInfo {
   bool hasInputRedirection;   // infile specified?
   bool hasOutputRedirection;  // outfile specified?
   bool runInBackground;       // run in background?
-  command_t CommArray[PIPE_MAX_NUM];
+  struct Command CommArray[PIPE_MAX_NUM];
   int pipeNum;
   char inFile[FILE_MAX_SIZE];   // file to be piped from
   char outFile[FILE_MAX_SIZE];  // file to pipe into
-} parse_info_t;
+};
 
 /* Function prototypes. */
-parse_info_t *parse(char *);
-void free_info(parse_info_t *);
-void print_info(parse_info_t *);
-bool is_bg_job(parse_info_t *);
+struct ParseInfo *parse(char *);
+void free_info(struct ParseInfo *);
+void print_info(struct ParseInfo *);
+bool is_bg_job(struct ParseInfo *);
 #endif

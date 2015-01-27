@@ -9,7 +9,7 @@
 #include "parse.h"
 
 int num_bg_jobs;
-bg_job_t *background_jobs[MAX_BG_JOBS];
+struct BGJob *background_jobs[MAX_BG_JOBS];
 
 void handle_sigchld(int signum) {
   if (signum != SIGCHLD) return;
@@ -17,7 +17,7 @@ void handle_sigchld(int signum) {
   pid_t pid = waitpid((pid_t)-1, 0, WNOHANG);
 
   // find the bg job that exited.
-  bg_job_t *job;
+  struct BGJob *job;
   int i;
   for (i = 0; i < num_bg_jobs; i++) {
     job = background_jobs[i];
@@ -36,7 +36,7 @@ void handle_sigchld(int signum) {
 
 bool has_bg_jobs() {
   for (int i = 0; i < num_bg_jobs; i++) {
-    bg_job_t *job = background_jobs[i];
+    struct BGJob *job = background_jobs[i];
     if (!job) continue;
 
     int status;
@@ -49,7 +49,7 @@ bool has_bg_jobs() {
 
 void print_running_jobs() {
   for (int i = 0; i < num_bg_jobs; i++) {
-    bg_job_t *job = background_jobs[i];
+    struct BGJob *job = background_jobs[i];
     if (!job) continue;
 
     int status;
@@ -60,7 +60,7 @@ void print_running_jobs() {
   }
 }
 
-void free_job(bg_job_t *job) {
+void free_job(struct BGJob *job) {
   free_info(job->info);
   free(job);
 }

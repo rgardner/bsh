@@ -32,7 +32,7 @@ void print_login_message() {
   printf("Welcome to Bob shell.\n");
 }
 
-void execute_command(parse_info_t *info, command_t cmd) {
+void execute_command(struct ParseInfo *info, struct Command cmd) {
   // setup file input/output redirection.
   if (info->hasInputRedirection) {
     int fd = open(info->inFile, O_RDONLY);
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
     free(expansion);
 
     //calls the parser
-    parse_info_t *info = parse(cmdLine);
+    struct ParseInfo *info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
       continue;
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 #endif
 
     //com contains the info. of the command before the first "|"
-    command_t *cmd=&info->CommArray[0];
+    struct Command *cmd=&info->CommArray[0];
     if (!cmd  || !cmd->command) {
       free_info(info);
       free(cmdLine);
@@ -139,7 +139,7 @@ int main(int argc, char **argv) {
         execute_command(info, *cmd);
       } else {
         if (is_bg_job(info)) {
-          bg_job_t *job = malloc(sizeof(bg_job_t));
+          struct BGJob *job = malloc(sizeof(struct BGJob));
           job->pid = child_pid;
           job->info = info;
           job->cmd = cmd;
