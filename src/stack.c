@@ -3,10 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct node {
-  void *data;
-  struct node *next;
-};
+#include "node.h"
 
 struct stack*
 stack_init()
@@ -65,6 +62,12 @@ stack_get(struct stack *s, int index)
 
   if (current) return current->data;
   return NULL;
+}
+
+bool
+stack_empty(struct stack *s)
+{
+  return (s->head == NULL);
 }
 
 void stack_free(struct stack *s)

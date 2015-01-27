@@ -243,7 +243,7 @@ dirs(int argc, char** argv)
 
 static int
 popd(int argc, char** argv) {
-  if (!directory_stack->head) {
+  if (stack_empty(directory_stack)) {
     printf("-bsh: popd: directory stack empty\n");
     return -1;
   }

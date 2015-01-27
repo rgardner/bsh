@@ -1,8 +1,11 @@
 #ifndef STACK_H
 #define STACK_H
 
+#include <stdbool.h>
+#include "node.h"
+
 struct stack {
-  void *head;
+  struct node *head;
   int size;
 };
 
@@ -29,4 +32,8 @@ stack_get(struct stack *, int);
 /* Free the stack. */
 void
 stack_free(struct stack *);
+
+/* Tests if the stack is empty. */
+bool
+stack_empty(struct stack *);
 #endif
