@@ -1,5 +1,6 @@
 #include "builtins.h"
 
+#include "linked_list.h"
 #include "stack.h"
 #include <sys/stat.h>
 #include <sys/param.h>
@@ -20,6 +21,7 @@
 /* Function prototypes. */
 static int alias(int, char**);
 struct Alias *alias_search(char *);
+void alias_insert(char *name, char *value);
 static char *cd(int, char**);
 static void history_wrapper(int, char**);
 static int dirs(int, char**);
@@ -29,16 +31,16 @@ static void which(int, char **);
 static bool which_is_there();
 static int which_print_matches(char *, char *);
 
-/* Global variables */
-
-struct linked_list *aliases;
-struct stack *directory_stack;
-
 /* Private structs. */
 struct Alias {
   char *name;
   char *value;
 };
+
+/* Global variables */
+struct LinkedList *aliases;
+struct Stack *directory_stack;
+
 
 /* Print helpful information. */
 void help(int command) {
@@ -105,9 +107,9 @@ int is_builtin_command(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
-void execute_builtin_command(int command, command_t cmd) {
+void execute_builtin_command(int command, struct Command cmd) {
   if (command == ALIAS) {
-
+    alias(cmd.VarNum, cmd.VarList);
   } else if (command == CD) {
     cd(cmd.VarNum, cmd.VarList);
   } else if (command == HELP) {
@@ -140,22 +142,35 @@ void execute_builtin_command(int command, command_t cmd) {
 static int
 alias(int argc, char **argv)
 {
+  /* Print all aliases. */
   if (argc == 0) {
     int len = ll_size(aliases);
     for (int i = 0; i < len; i++) {
       struct Alias *al = ll_get(aliases, i);
       printf("alias %s = %s\n", al->name, al->value);
     }
-  } else if (argc == 1) {
-    struct Alias *al = alias_search(argv[0]);
+    return 0;
+  }
+
+  /* Create an alias between a name/value pair. */
+  char *value;
+  if ((value = strsep(&argv[0], "="))) {
+    alias_insert(argv[0], value);
+    return 0;
+  }
+
+  /* Print all aliases matching name arguments. */
+  bool found = true;
+  for (int i = 0; i < argc; i++) {
+    struct Alias *al = alias_search(argv[i]);
     if (al) {
       printf("alias %s = %s\n", al->name, al->value);
     } else {
-      printf("bsh: alias: %s not found.\n", argv[0]);
-      return 1;
+      printf("bsh: alias: %s not found.\n", argv[i]);
+      found = false;
     }
   }
-  return 0;
+  return found ? 0 : 1;
 }
 
 struct Alias *
@@ -175,6 +190,8 @@ bool
 alias_add(char *name, char *value, bool overwrite)
 {
   int len = ll_size(aliases);
+
+  /* Search to see if alias already exists. */
   for (int i = 0; i < len; i++) {
     struct Alias *al = ll_get(aliases, i);
     if (!al) break;
@@ -187,10 +204,20 @@ alias_add(char *name, char *value, bool overwrite)
   struct Alias *new = malloc(sizeof(struct Alias));
   new->name = name;
   new->value = value;
-  for (int i = 0; i < len; i++) {
+  int i;
+  for (i = 0; i < len; i++) {
     struct Alias *al = ll_get(aliases, i);
+    if (strncmp(name, al->name, strlen(name)) < 0) break;
   }
+  ll_add(aliases, i, new);
   return true;
+}
+
+void
+alias_insert(char *name, char *value)
+{
+  struct Alias *new = malloc(sizeof(struct Alias));
+  *new = (struct Alias) { .name = name, .value = value };
 }
 
 static char *

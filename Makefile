@@ -18,7 +18,7 @@ $(BINDIR)/$(TARGET): $(OBJS)
 	@$(CC) -o $@ $(FLAGS) $(OBJS)
 
 $(OBJS): $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	@$(CC) $(CFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) $(DEBUG) -c $< -o $@
 
 .PHONEY: clean
 clean:

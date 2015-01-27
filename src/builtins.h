@@ -8,7 +8,7 @@ enum BuiltinCommands { NO_SUCH_BUILTIN=0, ALIAS, BG, CD, DIRS, EXIT, FG, HELP,
                        HISTORY, JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV,
                        WHICH };
 
-/* Sorted list of aliases. */
+/* Bsh aliases. */
 extern struct LinkedList *aliases;
 
 /* Directories saved for `dirs`, `pushd`, and `popd`. */

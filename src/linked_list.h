@@ -10,9 +10,12 @@ ll_init();
 void
 ll_free(struct LinkedList *list);
 
-/* Inserts the specified element at the specified position in this list. */
-void
-ll_int(struct LinkedList *list, int index, void *element);
+/* Inserts the specified element at the specified position in this list.
+ * If index > ll_size(list), the element will be inserted at the end of the
+ * list.
+ * Returns the index of the newly inserted element. */
+int
+ll_add(struct LinkedList *list, int index, void *element);
 
 /* Inserts the specified element to the beginning of the list. */
 void
