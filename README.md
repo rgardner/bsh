@@ -19,7 +19,7 @@ Welcome to Bob shell.
   - ~~`history -s num` and `history num`~~
 4. ~~`which`~~
   - ~~http://www.opensource.apple.com/source/shell_cmds/shell_cmds-170/which/which.c~~
-5. `pushd, popd`
+5. ~~`dirs, pushd, popd`~~
 6. `alias`
 7. `pipe`
 8. `advanced I/O`
