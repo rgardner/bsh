@@ -1,6 +1,5 @@
-#include "background_jobs.h"
+#include "bg_jobs.h"
 
-#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>

@@ -5,7 +5,7 @@
 #include <readline/readline.h>
 #include <unistd.h>
 
-#include "background_jobs.h"
+#include "bg_jobs.h"
 #include "builtins.h"
 #include "history.h"
 #include "parse.h"
