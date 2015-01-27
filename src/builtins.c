@@ -1,5 +1,6 @@
 #include "builtins.h"
 
+#include "stack.h"
 #include <sys/stat.h>
 #include <sys/param.h>
 
@@ -12,7 +13,6 @@
 #include "bg_jobs.h"
 #include "env.h"
 #include "history.h"
-#include "stack.h"
 #include "parse.h"
 
 #define UNUSED(x) (void)(x)
@@ -233,7 +233,8 @@ dirs(int argc, char** argv)
     return -1;
   }
   printf("%s", cwd);
-  for (int i = 0; i < directory_stack->size; i++) {
+  int size = stack_size(directory_stack);
+  for (int i = 0; i < size; i++) {
     char *dir = stack_get(directory_stack, i);
     printf(" %s", dir);
   }

@@ -4,85 +4,58 @@
 #include <string.h>
 
 #include "node.h"
+#include "linked_list.h"
+
+struct stack {
+  void *list;
+};
 
 struct stack*
 stack_init()
 {
   struct stack *s = malloc(sizeof(struct stack));
-  s->size = 0;
+  s->list = ll_init();
   return s;
 }
 
-void *
-stack_peak(struct stack *s)
+void stack_free(struct stack *s)
 {
-  struct node *head;
-
-  head = s->head;
-  if (!head) return NULL;
-  return head->data;
-}
-
-void *
-stack_pop(struct stack *s)
-{
-  struct node *head = s->head;
-  if (!head) return NULL;
-
-  void *data = head->data;
-  s->head = head->next;
-  free(head);
-  s->size--;
-
-  return data;
-}
-
-void
-stack_push(struct stack *s, void *data)
-{
-  struct node *element = malloc(sizeof(struct node));
-  element->data = data;
-  element->next = s->head;
-
-  s->head = element;
-  s->size++;
-}
-
-void *
-stack_get(struct stack *s, int index)
-{
-  if (index > s->size) return NULL;
-
-  struct node *current = s->head;
-  if (index == 0) return current->data;
-
-  for (int i = 0; (i < index) && (current); i++) {
-    current = current->next;
-  }
-
-  if (current) return current->data;
-  return NULL;
+  ll_free(s->list);
+  free(s);
 }
 
 bool
 stack_empty(struct stack *s)
 {
-  return (s->head == NULL);
+  return ll_size(s->list) == 0;
 }
 
-void stack_free(struct stack *s)
+void *
+stack_get(struct stack *s, int index)
 {
-  struct node *element;
-  struct node *other;
+  return ll_get(s->list, index);
+}
 
-  if (!s) return;
+void *
+stack_peak(struct stack *s)
+{
+  return ll_get(s->list, 0);
+}
 
-  element = s->head;
-  while (element) {
-    if (element->data) free(element->data);
-    other = element;
-    element = element->next;
-    free(other);
-  }
-  free(s);
+void *
+stack_pop(struct stack *s)
+{
+  return ll_remove(s->list);
+}
+
+void
+stack_push(struct stack *s, void *data)
+{
+  return ll_add_first(s->list, data);
+}
+
+int
+stack_size(struct stack *s)
+{
+  return ll_size(s->list);
 }
