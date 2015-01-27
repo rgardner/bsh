@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "background_jobs.h"
+#include "bg_jobs.h"
 #include "env.h"
 #include "history.h"
 #include "stack.h"
@@ -20,6 +20,7 @@
 /* Function prototypes. */
 static char *cd(int, char**);
 static void history_wrapper(int, char**);
+static int dirs(int, char**);
 static int popd(int, char**);
 static int pushd(int, char**);
 static void which(int, char **);
@@ -37,6 +38,9 @@ void help(int command) {
     printf("usage: cd <directory>\n\n"
            "change the working directory to <directory>.\n"
            "<directory> can be an absolute or relative path.\n");
+  } else if (command == DIRS) {
+    printf("usage: dirs\n\n"
+           "list directories on the directory stack.\n");
   } else if (command == EXIT) {
     printf("usage: exit\n\n"
            "terminate the shell process unless there are background processes.\n");
@@ -69,6 +73,7 @@ void help(int command) {
 int is_builtin_command(char * cmd) {
   if (strncmp(cmd, "bg", strlen("bg")) == 0) return BG;
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
+  if (strncmp(cmd, "dirs", strlen("dirs")) == 0) return DIRS;
   if (strncmp(cmd, "exit", strlen("exit")) == 0) return EXIT;
   if (strncmp(cmd, "fg", strlen("fg")) == 0) return FG;
   if (strncmp(cmd, "help", strlen("help")) == 0) return HELP;
@@ -91,6 +96,8 @@ void execute_builtin_command(int command, command_t cmd) {
     int command = HELP;
     if (cmd.VarList[0]) command = is_builtin_command(cmd.VarList[0]);
     help(command);
+  } else if (command == DIRS) {
+    dirs(cmd.VarNum, cmd.VarList);
   } else if (command == EXIT) {
     if (!has_bg_jobs()) {
       exit(EXIT_SUCCESS);
@@ -114,8 +121,8 @@ void execute_builtin_command(int command, command_t cmd) {
 
 static char *
 cd(int argc, char **argv) {
-  char cwd[1024];
-  char *dir;
+  size_t len = 1024;
+  char *dir = malloc(len);
 
   if (argc == 0) {
     dir = getenv("HOME");
@@ -127,7 +134,8 @@ cd(int argc, char **argv) {
     dir = argv[0];
   }
 
-  if (!getcwd(cwd, sizeof(cwd))) {
+  char *cwd = malloc(len);
+  if (!getcwd(cwd, len)) {
     fprintf(stderr, "Error. Could not obtain current working directory.\n");
   }
   bsh_setenv("OLDPWD", cwd, 1);
@@ -213,6 +221,27 @@ which_print_matches(char *path, char *filename) {
 }
 
 static int
+dirs(int argc, char** argv)
+{
+  UNUSED(argc);
+  UNUSED(argv);
+
+  size_t len = 1024;
+  char *cwd = malloc(len);
+  if (!getcwd(cwd, len)) {
+    fprintf(stderr, "Error. Could not obtain current working directory.\n");
+    return -1;
+  }
+  printf("%s", cwd);
+  for (int i = 0; i < directory_stack->size; i++) {
+    char *dir = stack_get(directory_stack, i);
+    printf(" %s", dir);
+  }
+  printf("\n");
+  return 0;
+}
+
+static int
 popd(int argc, char** argv) {
   if (!directory_stack->head) {
     printf("-bsh: popd: directory stack empty\n");
@@ -223,19 +252,23 @@ popd(int argc, char** argv) {
   argc = 1;
   argv[0] = dir;
   cd(argc, argv);
+  free(dir);
   return 0;
 }
 
 static int
 pushd(int argc, char** argv) {
-  char *dir;
-
   if (argc < 1) {
     printf("-bsh: pushd: no other directory\n");
     return -1;
   }
 
-  dir = cd(argc, argv);
-  stack_push(directory_stack, dir);
+  size_t len = 1024;
+  char *cwd = malloc(len);
+  if (!getcwd(cwd, len)) {
+    fprintf(stderr, "Error. Could not obtain current working directory.\n");
+  }
+  stack_push(directory_stack, cwd);
+  cd(argc, argv);
   return 0;
 }

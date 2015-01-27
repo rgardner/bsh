@@ -3,6 +3,7 @@
 
 struct stack {
   void *head;
+  int size;
 };
 
 /* Return a pointer to a new stack. */
@@ -20,6 +21,10 @@ stack_pop(struct stack *);
 /* Push an element on the stack. */
 void
 stack_push(struct stack *, void *);
+
+/* Get an element at index i from the stack. */
+void *
+stack_get(struct stack *, int);
 
 /* Free the stack. */
 void

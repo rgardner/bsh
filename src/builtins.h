@@ -3,7 +3,7 @@
 #include "stack.h"
 #include "parse.h"
 
-enum BuiltinCommands { NO_SUCH_BUILTIN=0, BG, CD, EXIT, FG, HELP, HISTORY,
+enum BuiltinCommands { NO_SUCH_BUILTIN=0, BG, CD, DIRS, EXIT, FG, HELP, HISTORY,
                        JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV, WHICH };
 
 extern struct stack *directory_stack;

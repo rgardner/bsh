@@ -11,7 +11,9 @@ struct node {
 struct stack*
 stack_init()
 {
-  return (struct stack*) malloc(sizeof(struct stack));
+  struct stack *s = malloc(sizeof(struct stack));
+  s->size = 0;
+  return s;
 }
 
 void *
@@ -27,15 +29,13 @@ stack_peak(struct stack *s)
 void *
 stack_pop(struct stack *s)
 {
-  void *data;
-  struct node *head;
-
-  head = s->head;
+  struct node *head = s->head;
   if (!head) return NULL;
-  data = head->data;
 
+  void *data = head->data;
   s->head = head->next;
   free(head);
+  s->size--;
 
   return data;
 }
@@ -43,15 +43,28 @@ stack_pop(struct stack *s)
 void
 stack_push(struct stack *s, void *data)
 {
-  struct node *element;
-  struct node *head;
-
-  head = s->head;
-  element = malloc(sizeof(struct node));
+  struct node *element = malloc(sizeof(struct node));
   element->data = data;
-  element->next = head;
+  element->next = s->head;
 
   s->head = element;
+  s->size++;
+}
+
+void *
+stack_get(struct stack *s, int index)
+{
+  if (index > s->size) return NULL;
+
+  struct node *current = s->head;
+  if (index == 0) return current->data;
+
+  for (int i = 0; (i < index) && (current); i++) {
+    current = current->next;
+  }
+
+  if (current) return current->data;
+  return NULL;
 }
 
 void stack_free(struct stack *s)
