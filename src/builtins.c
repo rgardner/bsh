@@ -30,9 +30,7 @@ static bool which_is_there();
 static int which_print_matches(char *, char *);
 
 /* Global variables */
-struct LinkedList *aliases;
 struct Stack *directory_stack;
-
 
 /* Print helpful information. */
 void help(int command) {
@@ -71,6 +69,8 @@ void help(int command) {
   } else if (command == POPD) {
   } else if (command == SETENV) {
     bsh_setenv_help();
+  } else if (command == UNALIAS) {
+    unalias_help();
   } else if (command == WHICH) {
    printf("usage: which program ...\n");
  }
@@ -91,6 +91,7 @@ int is_builtin_command(char * cmd) {
   if (strncmp(cmd, "printenv", strlen("printenv")) == 0) return PRINTENV;
   if (strncmp(cmd, "pushd", strlen("pushd")) == 0) return PUSHD;
   if (strncmp(cmd, "setenv", strlen("setenv")) == 0) return SETENV;
+  if (strncmp(cmd, "unalias", strlen("unalias")) == 0) return UNALIAS;
   if (strncmp(cmd, "which", strlen("which")) == 0) return WHICH;
 
   return NO_SUCH_BUILTIN;
@@ -123,6 +124,8 @@ void execute_builtin_command(int command, struct Command cmd) {
     popd(cmd.VarNum, cmd.VarList);
   } else if (command == PUSHD) {
     pushd(cmd.VarNum, cmd.VarList);
+  } else if (command == UNALIAS) {
+    unalias(cmd.VarNum, cmd.VarList);
   } else if (command == WHICH) {
     which(cmd.VarNum, cmd.VarList);
   }

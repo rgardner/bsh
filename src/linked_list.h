@@ -26,9 +26,11 @@ ll_add(struct LinkedList *list, int index, void *element);
 void
 ll_add_first(struct LinkedList *list, void *element);
 
-/* Inserts the specified element after node n in the list. O(1). */
+/* Inserts the specified element after node n in the list. O(1).
+ *
+ * If n is NULL; then set element to the head of the list. */
 void
-ll_add_after(struct Node *n, void *element);
+ll_add_after(struct LinkedList *list, struct Node *n, void *element);
 
 /* Returns the element at the specified position in this list. O(n). */
 void *

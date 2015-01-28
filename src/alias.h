@@ -11,4 +11,11 @@ alias(int, char**);
 /* Print helpful information about the alias command, then exit. */
 void
 alias_help();
+
+/* The unalias program. Unalias a name with its corresponding value. */
+int
+unalias(int, char**);
+
+void
+unalias_help();
 #endif

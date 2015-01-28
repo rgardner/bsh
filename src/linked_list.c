@@ -51,11 +51,16 @@ ll_add_first(struct LinkedList *list, void *element)
 }
 
 void
-ll_add_after(struct Node *n, void *element)
+ll_add_after(struct LinkedList *list, struct Node *n, void *element)
 {
   struct Node *new = malloc(sizeof(struct Node));
-  *new = (struct Node){ .data = element, .next = n->next };
-  n->next = new;
+  new->data = element;
+  if (n) {
+    new->next = n->next;
+    n->next = new;
+  } else {
+    list->head = element;
+  }
 }
 
 void *
