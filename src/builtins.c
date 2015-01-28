@@ -11,6 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "alias.h"
 #include "bg_jobs.h"
 #include "env.h"
 #include "history.h"
@@ -19,9 +20,6 @@
 #define UNUSED(x) (void)(x)
 
 /* Function prototypes. */
-static int alias(int, char**);
-bool alias_add(char *name, char *value, bool overwrite);
-struct Alias *alias_search(char *);
 static char *cd(int, char**);
 static void history_wrapper(int, char**);
 static int dirs(int, char**);
@@ -31,12 +29,6 @@ static void which(int, char **);
 static bool which_is_there();
 static int which_print_matches(char *, char *);
 
-/* Private structs. */
-struct Alias {
-  char *name;
-  char *value;
-};
-
 /* Global variables */
 struct LinkedList *aliases;
 struct Stack *directory_stack;
@@ -45,10 +37,7 @@ struct Stack *directory_stack;
 /* Print helpful information. */
 void help(int command) {
   if (command == ALIAS) {
-    printf("usage: alias [name[=value] ... ]\n\n"
-           "`alias`: print all existing aliases.\n"
-           "`alias name`: print the value associated with name.\n"
-           "`alias name=value`: create / modify name to be an alias for value.\n");
+    alias_help();
   } else if (command == BG) {
     bg_help();
   } else if (command == CD) {
@@ -139,80 +128,6 @@ void execute_builtin_command(int command, struct Command cmd) {
   }
 }
 
-static int
-alias(int argc, char **argv)
-{
-  /* Print all aliases. */
-  if (argc == 0) {
-    int len = ll_size(aliases);
-    for (int i = 0; i < len; i++) {
-      struct Alias *al = ll_get(aliases, i);
-      printf("alias %s = %s\n", al->name, al->value);
-    }
-    return 0;
-  }
-
-  /* Create an alias between a name/value pair. */
-  char *value;
-  if ((value = strsep(&argv[0], "="))) {
-    char *name = strdup(argv[0]);
-    alias_add(name, value, 1);
-    return 0;
-  }
-
-  /* Print all aliases matching name arguments. */
-  bool found = true;
-  for (int i = 0; i < argc; i++) {
-    struct Alias *al = alias_search(argv[i]);
-    if (al) {
-      printf("alias %s = %s\n", al->name, al->value);
-    } else {
-      printf("bsh: alias: %s not found.\n", argv[i]);
-      found = false;
-    }
-  }
-  return found ? 0 : 1;
-}
-
-struct Alias *
-alias_search(char *name)
-{
-  int len = ll_size(aliases);
-  for (int i = 0; i < len; i++) {
-    struct Alias *al = ll_get(aliases, i);
-    if (!al) break;
-
-    if (strncmp(al->name, name, strlen(al->name)) == 0) return al;
-  }
-  return NULL;
-}
-
-bool
-alias_add(char *name, char *value, bool overwrite)
-{
-  int len = ll_size(aliases);
-
-  /* Search to see if alias already exists. */
-  for (int i = 0; i < len; i++) {
-    struct Alias *al = ll_get(aliases, i);
-    if (!al) break;
-
-    if (strncmp(al->name, name, strlen(al->name)) != 0) continue;
-    if (!overwrite) return false;
-    al->value = value;
-    return true;
-  }
-  struct Alias *new = malloc(sizeof(struct Alias));
-  new->name = name;
-  new->value = value;
-  int i;
-  for (i = 0; i < len; i++) {
-    struct Alias *al = ll_get(aliases, i);
-    if (strncmp(name, al->name, strlen(name)) < 0) break;
-  }
-  ll_add(aliases, i, new);
-  return true;
-}
 
 static char *
 cd(int argc, char **argv) {
