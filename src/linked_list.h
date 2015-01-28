@@ -1,35 +1,44 @@
 #ifndef LinkedList_H
 #define LinkedList_H
-struct LinkedList;
+#include "node.h"
 
-/* Return a pointer to a new linked list. */
+struct LinkedList {
+  struct Node *head;
+  int size;
+};
+
+/* Return a pointer to a new linked list. O(1). */
 struct LinkedList *
 ll_init();
 
-/* Free every element in the list and the list itself. */
+/* Free every element in the list and the list itself. O(n). */
 void
 ll_free(struct LinkedList *list);
 
-/* Inserts the specified element at the specified position in this list.
+/* Inserts the specified element at the specified position in this list. O(n).
  * If index > ll_size(list), the element will be inserted at the end of the
  * list.
  * Returns the index of the newly inserted element. */
 int
 ll_add(struct LinkedList *list, int index, void *element);
 
-/* Inserts the specified element to the beginning of the list. */
+/* Inserts the specified element to the beginning of the list. O(1). */
 void
 ll_add_first(struct LinkedList *list, void *element);
 
-/* Returns the element at the specified position in this list. */
+/* Inserts the specified element after node n in the list. O(1). */
+void
+ll_add_after(struct Node *n, void *element);
+
+/* Returns the element at the specified position in this list. O(n). */
 void *
 ll_get(struct LinkedList *list, int index);
 
-/* Retrieves and removes the head (first element) of this list. */
+/* Retrieves and removes the head (first element) of this list. O(1). */
 void *
 ll_remove(struct LinkedList *list);
 
-/* Returns the number of elements. */
+/* Returns the number of elements. O(1). */
 int
 ll_size(struct LinkedList *list);
 #endif

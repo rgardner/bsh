@@ -3,11 +3,6 @@
 #include <stdlib.h>
 #include "node.h"
 
-struct LinkedList {
-  struct Node *head;
-  int size;
-};
-
 struct LinkedList *
 ll_init()
 {
@@ -53,6 +48,14 @@ void
 ll_add_first(struct LinkedList *list, void *element)
 {
   ll_add(list, 0, element);
+}
+
+void
+ll_add_after(struct Node *n, void *element)
+{
+  struct Node *new = malloc(sizeof(struct Node));
+  *new = (struct Node){ .data = element, .next = n->next };
+  n->next = new;
 }
 
 void *
