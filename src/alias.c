@@ -18,6 +18,7 @@ static bool alias_add(char *, char *, bool);
 static bool alias_remove(char *);
 static struct Alias* alias_search(char *);
 static void alias_print();
+static void alias_free(struct Alias *);
 
 /* Global variables. */
 struct LinkedList *aliases;
@@ -140,8 +141,8 @@ alias_add(char *name, char *value, bool overwrite)
 static bool
 alias_remove(char *name)
 {
-  struct Node *curr;
-  struct Node *prev;
+  struct Node *curr = NULL;
+  struct Node *prev = NULL;
   for (curr = aliases->head; curr; curr = curr->next) {
     struct Alias *alias = curr->data;
     int cmp = strncmp(name, alias->name, strlen(name));
@@ -157,6 +158,8 @@ alias_remove(char *name)
     } else {  // first element in the list
       aliases->head = curr->next;
     }
+    alias_free(alias);
+    node_free(curr);
     return true;
   }
   return false;
@@ -184,4 +187,12 @@ alias_print()
     struct Alias *al = current->data;
     printf("alias %s = %s\n", al->name, al->value);
   }
+}
+
+static void
+alias_free(struct Alias *alias)
+{
+  if (alias->name) free(alias->name);
+  if (alias->value) free(alias->value);
+  free(alias);
 }
