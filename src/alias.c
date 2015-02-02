@@ -92,9 +92,20 @@ unalias_help()
 }
 
 int
-alias_exp(char *input, char **output)
+alias_exp(char *string, char **output)
 {
-  return -1;
+  int length = strlen(string) + 1;
+  *output = malloc(sizeof(char) * length);
+  strncpy(*output, string, length);
+
+  struct Alias *result = alias_search(string);
+  if (!result) return -1;
+
+  char *value = result->value;
+  length = strlen(value) + 1;
+  *output = realloc(*output, sizeof(char) * length);
+  strncpy(*output, value, length);
+  return 1;
 }
 
 static bool

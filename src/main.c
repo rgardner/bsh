@@ -124,6 +124,7 @@ int main(int argc, char **argv) {
       result = alias_exp(cmd->command, &expansion);
       if (result < 0 || result == 2) {
         free(expansion);
+        continue;
       }
 
       // Copy expansion into command.
