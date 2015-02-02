@@ -10,10 +10,6 @@ struct Node *
 node_init(void *data);
 
 /* Free the node. */
-void
-node_free(struct Node *n);
-
-/* Return the data attached to the node. */
 void *
-node_data(struct Node *n);
+node_free(struct Node *n);
 #endif
