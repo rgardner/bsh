@@ -165,9 +165,9 @@ alias_remove(char *name)
 static struct Alias *
 alias_search(char *name)
 {
-  int len = ll_size(aliases);
-  for (int i = 0; i < len; i++) {
-    struct Alias *al = ll_get(aliases, i);
+  struct Node *current = NULL;
+  for (current = aliases->head; current; current = current->next) {
+    struct Alias *al = current->data;
     if (!al) break;
 
     if (strncmp(al->name, name, strlen(al->name)) == 0) return al;
