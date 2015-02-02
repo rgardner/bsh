@@ -22,6 +22,12 @@ static void alias_print();
 /* Global variables. */
 struct LinkedList *aliases;
 
+void
+alias_init()
+{
+  aliases = ll_init();
+}
+
 int
 alias(int argc, char **argv)
 {
@@ -42,17 +48,17 @@ alias(int argc, char **argv)
   }
 
   /* Print all aliases matching name arguments. */
-  bool found = true;
+  bool all_found = true;
   for (int i = 0; i < argc; i++) {
     struct Alias *al = alias_search(argv[i]);
     if (al) {
       printf("alias %s = %s\n", al->name, al->value);
     } else {
       printf("bsh: alias: %s not found.\n", argv[i]);
-      found = false;
+      all_found = false;
     }
   }
-  return found ? 0 : 1;
+  return all_found ? 0 : 1;
 }
 
 void
@@ -67,13 +73,28 @@ alias_help()
 int
 unalias(int argc, char **argv)
 {
-  return 0;
+  if (argc == 0) {
+    unalias_help();
+    return 2;
+  }
+
+  bool all_found = true;
+  for (int i = 0; i < argc; i++) {
+    all_found = alias_remove(argv[i]);
+  }
+  return all_found ? 0 : 1;
 }
 
 void
 unalias_help()
 {
+  printf("usage: unalias [-a] name [name ...]\n");
+}
 
+int
+alias_exp(char *input, char **output)
+{
+  return -1;
 }
 
 static bool

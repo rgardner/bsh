@@ -33,9 +33,6 @@ void init_command(struct Command *p) {
 }
 
 struct ParseInfo* parse(char *cmdline) {
-  struct ParseInfo *Result;
-  int i = 0;
-
   // Check if this is a valid string.
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
 
@@ -43,10 +40,11 @@ struct ParseInfo* parse(char *cmdline) {
   if (cmdline[0] == '\0') return NULL;
 
   // Skip blank characters at the start of the cmdline
+  int i = 0;
   for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
   if (cmdline[i] == '\n' && cmdline[i] == '\0') return NULL;
 
-  Result = malloc(sizeof(struct ParseInfo));
+  struct ParseInfo *Result = malloc(sizeof(struct ParseInfo));
   init_info(Result);
 
   struct Command *cmd = malloc(sizeof(struct Command));

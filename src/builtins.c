@@ -32,6 +32,13 @@ static int which_print_matches(char *, char *);
 /* Global variables */
 struct Stack *directory_stack;
 
+void
+builtins_init()
+{
+  alias_init();
+  directory_stack = stack_init();
+}
+
 /* Print helpful information. */
 void help(int command) {
   if (command == ALIAS) {

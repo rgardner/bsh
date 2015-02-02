@@ -5,6 +5,7 @@
 #include <readline/readline.h>
 #include <unistd.h>
 
+#include "alias.h"
 #include "bg_jobs.h"
 #include "builtins.h"
 #include "history.h"
@@ -63,8 +64,7 @@ int main(int argc, char **argv) {
 
   /* Initialization. */
   num_bg_jobs = 0;
-  aliases = ll_init();
-  directory_stack = stack_init();
+  builtins_init();
   history_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
@@ -116,7 +116,23 @@ int main(int argc, char **argv) {
       free(cmdLine);
       continue;
     }
-    //prints the info struct
+
+    // Expand aliases in info commands.
+    for (int i = 0; i < info->pipeNum; i++) {
+      struct Command *cmd = &info->CommArray[i];
+      char *expansion;
+      result = alias_exp(cmd->command, &expansion);
+      if (result < 0 || result == 2) {
+        free(expansion);
+      }
+
+      // Copy expansion into command.
+      int length = strlen(expansion) + 1;
+      char *command = realloc(cmd->command, sizeof(char) * length);
+      strncpy(command, expansion, length);
+      free(expansion);
+    }
+
 #ifdef DEBUG
     print_info(info);
 #endif
