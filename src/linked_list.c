@@ -60,7 +60,7 @@ ll_add_after(struct LinkedList *list, struct Node *n, void *element)
     new->next = n->next;
     n->next = new;
   } else {
-    list->head = element;
+    list->head = new;
   }
 }
 
