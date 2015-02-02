@@ -160,7 +160,10 @@ cd(int argc, char **argv) {
   }
   bsh_setenv("OLDPWD", cwd, 1);
 
-  chdir(dir);
+  int ret = chdir(dir);
+  if (ret != 0) {
+    fprintf(stderr, "-bsh: cd: %s: No such file or directory\n", dir);
+  }
   return dir;
 }
 
