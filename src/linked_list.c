@@ -7,6 +7,7 @@ struct LinkedList *
 ll_init()
 {
   struct LinkedList *list = malloc(sizeof(struct LinkedList));
+  list->head = NULL;
   list->size = 0;
   return list;
 }

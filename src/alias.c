@@ -42,7 +42,6 @@ alias(int argc, char **argv)
   if ((name = strsep(&argv[0], "="))) {
     name = strdup(name);
     char *value = strdup(argv[0]);
-    printf("name: %s\tvalue: %s\n", name, value);
     alias_add(name, value, 1);
     return 0;
   }
@@ -112,7 +111,7 @@ static bool
 alias_add(char *name, char *value, bool overwrite)
 {
   /* Search to see if alias already exists. */
-  struct Node *current;
+  struct Node *current = NULL;
   for (current = aliases->head; current; current = current->next) {
     struct Alias *alias = current->data;
     if (strncmp(name, alias->name, strlen(name)) != 0) continue;
@@ -125,7 +124,7 @@ alias_add(char *name, char *value, bool overwrite)
   struct Alias *new = malloc(sizeof(struct Alias));
   *new = (struct Alias ) { .name = name, .value = value };
 
-  struct Node *previous;
+  struct Node *previous = NULL;
   for (current = aliases->head; current; current = current->next) {
     struct Alias *alias = current->data;
     if (strncmp(name, alias->name, strlen(name)) < 0) break;
