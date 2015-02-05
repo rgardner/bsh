@@ -20,14 +20,17 @@
 #define UNUSED(x) (void)(x)
 
 /* Function prototypes. */
-static char *cd(int, char**);
-static void history_wrapper(int, char**);
-static int dirs(int, char**);
-static int popd(int, char**);
-static int pushd(int, char**);
+static char *cd(int, char **);
+static void history_wrapper(int, char **);
+static int dirs(int, char **);
+static int popd(int, char **);
+static int printenv_wrapper(int, char **);
+static int pushd(int, char **);
+static int setenv_wrapper(int, char **);
 static void which(int, char **);
 static bool which_is_there();
 static int which_print_matches(char *, char *);
+static int unset_wrapper(int, char **);
 
 /* Global variables */
 struct Stack *directory_stack;
@@ -189,6 +192,24 @@ history_wrapper(int argc, char **argv) {
   } else {  // print the entire history
     history_print(history_length);
   }
+}
+
+static int
+printenv_wrapper(int argc, char **argv)
+{
+  return 0;
+}
+
+static int
+setenv_wrapper(int argc, char **argv)
+{
+  return 0;
+}
+
+static int
+unset_wrapper(int argc, char **argv)
+{
+  return 0;
 }
 
 static void
