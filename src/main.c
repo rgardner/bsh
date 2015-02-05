@@ -12,6 +12,7 @@
 #include "parse.h"
 
 #define MAX_PROMPT_LENGTH 1024
+#define COMMAND_NOT_FOUND_EXIT_CODE 127
 #define UNUSED(x) (void)(x)
 
 char *buildPrompt() {
@@ -54,7 +55,10 @@ void execute_command(struct ParseInfo *info, struct Command cmd) {
     args[i + 1] = cmd.VarList[i];
   }
   args[cmd.VarNum+1] = NULL;
-  execvp(args[0], args);
+  if (execvp(args[0], args) == -1) {
+    printf("-bsh: %s: command not found\n", args[0]);
+    exit(COMMAND_NOT_FOUND_EXIT_CODE);
+  }
 }
 
 int main(int argc, char **argv) {
