@@ -14,6 +14,7 @@ struct Variable {
 };
 
 /* Function prototypes. */
+void variable_free(struct Variable *);
 
 /* Global variables. */
 struct LinkedList *variables;
@@ -86,7 +87,27 @@ bsh_setenv(char *name, char *value, int overwrite)
 int
 bsh_unsetenv(const char *name)
 {
-  return -1;
+  struct Node *prev = NULL;
+  for (struct Node *curr = variables->head; curr; curr = curr->next) {
+    struct Variable *alias = curr->data;
+    int cmp = strncmp(name, alias->name, strlen(name));
+    if (cmp > 0) break;
+    if (cmp < 0) {
+      prev = curr;
+      continue;
+    }
+
+    /* Found the node. */
+    if (prev) {
+      prev->next = curr->next;
+    } else {  // first element in the list
+      variables->head = curr->next;
+    }
+    variable_free(alias);
+    node_free(curr);
+    return 0;
+  }
+  return 1;
 }
 
 char *
@@ -99,4 +120,12 @@ bsh_getenv(const char *name) {
     if (strncmp(var->name, name, strlen(var->name)) == 0) return var->value;
   }
   return NULL;
+}
+
+void
+variable_free(struct Variable *var)
+{
+  if (var->name) free(var->name);
+  if (var->value) free(var->value);
+  free(var);
 }
