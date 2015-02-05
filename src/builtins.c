@@ -13,9 +13,9 @@
 
 #include "alias.h"
 #include "bg_jobs.h"
-#include "env.h"
 #include "history.h"
 #include "parse.h"
+#include "variables.h"
 
 #define UNUSED(x) (void)(x)
 

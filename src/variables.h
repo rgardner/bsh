@@ -1,5 +1,5 @@
-#ifndef ENV_H
-#define ENV_H
+#ifndef VARIABLES_H
+#define VARIABLES_H
 /* Initialize internal data structures. */
 void
 variables_init();
@@ -14,7 +14,7 @@ int
 bsh_printenv(const char *name);
 
 int
-bsh_setenv(const char *name, const char *value, int overwrite);
+bsh_setenv(char *name, char *value, int overwrite);
 
 int
 bsh_unset(const char *name);

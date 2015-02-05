@@ -1,7 +1,8 @@
-#include "env.h"
+#include "variables.h"
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "linked_list.h"
@@ -56,18 +57,46 @@ bsh_printenv(const char *name)
 }
 
 int
-bsh_setenv(const char *name, const char *value, int overwrite)
+bsh_setenv(char *name, char *value, int overwrite)
 {
+  /* Search to see if variable already exists. */
+  struct Node *curr;
+  for (curr = variables->head; curr; curr = curr->next) {
+    struct Variable *var = curr->data;
+    if (strncmp(name, var->name, strlen(name)) != 0) continue;
+    if (!overwrite) return false;
+    var->value = value;
+    return true;
+  }
 
-  return -1;
+  /* Add a new alias. */
+  struct Variable *new = malloc(sizeof(struct Variable));
+  *new = (struct Variable ) { .name = name, .value = value };
+
+  struct Node *previous = NULL;
+  for (curr = variables->head; curr; curr = curr->next) {
+    struct Variable *var = curr->data;
+    if (strncmp(name, var->name, strlen(name)) < 0) break;
+    previous = curr;
+  }
+  ll_add_after(variables, previous, new);
+  return 0;
 }
 
 int
-bsh_unsetenv(const char *name) {
+bsh_unsetenv(const char *name)
+{
   return -1;
 }
 
 char *
 bsh_getenv(const char *name) {
+  struct Node *current = NULL;
+  for (struct Node *curr = variables->head; curr; curr = curr->next) {
+    struct Variable *var = current->data;
+    if (!var) break;
+
+    if (strncmp(var->name, name, strlen(var->name)) == 0) return var->value;
+  }
   return NULL;
 }
