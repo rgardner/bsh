@@ -20,7 +20,7 @@ Welcome to Bob shell.
 4. ~~`which`~~
   - ~~http://www.opensource.apple.com/source/shell_cmds/shell_cmds-170/which/which.c~~
 5. ~~`dirs, pushd, popd`~~
-6. `alias`
+6. ~~`alias`~~
 7. `pipe`
 8. `advanced I/O`
 9. `fg/bg`
