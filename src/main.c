@@ -72,8 +72,8 @@ int main(int argc, char **argv) {
   history_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
-      perror("An error occurred while setting the SIGCHLD signal handler.");
-   }
+    perror("An error occurred while setting the SIGCHLD signal handler.");
+  }
 
 #ifdef UNIX
   printf("This is the UNIX version.\n");
