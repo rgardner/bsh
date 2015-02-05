@@ -1,10 +1,24 @@
 #ifndef ENV_H
 #define ENV_H
-void bsh_printenv_help();
-void bsh_setenv_help();
+/* Initialize internal data structures. */
+void
+variables_init();
 
-void bsh_printenv(const char *name);
-int bsh_setenv(const char *name, const char *value, int overwrite);
-int bsh_unsetenv(const char *name);
-char * bsh_getenv(const char *name);
+void
+bsh_printenv_help();
+
+void
+bsh_setenv_help();
+
+int
+bsh_printenv(const char *name);
+
+int
+bsh_setenv(const char *name, const char *value, int overwrite);
+
+int
+bsh_unset(const char *name);
+
+char *
+bsh_getenv(const char *name);
 #endif
