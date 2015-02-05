@@ -130,10 +130,16 @@ void execute_builtin_command(int command, struct Command cmd) {
     kill(pid, SIGKILL);
   } else if (command == POPD) {
     popd(cmd.VarNum, cmd.VarList);
+  } else if (command == PRINTENV) {
+    printenv_wrapper(cmd.VarNum, cmd.VarList);
   } else if (command == PUSHD) {
     pushd(cmd.VarNum, cmd.VarList);
+  } else if (command == SETENV) {
+    setenv_wrapper(cmd.VarNum, cmd.VarList);
   } else if (command == UNALIAS) {
     unalias(cmd.VarNum, cmd.VarList);
+  } else if (command == UNSET) {
+    unset_wrapper(cmd.VarNum, cmd.VarList);
   } else if (command == WHICH) {
     which(cmd.VarNum, cmd.VarList);
   }

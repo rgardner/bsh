@@ -6,7 +6,7 @@
 
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, ALIAS, BG, CD, DIRS, EXIT, FG, HELP,
                        HISTORY, JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV,
-                       UNALIAS, WHICH };
+                       UNALIAS, UNSET, WHICH };
 
 
 /* Initialize all data structures for builtin commands. */
