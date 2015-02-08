@@ -2,9 +2,9 @@
 
 #include "linked_list.h"
 #include "stack.h"
+
 #include <sys/stat.h>
 #include <sys/param.h>
-
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,17 +20,17 @@
 #define UNUSED(x) (void)(x)
 
 /* Function prototypes. */
-static char *cd(int, char **);
-static void history_wrapper(int, char **);
-static int dirs(int, char **);
-static int popd(int, char **);
-static int printenv_wrapper(int, char **);
-static int pushd(int, char **);
-static int setenv_wrapper(int, char **);
-static void which(int, char **);
-static bool which_is_there();
-static int which_print_matches(char *, char *);
-static int unset_wrapper(int, char **);
+static char *cd(const int, const char **);
+static void history_wrapper(const int, const char **);
+static int dirs(const int, const char **);
+static int popd(const int, const char **);
+static int printenv_wrapper(const int, const char **);
+static int pushd(const int, const char **);
+static int setenv_wrapper(const int, const char **);
+static void which(const int, const char **);
+static bool which_is_there(const char *);
+static int which_print_matches(char *, const char *);
+static int unset_wrapper(const int, const char **);
 
 /* Global variables */
 struct Stack *directory_stack;
@@ -45,7 +45,9 @@ builtins_init()
 }
 
 /* Print helpful information. */
-void help(int command) {
+void
+help(int command)
+{
   if (command == ALIAS) {
     alias_help();
   } else if (command == BG) {
@@ -88,7 +90,7 @@ void help(int command) {
  }
 }
 
-int is_builtin_command(char * cmd) {
+int is_builtin_command(const char * cmd) {
   if (strncmp(cmd, "alias", strlen("alias")) == 0) return ALIAS;
   if (strncmp(cmd, "bg", strlen("bg")) == 0) return BG;
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
@@ -109,49 +111,53 @@ int is_builtin_command(char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
-void execute_builtin_command(int command, struct Command cmd) {
+void
+execute_builtin_command(const int command, struct Command cmd)
+{
+  const char **varlist = (const char **)cmd.VarList;
   if (command == ALIAS) {
-    alias(cmd.VarNum, cmd.VarList);
+    alias(cmd.VarNum, varlist);
   } else if (command == CD) {
-    cd(cmd.VarNum, cmd.VarList);
+    cd(cmd.VarNum, varlist);
   } else if (command == HELP) {
     int command = HELP;
     if (cmd.VarList[0]) command = is_builtin_command(cmd.VarList[0]);
     help(command);
   } else if (command == DIRS) {
-    dirs(cmd.VarNum, cmd.VarList);
+    dirs(cmd.VarNum, varlist);
   } else if (command == EXIT) {
     if (!has_bg_jobs()) {
       exit(EXIT_SUCCESS);
     }
     printf("There are background processes.\n");
   } else if (command == HISTORY) {
-    history_wrapper(cmd.VarNum, cmd.VarList);
+    history_wrapper(cmd.VarNum, varlist);
   } else if (command == JOBS) {
     print_running_jobs();
   } else if (command == KILL) {
     pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
     kill(pid, SIGKILL);
   } else if (command == POPD) {
-    popd(cmd.VarNum, cmd.VarList);
+    popd(cmd.VarNum, varlist);
   } else if (command == PRINTENV) {
-    printenv_wrapper(cmd.VarNum, cmd.VarList);
+    printenv_wrapper(cmd.VarNum, varlist);
   } else if (command == PUSHD) {
-    pushd(cmd.VarNum, cmd.VarList);
+    pushd(cmd.VarNum, varlist);
   } else if (command == SETENV) {
-    setenv_wrapper(cmd.VarNum, cmd.VarList);
+    setenv_wrapper(cmd.VarNum, varlist);
   } else if (command == UNALIAS) {
-    unalias(cmd.VarNum, cmd.VarList);
+    unalias(cmd.VarNum, varlist);
   } else if (command == UNSET) {
-    unset_wrapper(cmd.VarNum, cmd.VarList);
+    unset_wrapper(cmd.VarNum, varlist);
   } else if (command == WHICH) {
-    which(cmd.VarNum, cmd.VarList);
+    which(cmd.VarNum, varlist);
   }
 }
 
 
 static char *
-cd(int argc, char **argv) {
+cd(const int argc, const char **argv)
+{
   size_t len = 1024;
   char *dir = malloc(len);
 
@@ -162,7 +168,7 @@ cd(int argc, char **argv) {
   } else if (strncmp(argv[0], "-", strlen("-")) == 0) {
     dir = bsh_getenv("OLDPWD");
   } else {
-    dir = argv[0];
+    strncpy(dir, argv[0], sizeof(strlen(argv[0])));
   }
 
   char *cwd = malloc(len);
@@ -179,7 +185,8 @@ cd(int argc, char **argv) {
 }
 
 static void
-history_wrapper(int argc, char **argv) {
+history_wrapper(const int argc, const char **argv)
+{
   if (argc == 2) {  // set the history size
     if (strncmp(argv[0], "-s", strlen("-s")) == 0) {
       int hist_size = strtol(argv[1], (char **)NULL, 10);
@@ -196,39 +203,39 @@ history_wrapper(int argc, char **argv) {
 }
 
 static int
-printenv_wrapper(int argc, char **argv)
+printenv_wrapper(const int argc, const char **argv)
 {
   return 0;
 }
 
 static int
-setenv_wrapper(int argc, char **argv)
+setenv_wrapper(const int argc, const char **argv)
 {
   return 0;
 }
 
 static int
-unset_wrapper(int argc, char **argv)
+unset_wrapper(const int argc, const char **argv)
 {
   return 0;
 }
 
 static void
-which(int argc, char **argv) {
+which(const int argc, const char **argv)
+{
   char *p = getenv("PATH");
   size_t pathlen = strlen(p) + 1;
   char *path = malloc(pathlen);
-  while (argc > 0) {
+  for (int i = 0; i < argc; i++) {
     memcpy(path, p, pathlen);
-    if (strlen(*argv) >= FILE_MAX_SIZE) continue;
-    which_print_matches(path, *argv);
-    argv++;
-    argc--;
+    if (strlen(argv[i]) >= FILE_MAX_SIZE) continue;
+    which_print_matches(path, argv[i]);
   }
 }
 
 static bool
-which_is_there(char *candidate) {
+which_is_there(const char *candidate)
+{
   struct stat fin;
 
   /* XXX work around access(2) false positives for superuser */
@@ -244,7 +251,8 @@ which_is_there(char *candidate) {
 }
 
 static int
-which_print_matches(char *path, char *filename) {
+which_print_matches(char *path, const char *filename)
+{
   if (strchr(filename, '/')) {
     return which_is_there(filename) ? 0 : -1;
   }
@@ -269,7 +277,7 @@ which_print_matches(char *path, char *filename) {
 }
 
 static int
-dirs(int argc, char** argv)
+dirs(const int argc, const char** argv)
 {
   UNUSED(argc);
   UNUSED(argv);
@@ -291,14 +299,15 @@ dirs(int argc, char** argv)
 }
 
 static int
-popd(int argc, char** argv) {
+popd(const int argc, const char** argv)
+{
   if (stack_empty(directory_stack)) {
     printf("-bsh: popd: directory stack empty\n");
     return -1;
   }
 
   char *dir = (char *)stack_pop(directory_stack);
-  argc = 1;
+  const int new_argc = 1;
   argv[0] = dir;
   cd(argc, argv);
   free(dir);
@@ -306,7 +315,8 @@ popd(int argc, char** argv) {
 }
 
 static int
-pushd(int argc, char** argv) {
+pushd(const int argc, const char** argv)
+{
   if (argc < 1) {
     printf("-bsh: pushd: no other directory\n");
     return -1;

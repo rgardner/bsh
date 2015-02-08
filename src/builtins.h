@@ -15,13 +15,13 @@ builtins_init();
 
 /* Print help about a specific builtin command. */
 void
-help(int command);
+help(const int command);
 
 /* Return the enum that corresponds to cmd. */
 int
-is_builtin_command(char *cmd);
+is_builtin_command(const char *cmd);
 
+/* Execute the builtin command in the same process as the caller. */
 void
-execute_builtin_command(int command, struct Command cmd);
-
+execute_builtin_command(const int command, const struct Command cmd);
 #endif

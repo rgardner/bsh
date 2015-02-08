@@ -26,7 +26,7 @@ struct ParseInfo {
 
 /* Function prototypes. */
 struct ParseInfo *
-parse(char *);
+parse(const char *);
 
 void
 free_info(const struct ParseInfo *);

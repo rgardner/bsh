@@ -12,7 +12,7 @@
 #include <string.h>
 
 /* Function prototypes. */
-int copy_substring(char *, char *, int, int);
+int copy_substring(char *, const char *, const int, const int);
 
 bool
 is_bg_job(const struct ParseInfo *info)
@@ -31,14 +31,16 @@ init_info(struct ParseInfo *p)
                     .outFile = "" };
 }
 
-void init_command(struct Command *p)
+void
+init_command(struct Command *p)
 {
   *p = (struct Command){ .command = malloc(MAXLINE*sizeof(char)),
                       .VarList = {NULL},
                       .VarNum = 0};
 }
 
-struct ParseInfo* parse(char *cmdline)
+struct ParseInfo *
+parse(const char *cmdline)
 {
   // Check if this is a valid string.
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
@@ -123,7 +125,7 @@ struct ParseInfo* parse(char *cmdline)
  * -1 if the length of the new string is greater than the supplied limit.
  */
 int
-copy_substring(char *dest, char *src, int begin, int limit)
+copy_substring(char *dest, const char *src, const int begin, const int limit)
 {
   int end = begin;
   for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++);
