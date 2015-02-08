@@ -23,7 +23,7 @@ void
 free_job(struct BGJob *job);
 
 void
-handle_sigchld(int signum);
+handle_sigchld(const int signum);
 
 bool
 has_bg_jobs();

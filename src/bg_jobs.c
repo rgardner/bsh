@@ -8,6 +8,7 @@
 
 #include "parse.h"
 
+/* Global variables. */
 int num_bg_jobs;
 struct BGJob *background_jobs[MAX_BG_JOBS];
 
@@ -20,7 +21,9 @@ job_init(const pid_t pid, const struct ParseInfo *info, const struct Command *cm
   return job;
 }
 
-void handle_sigchld(int signum) {
+void
+handle_sigchld(const int signum)
+{
   if (signum != SIGCHLD) return;
 
   pid_t pid = waitpid((pid_t)-1, 0, WNOHANG);
@@ -43,7 +46,9 @@ void handle_sigchld(int signum) {
   background_jobs[i] = NULL;
 }
 
-bool has_bg_jobs() {
+bool
+has_bg_jobs()
+{
   for (int i = 0; i < num_bg_jobs; i++) {
     struct BGJob *job = background_jobs[i];
     if (!job) continue;
@@ -56,7 +61,9 @@ bool has_bg_jobs() {
   return false;
 }
 
-void print_running_jobs() {
+void
+print_running_jobs()
+{
   for (int i = 0; i < num_bg_jobs; i++) {
     struct BGJob *job = background_jobs[i];
     if (!job) continue;
@@ -69,22 +76,30 @@ void print_running_jobs() {
   }
 }
 
-void free_job(struct BGJob *job) {
+void
+free_job(struct BGJob *job)
+{
   free_info(job->info);
   free(job);
 }
 
-void jobs_help() {
+void
+jobs_help()
+{
   printf("usage: jobs\n\n"
          "list the processes currently executing in the background.\n");
 }
 
-void bg_help() {
+void
+bg_help()
+{
   printf("usage: bg [job]\n\n"
          "resume suspended jobs without bringing them to the foreground.\n");
 }
 
-void fg_help() {
+void
+fg_help()
+{
   printf("usage: fg [ %%job_id ]\n\n"
          "continues a stopped job by running it in the foreground.\n");
 }
