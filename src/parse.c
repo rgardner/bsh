@@ -11,13 +11,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Function prototypes. */
 int copy_substring(char *, char *, int, int);
 
-bool is_bg_job(struct ParseInfo *info) {
+bool
+is_bg_job(const struct ParseInfo *info)
+{
   return info->runInBackground == true;
 }
 
-void init_info(struct ParseInfo *p) {
+void
+init_info(struct ParseInfo *p)
+{
   *p = (struct ParseInfo){ .hasInputRedirection = false,
                     .hasOutputRedirection = false,
                     .runInBackground = false,
@@ -26,13 +31,15 @@ void init_info(struct ParseInfo *p) {
                     .outFile = "" };
 }
 
-void init_command(struct Command *p) {
+void init_command(struct Command *p)
+{
   *p = (struct Command){ .command = malloc(MAXLINE*sizeof(char)),
                       .VarList = {NULL},
                       .VarNum = 0};
 }
 
-struct ParseInfo* parse(char *cmdline) {
+struct ParseInfo* parse(char *cmdline)
+{
   // Check if this is a valid string.
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
 
@@ -115,7 +122,9 @@ struct ParseInfo* parse(char *cmdline) {
  * is encountered. Returns the index of the last valid character found. Returns
  * -1 if the length of the new string is greater than the supplied limit.
  */
-int copy_substring(char *dest, char *src, int begin, int limit) {
+int
+copy_substring(char *dest, char *src, int begin, int limit)
+{
   int end = begin;
   for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++);
   if (end - begin > limit) return -1;  // length of string to copy too large
@@ -124,7 +133,9 @@ int copy_substring(char *dest, char *src, int begin, int limit) {
   return end;
 }
 
-void print_info(struct ParseInfo *info) {
+void
+print_info(const struct ParseInfo *info)
+{
   for (int i = 0; i < info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
     for (int j = 0; j < info->CommArray[i].VarNum; j++) {
@@ -146,7 +157,9 @@ void print_info(struct ParseInfo *info) {
   printf("background: %s\n", (info->runInBackground) ? "yes" : "no");
 }
 
-void free_info(struct ParseInfo *info) {
+void
+free_info(const struct ParseInfo *info)
+{
   if (!info) return;
   for (int i = 0; i < info->pipeNum; i++) {
     struct Command cmd = info->CommArray[i];
@@ -155,5 +168,5 @@ void free_info(struct ParseInfo *info) {
       free(cmd.VarList[j]);
     }
   }
-  free(info);
+  free((void*)info);
 }

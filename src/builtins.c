@@ -41,6 +41,7 @@ builtins_init()
   alias_init();
   directory_stack = stack_init();
   variables_init();
+  history_init();
 }
 
 /* Print helpful information. */

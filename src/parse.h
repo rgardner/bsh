@@ -25,8 +25,15 @@ struct ParseInfo {
 };
 
 /* Function prototypes. */
-struct ParseInfo *parse(char *);
-void free_info(struct ParseInfo *);
-void print_info(struct ParseInfo *);
-bool is_bg_job(struct ParseInfo *);
+struct ParseInfo *
+parse(char *);
+
+void
+free_info(const struct ParseInfo *);
+
+void
+print_info(const struct ParseInfo *);
+
+bool
+is_bg_job(const struct ParseInfo *);
 #endif

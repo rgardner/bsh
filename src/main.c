@@ -15,7 +15,9 @@
 #define COMMAND_NOT_FOUND_EXIT_CODE 127
 #define UNUSED(x) (void)(x)
 
-char *buildPrompt() {
+char *
+buildPrompt()
+{
   char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
   char cwd[1024];
   if (!getcwd(cwd, sizeof(cwd))) {
@@ -25,7 +27,9 @@ char *buildPrompt() {
   return prompt;
 }
 
-void print_login_message() {
+void
+print_login_message()
+{
   printf("                __\n");
   printf("    ___        |  \"---.\n");
   printf("  .\"   \". -o)  |      |\n");
@@ -34,7 +38,9 @@ void print_login_message() {
   printf("Welcome to Bob shell.\n");
 }
 
-void execute_command(struct ParseInfo *info, struct Command cmd) {
+void
+execute_command(struct ParseInfo const *info, const struct Command cmd)
+{
   // setup file input/output redirection.
   if (info->hasInputRedirection) {
     int fd = open(info->inFile, O_RDONLY);
@@ -61,7 +67,8 @@ void execute_command(struct ParseInfo *info, struct Command cmd) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   // Ignore argc and argv until we add command line arguments.
   UNUSED(argc);
   UNUSED(argv);
@@ -69,7 +76,6 @@ int main(int argc, char **argv) {
   /* Initialization. */
   num_bg_jobs = 0;
   builtins_init();
-  history_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
     perror("An error occurred while setting the SIGCHLD signal handler.");
@@ -101,21 +107,21 @@ int main(int argc, char **argv) {
 
     // Look up in history.
     char *expansion;
-    int result = history_exp(cmdLine, &expansion);
-    if (result < 0 || result == 2) {  // error or should not execute.
+    const int his_res = history_exp(cmdLine, &expansion);
+    if (his_res < 0 || his_res == 2) {  // error or should not execute.
       free(expansion);
       continue;
     }
     history_add(expansion);
 
     // Copy expansion into cmdLine.
-    int length = strlen(expansion) + 1;
+    const int length = strlen(expansion) + 1;
     cmdLine = realloc(cmdLine, sizeof(char) * length);
     strncpy(cmdLine, expansion, length);
     free(expansion);
 
     //calls the parser
-    struct ParseInfo *info = parse(cmdLine);
+    const struct ParseInfo *info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
       continue;
@@ -123,16 +129,16 @@ int main(int argc, char **argv) {
 
     // Expand aliases in info commands.
     for (int i = 0; i < info->pipeNum; i++) {
-      struct Command *cmd = &info->CommArray[i];
+      const struct Command *cmd = &info->CommArray[i];
       char *expansion;
-      result = alias_exp(cmd->command, &expansion);
-      if (result < 0 || result == 2) {
+      const int alias_res = alias_exp(cmd->command, &expansion);
+      if (alias_res < 0 || alias_res == 2) {
         free(expansion);
         continue;
       }
 
       // Copy expansion into command.
-      int length = strlen(expansion) + 1;
+      const int length = strlen(expansion) + 1;
       char *command = realloc(cmd->command, sizeof(char) * length);
       strncpy(command, expansion, length);
       free(expansion);
@@ -143,7 +149,7 @@ int main(int argc, char **argv) {
 #endif
 
     //com contains the info. of the command before the first "|"
-    struct Command *cmd=&info->CommArray[0];
+    const struct Command *cmd=&info->CommArray[0];
     if (!cmd  || !cmd->command) {
       free_info(info);
       free(cmdLine);
@@ -160,10 +166,7 @@ int main(int argc, char **argv) {
         execute_command(info, *cmd);
       } else {
         if (is_bg_job(info)) {
-          struct BGJob *job = malloc(sizeof(struct BGJob));
-          job->pid = child_pid;
-          job->info = info;
-          job->cmd = cmd;
+          struct BGJob *job = job_init(child_pid, info, cmd);
           background_jobs[num_bg_jobs] = job;
           num_bg_jobs++;
           printf("[%d] %d\n", num_bg_jobs, child_pid);

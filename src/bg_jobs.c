@@ -11,6 +11,15 @@
 int num_bg_jobs;
 struct BGJob *background_jobs[MAX_BG_JOBS];
 
+struct BGJob *
+job_init(const pid_t pid, const struct ParseInfo *info, const struct Command *cmd)
+{
+  struct BGJob init = { .pid = pid, .info = info, .cmd = cmd };
+  struct BGJob *job = malloc(sizeof(struct BGJob));
+  memcpy(job, &init, sizeof(struct BGJob));
+  return job;
+}
+
 void handle_sigchld(int signum) {
   if (signum != SIGCHLD) return;
 
