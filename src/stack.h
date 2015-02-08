@@ -10,29 +10,29 @@ stack_init();
 
 /* Free the stack. */
 void
-stack_free(struct Stack *);
+stack_free(const struct Stack *);
 
 /* Tests if the stack is empty. */
 bool
-stack_empty(struct Stack *);
+stack_empty(const struct Stack *);
 
 /* Get an element at index i from the stack. */
 void *
-stack_get(struct Stack *, int);
+stack_get(const struct Stack *, const int);
 
 /* Return the data on the top of the stack without removing it. */
 void *
-stack_peak(struct Stack *);
+stack_peak(const struct Stack *);
 
 /* Pop an element from the stack. */
 void *
-stack_pop(struct Stack *);
+stack_pop(const struct Stack *);
 
 /* Push an element on the stack. */
 void
-stack_push(struct Stack *, void *);
+stack_push(const struct Stack *, const void *);
 
 /* Returns the number of elements in the list. */
 int
-stack_size(struct Stack *);
+stack_size(const struct Stack *);
 #endif

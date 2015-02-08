@@ -4,20 +4,20 @@
 
 /* Return a newly allocated node. */
 struct Node *
-node_init(void *data)
+node_init(const void *data)
 {
   struct Node *node = malloc(sizeof(struct Node));
-  node->data = data;
+  node->data = (void *)data;
   node->next = NULL;
   return node;
 }
 
 /* Free the node. */
 void *
-node_free(struct Node *node)
+node_free(const struct Node *node)
 {
   if (!node) return NULL;
   void *data = node->data;
-  free(node);
+  free((struct Node *)node);
   return data;
 }

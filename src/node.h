@@ -7,9 +7,9 @@ struct Node {
 
 /* Return a newly allocated node. */
 struct Node *
-node_init(void *data);
+node_init(const void *data);
 
 /* Free the node. */
 void *
-node_free(struct Node *n);
+node_free(const struct Node *n);
 #endif

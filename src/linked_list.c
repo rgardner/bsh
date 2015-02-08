@@ -13,7 +13,7 @@ ll_init()
 }
 
 void
-ll_free(struct LinkedList *list)
+ll_free(const struct LinkedList *list)
 {
   struct Node *current = list->head;
   while (current) {
@@ -21,14 +21,13 @@ ll_free(struct LinkedList *list)
     free(current);
     current = cp;
   }
-  free(list);
+  free((struct LinkedList *)list);
 }
 
 int
-ll_add(struct LinkedList *list, int index, void *element)
+ll_add(struct LinkedList *list, const int index, const void *element)
 {
-  struct Node *new = malloc(sizeof(struct Node));
-  new->data = element;
+  struct Node *new = node_init(element);
   list->size++;
 
   if (index == 0) {
@@ -46,16 +45,15 @@ ll_add(struct LinkedList *list, int index, void *element)
 }
 
 void
-ll_add_first(struct LinkedList *list, void *element)
+ll_add_first(struct LinkedList *list, const void *element)
 {
   ll_add(list, 0, element);
 }
 
 void
-ll_add_after(struct LinkedList *list, struct Node *n, void *element)
+ll_add_after(struct LinkedList *list, struct Node *n, const void *element)
 {
-  struct Node *new = malloc(sizeof(struct Node));
-  new->data = element;
+  struct Node *new = node_init(element);
   if (n) {
     new->next = n->next;
     n->next = new;
@@ -65,7 +63,7 @@ ll_add_after(struct LinkedList *list, struct Node *n, void *element)
 }
 
 void *
-ll_get(struct LinkedList *list, int index)
+ll_get(const struct LinkedList *list, const int index)
 {
   struct Node *current = list->head;
   if (index == 0) {
@@ -89,7 +87,7 @@ ll_remove(struct LinkedList *list)
 }
 
 int
-ll_size(struct LinkedList *list)
+ll_size(const struct LinkedList *list)
 {
   return list->size;
 }

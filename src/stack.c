@@ -18,44 +18,44 @@ stack_init()
   return s;
 }
 
-void stack_free(struct Stack *s)
+void stack_free(const struct Stack *s)
 {
   ll_free(s->list);
-  free(s);
+  free((struct Stack *)s);
 }
 
 bool
-stack_empty(struct Stack *s)
+stack_empty(const struct Stack *s)
 {
   return ll_size(s->list) == 0;
 }
 
 void *
-stack_get(struct Stack *s, int index)
+stack_get(const struct Stack *s, const int index)
 {
   return ll_get(s->list, index);
 }
 
 void *
-stack_peak(struct Stack *s)
+stack_peak(const struct Stack *s)
 {
   return ll_get(s->list, 0);
 }
 
 void *
-stack_pop(struct Stack *s)
+stack_pop(const struct Stack *s)
 {
   return ll_remove(s->list);
 }
 
 void
-stack_push(struct Stack *s, void *data)
+stack_push(const struct Stack *s, const void *data)
 {
   return ll_add_first(s->list, data);
 }
 
 int
-stack_size(struct Stack *s)
+stack_size(const struct Stack *s)
 {
   return ll_size(s->list);
 }
