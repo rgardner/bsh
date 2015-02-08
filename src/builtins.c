@@ -301,6 +301,8 @@ dirs(const int argc, const char** argv)
 static int
 popd(const int argc, const char** argv)
 {
+  UNUSED(argc);
+
   if (stack_empty(directory_stack)) {
     printf("-bsh: popd: directory stack empty\n");
     return -1;
@@ -309,7 +311,7 @@ popd(const int argc, const char** argv)
   char *dir = (char *)stack_pop(directory_stack);
   const int new_argc = 1;
   argv[0] = dir;
-  cd(argc, argv);
+  cd(new_argc, argv);
   free(dir);
   return 0;
 }

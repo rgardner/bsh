@@ -1,5 +1,6 @@
 #include "history.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +24,7 @@ typedef struct _hist_state {
 } HISTORY_STATE;
 
 /* Function prototypes. */
-histdata_t free_hist_entry(HIST_ENTRY *);
+histdata_t free_hist_entry(const HIST_ENTRY *);
 
 /* Global variables. */
 /* Public global variables. */
@@ -33,7 +34,9 @@ int history_max_entries;
 /* Private global variables. */
 HISTORY_STATE state;
 
-void history_init() {
+void
+history_init()
+{
   state.count = -1;
   state.length = 0;
   history_length = state.length;
@@ -45,7 +48,9 @@ void history_init() {
   }
 }
 
-int history_exp(char *string, char **output) {
+int
+history_exp(const char *string, char **output)
+{
   int i = 0;
   int length = strlen(string) + 1;
   *output = malloc(sizeof(char) * length);
@@ -82,7 +87,9 @@ int history_exp(char *string, char **output) {
 }
 
 
-void history_add(char *string) {
+void
+history_add(const char *string)
+{
   int length;        // length of string
   int pre;           // previous element in history
   int timestamp;     // timestamp to save
@@ -114,7 +121,9 @@ void history_add(char *string) {
   state.entries[state.count % state.size] = entry;
 }
 
-void history_stifle(int max) {
+void
+history_stifle(const int max)
+{
   if (max < 0) return;  // can't record a negative number of commands
   if (state.size == max) return;  // nothing to change
 
@@ -137,15 +146,19 @@ void history_stifle(int max) {
   history_max_entries = state.size;
 }
 
-histdata_t free_hist_entry(HIST_ENTRY *histent) {
+histdata_t
+free_hist_entry(const HIST_ENTRY *histent)
+{
   if (histent->line) free(histent->line);
   histdata_t data = histent->data;
-  free(histent);
+  free((HIST_ENTRY *)histent);
   return data;
 }
 
-void history_print(int num) {
-  if (num > state.length) num = state.length;
+void
+history_print(const int num)
+{
+  assert(num < state.length);
   int start = state.count % state.size + 1;
   if (start >= state.length) start = 0;
 
@@ -161,7 +174,9 @@ void history_print(int num) {
   }
 }
 
-void history_help() {
+void
+history_help()
+{
   printf("usage: history [num] [-s num]\n\n"
          "history: print the list of previously executed commands.\n"
          "history num: return the last `num` commands.\n"
