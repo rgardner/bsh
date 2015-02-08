@@ -9,38 +9,47 @@
 
 /* Structs. */
 struct Alias {
-  char *name;
-  char *value;
+  const char *name;
+  const char *value;
 };
 
 /* Function prototypes. */
-static bool alias_add(char *, char *, bool);
-static bool alias_remove(char *);
-static struct Alias* alias_search(char *);
-static void alias_print();
-static void alias_free(struct Alias *);
+static bool alias_add(const char *, const char *, const bool);
+static bool alias_remove(const char *);
+static struct Alias* alias_search(const char *);
+static void aliases_print();
+static void alias_free(const struct Alias *);
 
 /* Global variables. */
 struct LinkedList *aliases;
 
 void
-alias_init()
+aliases_init()
 {
   aliases = ll_init();
 }
 
+static struct Alias *
+alias_init(const char *name, const char *value)
+{
+  struct Alias al = { .name = name, .value = value };
+  struct Alias *alias = malloc(sizeof(struct Alias));
+  memcpy(alias, &al, sizeof(struct Alias));
+  return alias;
+}
+
 int
-alias(int argc, char **argv)
+alias(const int argc, const char **argv)
 {
   /* Print all aliases. */
   if (argc == 0) {
-    alias_print();
+    aliases_print();
     return 0;
   }
 
   /* Create an alias between a name/value pair. */
   char *name;
-  if ((name = strsep(&argv[0], "="))) {
+  if ((name = strsep((char **)&argv[0], "="))) {
     name = strdup(name);
     char *value = strdup(argv[0]);
     alias_add(name, value, 1);
@@ -71,7 +80,7 @@ alias_help()
 }
 
 int
-unalias(int argc, char **argv)
+unalias(const int argc, const char **argv)
 {
   if (argc == 0) {
     unalias_help();
@@ -92,7 +101,7 @@ unalias_help()
 }
 
 int
-alias_exp(char *string, char **output)
+alias_exp(const char *string, char **output)
 {
   int length = strlen(string) + 1;
   *output = malloc(sizeof(char) * length);
@@ -101,7 +110,7 @@ alias_exp(char *string, char **output)
   struct Alias *result = alias_search(string);
   if (!result) return -1;
 
-  char *value = result->value;
+  const char *value = result->value;
   length = strlen(value) + 1;
   *output = realloc(*output, sizeof(char) * length);
   strncpy(*output, value, length);
@@ -109,7 +118,7 @@ alias_exp(char *string, char **output)
 }
 
 static bool
-alias_add(char *name, char *value, bool overwrite)
+alias_add(const char *name, const char *value, const bool overwrite)
 {
   /* Search to see if alias already exists. */
   struct Node *current = NULL;
@@ -122,8 +131,7 @@ alias_add(char *name, char *value, bool overwrite)
   }
 
   /* Add a new alias. */
-  struct Alias *new = malloc(sizeof(struct Alias));
-  *new = (struct Alias ) { .name = name, .value = value };
+  struct Alias *new = alias_init(name, value);
 
   struct Node *previous = NULL;
   for (current = aliases->head; current; current = current->next) {
@@ -139,7 +147,7 @@ alias_add(char *name, char *value, bool overwrite)
  *
  * Returns true if found; false otherwise. */
 static bool
-alias_remove(char *name)
+alias_remove(const char *name)
 {
   struct Node *curr = NULL;
   struct Node *prev = NULL;
@@ -166,7 +174,7 @@ alias_remove(char *name)
 }
 
 static struct Alias *
-alias_search(char *name)
+alias_search(const char *name)
 {
   struct Node *current = NULL;
   for (current = aliases->head; current; current = current->next) {
@@ -180,7 +188,7 @@ alias_search(char *name)
 
 /* Print all aliases matching names. If names is NULL, print all aliases. */
 static void
-alias_print()
+aliases_print()
 {
   struct Node *current;
   for (current = aliases->head; current; current = current->next) {
@@ -190,9 +198,9 @@ alias_print()
 }
 
 static void
-alias_free(struct Alias *alias)
+alias_free(const struct Alias *alias)
 {
-  if (alias->name) free(alias->name);
-  if (alias->value) free(alias->value);
-  free(alias);
+  if (alias->name) free((char *)alias->name);
+  if (alias->value) free((char *)alias->value);
+  free((struct Alias *)alias);
 }

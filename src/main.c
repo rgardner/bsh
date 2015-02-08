@@ -39,7 +39,7 @@ print_login_message()
 }
 
 void
-execute_command(struct ParseInfo const *info, const struct Command cmd)
+execute_command(const struct ParseInfo *info, const struct Command cmd)
 {
   // setup file input/output redirection.
   if (info->hasInputRedirection) {
@@ -67,7 +67,8 @@ execute_command(struct ParseInfo const *info, const struct Command cmd)
   }
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
   // Ignore argc and argv until we add command line arguments.
   UNUSED(argc);

@@ -38,7 +38,7 @@ struct Stack *directory_stack;
 void
 builtins_init()
 {
-  alias_init();
+  aliases_init();
   directory_stack = stack_init();
   variables_init();
   history_init();
