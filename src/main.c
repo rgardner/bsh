@@ -39,36 +39,6 @@ print_login_message()
 }
 
 void
-execute_command(const struct ParseInfo *info, const struct Command cmd)
-{
-  // setup file input/output redirection.
-  if (info->hasInputRedirection) {
-    int fd = open(info->inFile, O_RDONLY);
-    dup2(fd, fileno(stdin));
-  }
-  if (info->hasOutputRedirection) {
-    FILE *f = fopen(info->outFile, "w");
-    if (!f) {
-      fprintf(stderr, "Error opening file!\n");
-      exit(EXIT_FAILURE);
-    }
-    dup2(fileno(f), fileno(stdout));
-  }
-
-  // construct args
-  char *args[cmd.VarNum+2];  // command, *args, NULL
-  args[0] = cmd.command;
-  for (int i = 0; i < cmd.VarNum; i++) {
-    args[i + 1] = cmd.VarList[i];
-  }
-  args[cmd.VarNum+1] = NULL;
-  if (execvp(args[0], args) == -1) {
-    printf("-bsh: %s: command not found\n", args[0]);
-    exit(COMMAND_NOT_FOUND_EXIT_CODE);
-  }
-}
-
-void
 launch_process(char **argv, const int infile, const int outfile)
 {
   if (infile != STDIN_FILENO) {
@@ -79,9 +49,10 @@ launch_process(char **argv, const int infile, const int outfile)
     dup2(outfile, STDOUT_FILENO);
     close(outfile);
   }
-  execvp(argv[0], argv);
-  perror("execvp");
-  exit(EXIT_FAILURE);
+  if (execvp(argv[0], argv) == -1) {
+    printf("-bsh: %s: command not found\n", argv[0]);
+    exit(COMMAND_NOT_FOUND_EXIT_CODE);
+  }
 }
 
 void
