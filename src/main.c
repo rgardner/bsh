@@ -97,6 +97,9 @@ main(int argc, char **argv)
       printf("\n");
       exit(EXIT_SUCCESS);
     }
+#elif WINDOWS
+    fprintf(stderr, "ERROR: Windows is currently not supported.\n");
+    exit(EXIT_FAILURE);
 #endif
 
     // check command line length
