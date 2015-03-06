@@ -54,6 +54,7 @@ execute_command(const struct ParseInfo *info, const struct Command cmd)
     }
     dup2(fileno(f), fileno(stdout));
   }
+
   // construct args
   char *args[cmd.VarNum+2];  // command, *args, NULL
   args[0] = cmd.command;
@@ -64,6 +65,68 @@ execute_command(const struct ParseInfo *info, const struct Command cmd)
   if (execvp(args[0], args) == -1) {
     printf("-bsh: %s: command not found\n", args[0]);
     exit(COMMAND_NOT_FOUND_EXIT_CODE);
+  }
+}
+
+void
+launch_process(char **argv, const int infile, const int outfile)
+{
+  if (infile != STDIN_FILENO) {
+    dup2(infile, STDIN_FILENO);
+    close(infile);
+  }
+  if (outfile != STDOUT_FILENO) {
+    dup2(outfile, STDOUT_FILENO);
+    close(outfile);
+  }
+  execvp(argv[0], argv);
+  perror("execvp");
+  exit(EXIT_FAILURE);
+}
+
+void
+launch_job(const struct ParseInfo *info)
+{
+  // set up piping
+  int infile = open(info->inFile, O_RDONLY);
+  int pipefd[2];
+  for (int i = 0; i <= info->pipeNum; i++) {
+    int outfile;
+    if (i < info->pipeNum) {
+      if (pipe(pipefd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+      }
+      outfile = pipefd[1];
+    } else {
+      outfile = open(info->outFile, O_WRONLY);
+    }
+
+    // fork
+    pid_t pid;
+    if ((pid = fork()) == -1) {
+      perror("fork");
+      exit(EXIT_FAILURE);
+    } else if (pid == 0) {  /* Child process. */
+      struct Command cmd = info->CommArray[i];
+      char *argv[cmd.VarNum+2];  // command, *args, NULL
+      argv[0] = cmd.command;
+      for (int i = 0; i < cmd.VarNum; i++) {
+        argv[i + 1] = cmd.VarList[i];
+      }
+      argv[cmd.VarNum+1] = NULL;
+      launch_process(argv, infile, outfile);
+    } else {                /* Parent process. */
+
+    }
+    // clean up pipes
+    if (infile != open(info->inFile, O_RDONLY)) {
+      close (infile);
+    }
+    if (outfile != open(info->outFile, O_WRONLY)) {
+      close (outfile);
+    }
+    infile = pipefd[0];
   }
 }
 
@@ -161,6 +224,7 @@ main(int argc, char **argv)
     }
 
     //com->command tells the command name of com
+    launch_job(info);
     enum BuiltinCommands command;
     if ((command = is_builtin_command(cmd->command) != NO_SUCH_BUILTIN)) {
       execute_builtin_command(command, *cmd);
