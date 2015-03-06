@@ -96,7 +96,12 @@ launch_job(const struct ParseInfo *info)
 
   // set up piping
   pid_t pid;
-  int infile = open(info->inFile, O_RDONLY);
+  int infile;
+  if (info->hasInputRedirection) {
+    infile = open(info->inFile, O_RDONLY);
+  } else {
+    infile = STDIN_FILENO;
+  }
   int pipefd[2];
   for (int i = 0; i <= info->pipeNum; i++) {
     int outfile;
@@ -107,7 +112,11 @@ launch_job(const struct ParseInfo *info)
       }
       outfile = pipefd[1];
     } else {
-      outfile = open(info->outFile, O_WRONLY);
+      if (info->hasOutputRedirection) {
+        outfile = open(info->outFile, O_WRONLY);
+      } else {
+        outfile = STDOUT_FILENO;
+      }
     }
 
     // fork
