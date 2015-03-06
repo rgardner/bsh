@@ -39,6 +39,7 @@ void
 builtins_init()
 {
   aliases_init();
+  jobs_init();
   directory_stack = stack_init();
   variables_init();
   history_init();

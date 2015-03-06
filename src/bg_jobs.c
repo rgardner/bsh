@@ -8,17 +8,25 @@
 
 #include "parse.h"
 
+/* Function prototypes. */
+static struct BGJob *job_init(const pid_t, const struct ParseInfo *,
+                              const struct Command *);
+static void free_job(struct BGJob *);
+
+struct BGJob {
+  const pid_t pid;
+  const struct ParseInfo *info;
+  const struct Command *cmd;
+};
+
 /* Global variables. */
 int num_bg_jobs;
 struct BGJob *background_jobs[MAX_BG_JOBS];
 
-struct BGJob *
-job_init(const pid_t pid, const struct ParseInfo *info, const struct Command *cmd)
+void
+jobs_init()
 {
-  struct BGJob init = { .pid = pid, .info = info, .cmd = cmd };
-  struct BGJob *job = malloc(sizeof(struct BGJob));
-  memcpy(job, &init, sizeof(struct BGJob));
-  return job;
+  num_bg_jobs = 0;
 }
 
 void
@@ -44,6 +52,31 @@ handle_sigchld(const int signum)
   if (num_bg_jobs == 1) num_bg_jobs = 0;
   free_job(job);
   background_jobs[i] = NULL;
+}
+
+static struct BGJob *
+job_init(const pid_t pid, const struct ParseInfo *info, const struct Command *cmd)
+{
+  struct BGJob init = { .pid = pid, .info = info, .cmd = cmd };
+  struct BGJob *job = malloc(sizeof(struct BGJob));
+  memcpy(job, &init, sizeof(struct BGJob));
+  return job;
+}
+
+static void
+free_job(struct BGJob *job)
+{
+  free_info(job->info);
+  free(job);
+}
+
+void
+put_job_in_background(const struct ParseInfo *info, pid_t pid)
+{
+  struct BGJob *job = job_init(pid, info, &info->CommArray[0]);
+  background_jobs[num_bg_jobs] = job;
+  num_bg_jobs++;
+  printf("[%d] %d\n", num_bg_jobs, pid);
 }
 
 bool
@@ -77,13 +110,6 @@ print_running_jobs()
 }
 
 void
-free_job(struct BGJob *job)
-{
-  free_info(job->info);
-  free(job);
-}
-
-void
 jobs_help()
 {
   printf("usage: jobs\n\n"
@@ -102,13 +128,4 @@ fg_help()
 {
   printf("usage: fg [ %%job_id ]\n\n"
          "continues a stopped job by running it in the foreground.\n");
-}
-
-void
-put_job_in_background(const struct ParseInfo *info, pid_t pid)
-{
-  struct BGJob *job = job_init(pid, info, &info->CommArray[0]);
-  background_jobs[num_bg_jobs] = job;
-  num_bg_jobs++;
-  printf("[%d] %d\n", num_bg_jobs, pid);
 }

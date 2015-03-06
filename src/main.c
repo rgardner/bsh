@@ -151,7 +151,6 @@ main(int argc, char **argv)
   UNUSED(argv);
 
   /* Initialization. */
-  num_bg_jobs = 0;
   builtins_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {

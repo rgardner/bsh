@@ -6,21 +6,9 @@
 
 #define MAX_BG_JOBS 10
 
-struct BGJob {
-  const pid_t pid;
-  const struct ParseInfo *info;
-  const struct Command *cmd;
-};
-
-extern int num_bg_jobs;
-extern struct BGJob *background_jobs[MAX_BG_JOBS];
-
 /* Function prototypes. */
-struct BGJob *
-job_init(const pid_t, const struct ParseInfo *, const struct Command *);
-
 void
-free_job(struct BGJob *job);
+jobs_init();
 
 void
 handle_sigchld(const int signum);
