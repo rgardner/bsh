@@ -103,3 +103,12 @@ fg_help()
   printf("usage: fg [ %%job_id ]\n\n"
          "continues a stopped job by running it in the foreground.\n");
 }
+
+void
+put_job_in_background(const struct ParseInfo *info, pid_t pid)
+{
+  struct BGJob *job = job_init(pid, info, &info->CommArray[0]);
+  background_jobs[num_bg_jobs] = job;
+  num_bg_jobs++;
+  printf("[%d] %d\n", num_bg_jobs, pid);
+}

@@ -32,6 +32,9 @@ void
 print_running_jobs();
 
 void
+put_job_in_background(const struct ParseInfo *, pid_t);
+
+void
 jobs_help();
 
 void

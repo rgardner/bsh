@@ -87,7 +87,15 @@ launch_process(char **argv, const int infile, const int outfile)
 void
 launch_job(const struct ParseInfo *info)
 {
+  // Currently, bsh does not support pipes with builtin commands.
+  const struct Command cmd = info->CommArray[0];
+  enum BuiltinCommands command = is_builtin_command(cmd.command);
+  if (command != NO_SUCH_BUILTIN) {
+    execute_builtin_command(command, cmd);
+  }
+
   // set up piping
+  pid_t pid;
   int infile = open(info->inFile, O_RDONLY);
   int pipefd[2];
   for (int i = 0; i <= info->pipeNum; i++) {
@@ -103,7 +111,6 @@ launch_job(const struct ParseInfo *info)
     }
 
     // fork
-    pid_t pid;
     if ((pid = fork()) == -1) {
       perror("fork");
       exit(EXIT_FAILURE);
@@ -128,7 +135,13 @@ launch_job(const struct ParseInfo *info)
     }
     infile = pipefd[0];
   }
-}
+  if (is_bg_job(info)) {
+    put_job_in_background(info, pid);
+  } else {
+    int status;
+    waitpid(pid, &status, 0);
+  }
+ }
 
 int
 main(int argc, char **argv)
@@ -225,26 +238,6 @@ main(int argc, char **argv)
 
     //com->command tells the command name of com
     launch_job(info);
-    enum BuiltinCommands command;
-    if ((command = is_builtin_command(cmd->command) != NO_SUCH_BUILTIN)) {
-      execute_builtin_command(command, *cmd);
-    } else {
-      pid_t child_pid;
-      if ((child_pid = fork()) == 0) {
-        execute_command(info, *cmd);
-      } else {
-        if (is_bg_job(info)) {
-          struct BGJob *job = job_init(child_pid, info, cmd);
-          background_jobs[num_bg_jobs] = job;
-          num_bg_jobs++;
-          printf("[%d] %d\n", num_bg_jobs, child_pid);
-        } else {
-          int status;
-          waitpid(child_pid, &status, 0);
-        }
-      }
-    }
-
     if (!is_bg_job(info)) free_info(info);
   }
 }
