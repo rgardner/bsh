@@ -63,6 +63,7 @@ launch_job(const struct ParseInfo *info)
   enum BuiltinCommands command = is_builtin_command(cmd.command);
   if (command != NO_SUCH_BUILTIN) {
     execute_builtin_command(command, cmd);
+    return;
   }
 
   // set up piping
@@ -76,7 +77,7 @@ launch_job(const struct ParseInfo *info)
   int pipefd[2];
   for (int i = 0; i <= info->pipeNum; i++) {
     int outfile;
-    if (i < info->pipeNum) {
+    if (i < (info->pipeNum-1)) {
       if (pipe(pipefd) == -1) {
         perror("pipe");
         exit(EXIT_FAILURE);
@@ -108,10 +109,10 @@ launch_job(const struct ParseInfo *info)
     }
     // clean up pipes
     if (infile != open(info->inFile, O_RDONLY)) {
-      close (infile);
+      close(infile);
     }
     if (outfile != open(info->outFile, O_WRONLY)) {
-      close (outfile);
+      close(outfile);
     }
     infile = pipefd[0];
   }
@@ -121,7 +122,7 @@ launch_job(const struct ParseInfo *info)
     int status;
     waitpid(pid, &status, 0);
   }
- }
+}
 
 int
 main(int argc, char **argv)
@@ -215,7 +216,6 @@ main(int argc, char **argv)
       continue;
     }
 
-    //com->command tells the command name of com
     launch_job(info);
     if (!is_bg_job(info)) free_info(info);
   }
