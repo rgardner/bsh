@@ -18,10 +18,11 @@ void
 help(const int command);
 
 /* Return the enum that corresponds to cmd. */
-int
+enum BuiltinCommands
 is_builtin_command(const char *cmd);
 
 /* Execute the builtin command in the same process as the caller. */
 void
-execute_builtin_command(const int command, const struct Command cmd);
+execute_builtin_command(const enum BuiltinCommands command,
+                        const struct Command cmd);
 #endif

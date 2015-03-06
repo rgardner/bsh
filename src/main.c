@@ -161,8 +161,8 @@ main(int argc, char **argv)
     }
 
     //com->command tells the command name of com
-    int command;
-    if ((command = is_builtin_command(cmd->command)) != 0) {
+    enum BuiltinCommands command;
+    if ((command = is_builtin_command(cmd->command) != NO_SUCH_BUILTIN)) {
       execute_builtin_command(command, *cmd);
     } else {
       pid_t child_pid;

@@ -90,7 +90,9 @@ help(int command)
  }
 }
 
-int is_builtin_command(const char * cmd) {
+/* Returns an enum of type BuiltinCommands. */
+enum BuiltinCommands
+is_builtin_command(const char * cmd) {
   if (strncmp(cmd, "alias", strlen("alias")) == 0) return ALIAS;
   if (strncmp(cmd, "bg", strlen("bg")) == 0) return BG;
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
@@ -112,7 +114,7 @@ int is_builtin_command(const char * cmd) {
 }
 
 void
-execute_builtin_command(const int command, struct Command cmd)
+execute_builtin_command(const enum BuiltinCommands command, struct Command cmd)
 {
   const char **varlist = (const char **)cmd.VarList;
   if (command == ALIAS) {
