@@ -1,8 +1,10 @@
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <readline/readline.h>
+#include <termios.h>
 #include <unistd.h>
 
 #include "alias.h"
@@ -14,6 +16,11 @@
 #define MAX_PROMPT_LENGTH 1024
 #define COMMAND_NOT_FOUND_EXIT_CODE 127
 #define UNUSED(x) (void)(x)
+
+pid_t shell_pgid;
+struct termios shell_tmodes;
+int shell_terminal;
+int shell_is_interactive;
 
 char *
 buildPrompt()
@@ -36,6 +43,42 @@ print_login_message()
   printf("<|_______|/`   |__,---;\n");
   printf("  UU   UU ====|_______|\n");
   printf("Welcome to Bob shell.\n");
+}
+
+void
+init_shell()
+{
+  /* See if we are running interactively.  */
+  shell_terminal = STDIN_FILENO;
+  shell_is_interactive = isatty (shell_terminal);
+
+  if (shell_is_interactive) {
+    /* Loop until we are in the foreground.  */
+    while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ())) {
+      kill(-shell_pgid, SIGTTIN);
+    }
+
+    /* Ignore interactive and job-control signals.  */
+    signal(SIGINT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+    signal(SIGTSTP, SIG_IGN);
+    signal(SIGTTIN, SIG_IGN);
+    signal(SIGTTOU, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);
+
+    /* Put ourselves in our own process group.  */
+    shell_pgid = getpid ();
+    if (setpgid (shell_pgid, shell_pgid) < 0) {
+      perror ("Couldn't put the shell in its own process group");
+      exit(1);
+    }
+
+    /* Grab control of the terminal.  */
+    tcsetpgrp(shell_terminal, shell_pgid);
+
+    /* Save default terminal attributes for shell.  */
+    tcgetattr(shell_terminal, &shell_tmodes);
+  }
 }
 
 void
