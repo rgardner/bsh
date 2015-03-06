@@ -108,10 +108,10 @@ launch_job(const struct ParseInfo *info)
 
     }
     // clean up pipes
-    if (infile != open(info->inFile, O_RDONLY)) {
+    if (info->hasInputRedirection && (infile != open(info->inFile, O_RDONLY))) {
       close(infile);
     }
-    if (outfile != open(info->outFile, O_WRONLY)) {
+    if (info->hasOutputRedirection && (infile != open(info->outFile, O_RDONLY))) {
       close(outfile);
     }
     infile = pipefd[0];
