@@ -75,7 +75,7 @@ launch_job(const struct ParseInfo *info)
     infile = STDIN_FILENO;
   }
   int pipefd[2];
-  for (int i = 0; i <= info->pipeNum; i++) {
+  for (int i = 0; i < info->pipeNum; i++) {
     int outfile;
     if (i < (info->pipeNum-1)) {
       if (pipe(pipefd) == -1) {
