@@ -34,6 +34,7 @@ Welcome to Bob shell.
 
 ## Resources
 These resources have been invaluable to me while working on this project:
+
 1. Cornell CS414 Summer 2004 by Jeanna Matthews
   - ["Parse.c" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html)
   - ["Writing Your Own Shell" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html)
