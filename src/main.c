@@ -128,7 +128,7 @@ launch_job(const struct ParseInfo *info)
       outfile = pipefd[1];
     } else {
       if (info->hasOutputRedirection) {
-        outfile = open(info->outFile, O_WRONLY);
+        outfile = open(info->outFile, O_WRONLY | O_CREAT, 0644);
       } else {
         outfile = STDOUT_FILENO;
       }
@@ -154,7 +154,7 @@ launch_job(const struct ParseInfo *info)
     if (info->hasInputRedirection && (infile != open(info->inFile, O_RDONLY))) {
       close(infile);
     }
-    if (info->hasOutputRedirection && (infile != open(info->outFile, O_RDONLY))) {
+    if (info->hasOutputRedirection && (outfile != open(info->outFile, O_RDONLY))) {
       close(outfile);
     }
     infile = pipefd[0];
