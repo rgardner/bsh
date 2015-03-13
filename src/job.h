@@ -5,8 +5,7 @@
 #include <unistd.h>
 
 /* A process is a single process.  */
-typedef struct process
-{
+typedef struct process {
   struct process *next;       /* next process in pipeline */
   char **argv;                /* for exec */
   pid_t pid;                  /* process ID */
@@ -16,8 +15,7 @@ typedef struct process
 } process;
 
 /* A job is a pipeline of processes.  */
-typedef struct job
-{
+typedef struct job {
   struct job *next;           /* next active job */
   char *command;              /* command line, used for messages */
   process *first_process;     /* list of processes in this job */
