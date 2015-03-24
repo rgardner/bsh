@@ -41,6 +41,8 @@ These resources have been invaluable to me while working on this project:
 2. [GNU History Library](http://cnswww.cns.cwru.edu/php/chet/readline/history.html)
 3. [Bash source code](https://ftp.gnu.org/gnu/bash/)
 4. [Implementing a Job Control Shell](http://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html#Implementing-a-Shell)
+5. [The C Programming Language, 2nd
+   Edition](http://smile.amazon.com/dp/0131103628/ref=cm_sw_r_tw_dp_.lqevb1B3CJ24)
 
 ## Credit
 The awesome "geek tortoise" ascii art was found on
