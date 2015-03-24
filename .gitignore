@@ -1,6 +1,6 @@
 # Object files
-*.o
 *.a
+*.o
 
 # Executables
 bsh
@@ -13,6 +13,7 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 Testing
+CTestTestfile.cmake
 
 # Debug
 *.dSYM
