@@ -12,6 +12,7 @@
 #include "builtins.h"
 #include "history.h"
 #include "parse.h"
+#include "job.h"
 
 #define MAX_PROMPT_LENGTH 1024
 #define COMMAND_NOT_FOUND_EXIT_CODE 127
@@ -50,11 +51,11 @@ init_shell()
 {
   /* See if we are running interactively.  */
   shell_terminal = STDIN_FILENO;
-  shell_is_interactive = isatty (shell_terminal);
+  shell_is_interactive = isatty(shell_terminal);
 
   if (shell_is_interactive) {
     /* Loop until we are in the foreground.  */
-    while (tcgetpgrp (shell_terminal) != (shell_pgid = getpgrp ())) {
+    while (tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())) {
       kill(-shell_pgid, SIGTTIN);
     }
 
@@ -67,7 +68,7 @@ init_shell()
     signal(SIGCHLD, SIG_IGN);
 
     /* Put ourselves in our own process group.  */
-    shell_pgid = getpid ();
+    shell_pgid = getpid();
     if (setpgid (shell_pgid, shell_pgid) < 0) {
       perror ("Couldn't put the shell in its own process group");
       exit(1);
@@ -223,7 +224,7 @@ main(int argc, char **argv)
     strncpy(cmdLine, expansion, length);
     free(expansion);
 
-    //calls the parser
+    // Call the parser.
     const struct ParseInfo *info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
@@ -250,6 +251,10 @@ main(int argc, char **argv)
 #ifdef DEBUG
     print_info(info);
 #endif
+
+    // Convert ParseInfo to Job.
+    /*job *j;*/
+    /*init_job(j, info, );*/
 
     //com contains the info. of the command before the first "|"
     const struct Command *cmd=&info->CommArray[0];
