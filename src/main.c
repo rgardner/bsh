@@ -47,7 +47,7 @@ print_login_message()
 }
 
 void
-init_shell()
+shell_init()
 {
   /* See if we are running interactively.  */
   shell_terminal = STDIN_FILENO;
@@ -176,6 +176,7 @@ main(int argc, char **argv)
   UNUSED(argv);
 
   /* Initialization. */
+  shell_init();
   builtins_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
