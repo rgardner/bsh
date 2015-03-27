@@ -14,7 +14,7 @@ struct Alias {
 };
 
 /* Function prototypes. */
-static bool alias_add(const char *, const char *, const bool);
+static bool alias_add(const char *, const char *, bool);
 static bool alias_remove(const char *);
 static struct Alias* alias_search(const char *);
 static void aliases_print();
@@ -39,7 +39,7 @@ alias_init(const char *name, const char *value)
 }
 
 int
-alias(const int argc, const char **argv)
+alias(const int argc, char **argv)
 {
   /* Print all aliases. */
   if (argc == 0) {
@@ -80,7 +80,7 @@ alias_help()
 }
 
 int
-unalias(const int argc, const char **argv)
+unalias(const int argc, char **argv)
 {
   if (argc == 0) {
     unalias_help();

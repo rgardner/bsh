@@ -83,8 +83,27 @@ shell_init()
 }
 
 void
-launch_process(char **argv, const int infile, const int outfile)
+launch_process(process *p, pid_t pgid, int infile, int outfile, int errfile,
+               bool foreground)
 {
+  pid_t pid;
+  if (shell_is_interactive) {
+    /* Put the process into the process group and give the process group the
+     * terminal, if appropriate. This has to be done both by the shell and in
+     * the individual child processes beacuse of potential race conditions. */
+    pid = getpid();
+    if (pgid == 0) pgid = pid;
+    setpgid(pid, pgid);
+    if (foreground) tcsetpgrp(shell_terminal, pgid);
+
+    /* Set the handling for job control signals back to the default. */
+      signal(SIGINT, SIG_DFL);
+      signal(SIGQUIT, SIG_DFL);
+      signal(SIGTSTP, SIG_DFL);
+      signal(SIGTTIN, SIG_DFL);
+      signal(SIGTTOU, SIG_DFL);
+      signal(SIGCHLD, SIG_DFL);
+  }
   if (infile != STDIN_FILENO) {
     dup2(infile, STDIN_FILENO);
     close(infile);
@@ -93,78 +112,76 @@ launch_process(char **argv, const int infile, const int outfile)
     dup2(outfile, STDOUT_FILENO);
     close(outfile);
   }
-  if (execvp(argv[0], argv) == -1) {
-    printf("-bsh: %s: command not found\n", argv[0]);
+  if (errfile != STDERR_FILENO) {
+    dup2(errfile, STDERR_FILENO);
+    close(errfile);
+  }
+  if (execvp(p->argv[0], p->argv) < -1) {
+    printf("-bsh: %s: command not found\n", p->argv[0]);
     exit(COMMAND_NOT_FOUND_EXIT_CODE);
   }
 }
 
 void
-launch_job(const struct ParseInfo *info)
+launch_job(job *j, const bool foreground)
 {
   // Currently, bsh does not support pipes with builtin commands.
-  const struct Command cmd = info->CommArray[0];
-  enum BuiltinCommands command = is_builtin_command(cmd.command);
+  enum BuiltinCommands command = is_builtin_command(j->first_process->argv[0]);
   if (command != NO_SUCH_BUILTIN) {
-    execute_builtin_command(command, cmd);
+    execute_builtin_command(command, *j->first_process);
     return;
   }
 
   // set up piping
   pid_t pid;
-  int infile;
-  if (info->hasInputRedirection) {
-    infile = open(info->inFile, O_RDONLY);
-  } else {
-    infile = STDIN_FILENO;
-  }
+  int infile = j->stdin;
   int pipefd[2];
-  for (int i = 0; i < info->pipeNum; i++) {
+  process *p;
+  for (p = j->first_process; p; p = p->next) {
     int outfile;
-    if (i < (info->pipeNum-1)) {
-      if (pipe(pipefd) == -1) {
+    if (p->next) {
+      if (pipe(pipefd) < 0) {
         perror("pipe");
         exit(EXIT_FAILURE);
       }
       outfile = pipefd[1];
     } else {
-      if (info->hasOutputRedirection) {
-        outfile = open(info->outFile, O_WRONLY | O_CREAT, 0644);
-      } else {
-        outfile = STDOUT_FILENO;
-      }
+      outfile = j->stdout;
     }
 
-    // fork
-    if ((pid = fork()) == -1) {
+    // Fork the child process.
+    pid = fork();
+    if ((pid = fork()) == 0) { // child process
+      launch_process(p, j->pgid, infile, outfile, j->stderr, foreground);
+     } else if (pid < 0) {  // fork failed
       perror("fork");
       exit(EXIT_FAILURE);
-    } else if (pid == 0) {  /* Child process. */
-      struct Command cmd = info->CommArray[i];
-      char *argv[cmd.VarNum+2];  // command, *args, NULL
-      argv[0] = cmd.command;
-      for (int i = 0; i < cmd.VarNum; i++) {
-        argv[i + 1] = cmd.VarList[i];
+    } else {                // parent process
+      p->pid = pid;
+      if (shell_is_interactive) {
+        if (!j->pgid) {
+          j->pgid = pid;
+          setpgid(pid, j->pgid);
+        }
       }
-      argv[cmd.VarNum+1] = NULL;
-      launch_process(argv, infile, outfile);
-    } else {                /* Parent process. */
-
     }
     // clean up pipes
-    if (info->hasInputRedirection && (infile != open(info->inFile, O_RDONLY))) {
+    if (infile != j->stdin) {
       close(infile);
     }
-    if (info->hasOutputRedirection && (outfile != open(info->outFile, O_RDONLY))) {
+    if (outfile != j->stdout) {
       close(outfile);
     }
     infile = pipefd[0];
   }
-  if (is_bg_job(info)) {
-    put_job_in_background(info, pid);
-  } else {
+  if (!shell_is_interactive) {
     int status;
     waitpid(pid, &status, 0);
+  } else if (foreground) {
+    // put job in foreground.
+  } else {
+    // FIXME
+    /*put_job_in_background(info, pid);*/
   }
 }
 
@@ -253,10 +270,6 @@ main(int argc, char **argv)
     print_info(info);
 #endif
 
-    // Convert ParseInfo to Job.
-    /*job *j;*/
-    /*init_job(j, info, );*/
-
     //com contains the info. of the command before the first "|"
     const struct Command *cmd=&info->CommArray[0];
     if (!cmd  || !cmd->command) {
@@ -265,7 +278,13 @@ main(int argc, char **argv)
       continue;
     }
 
-    launch_job(info);
+    // Convert ParseInfo to Job.
+    job *j = malloc(sizeof(job));
+    init_job(j, info, shell_pgid, shell_tmodes);
+    bool foreground = info->runInBackground;
+    free_info(info);
+
+    launch_job(j, foreground);
     if (!is_bg_job(info)) free_info(info);
   }
 }

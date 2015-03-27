@@ -14,23 +14,21 @@
 #include "alias.h"
 #include "bg_jobs.h"
 #include "history.h"
+#include "job.h"
 #include "parse.h"
 #include "variables.h"
 
 #define UNUSED(x) (void)(x)
 
 /* Function prototypes. */
-static char *cd(const int, const char **);
-static void history_wrapper(const int, const char **);
-static int dirs(const int, const char **);
-static int popd(const int, const char **);
-static int printenv_wrapper(const int, const char **);
-static int pushd(const int, const char **);
-static int setenv_wrapper(const int, const char **);
-static void which(const int, const char **);
+static char *cd(int, char **);
+static void history_wrapper(int, char **);
+static int dirs(int, char **);
+static int popd(int, char **);
+static int pushd(int, char **);
+static void which(int, char **);
 static bool which_is_there(const char *);
 static int which_print_matches(char *, const char *);
-static int unset_wrapper(const int, const char **);
 
 /* Global variables */
 struct Stack *directory_stack;
@@ -79,11 +77,6 @@ help(int command)
            "terminate the process numbered `num` in the list of background "
            "processes return by `jobs` (by sending it SIGKILL).\n");
   } else if (command == POPD) {
-  } else if (command == PRINTENV) {
-    bsh_printenv_help();
-  } else if (command == POPD) {
-  } else if (command == SETENV) {
-    bsh_setenv_help();
   } else if (command == UNALIAS) {
     unalias_help();
   } else if (command == WHICH) {
@@ -105,9 +98,7 @@ is_builtin_command(const char * cmd) {
   if (strncmp(cmd, "jobs", strlen("jobs")) == 0) return JOBS;
   if (strncmp(cmd, "kill", strlen("kill")) == 0) return KILL;
   if (strncmp(cmd, "popd", strlen("popd")) == 0) return POPD;
-  if (strncmp(cmd, "printenv", strlen("printenv")) == 0) return PRINTENV;
   if (strncmp(cmd, "pushd", strlen("pushd")) == 0) return PUSHD;
-  if (strncmp(cmd, "setenv", strlen("setenv")) == 0) return SETENV;
   if (strncmp(cmd, "unalias", strlen("unalias")) == 0) return UNALIAS;
   if (strncmp(cmd, "which", strlen("which")) == 0) return WHICH;
 
@@ -115,51 +106,44 @@ is_builtin_command(const char * cmd) {
 }
 
 void
-execute_builtin_command(const enum BuiltinCommands command, struct Command cmd)
+execute_builtin_command(const enum BuiltinCommands command, process cmd)
 {
-  const char **varlist = (const char **)cmd.VarList;
   if (command == ALIAS) {
-    alias(cmd.VarNum, varlist);
+    alias(cmd.argc, cmd.argv);
   } else if (command == CD) {
-    cd(cmd.VarNum, varlist);
+    cd(cmd.argc, cmd.argv);
   } else if (command == HELP) {
     int command = HELP;
-    if (cmd.VarList[0]) command = is_builtin_command(cmd.VarList[0]);
+    if (cmd.argv[1]) command = is_builtin_command(cmd.argv[1]);
     help(command);
   } else if (command == DIRS) {
-    dirs(cmd.VarNum, varlist);
+    dirs(cmd.argc, cmd.argv);
   } else if (command == EXIT) {
     if (!has_bg_jobs()) {
       exit(EXIT_SUCCESS);
     }
     printf("There are background processes.\n");
   } else if (command == HISTORY) {
-    history_wrapper(cmd.VarNum, varlist);
+    history_wrapper(cmd.argc, cmd.argv);
   } else if (command == JOBS) {
     print_running_jobs();
   } else if (command == KILL) {
-    pid_t pid = strtol(cmd.VarList[0], (char **)NULL, 10);
+    pid_t pid = strtol(cmd.argv[1], (char **)NULL, 10);
     kill(pid, SIGKILL);
   } else if (command == POPD) {
-    popd(cmd.VarNum, varlist);
-  } else if (command == PRINTENV) {
-    printenv_wrapper(cmd.VarNum, varlist);
+    popd(cmd.argc, cmd.argv);
   } else if (command == PUSHD) {
-    pushd(cmd.VarNum, varlist);
-  } else if (command == SETENV) {
-    setenv_wrapper(cmd.VarNum, varlist);
+    pushd(cmd.argc, cmd.argv);
   } else if (command == UNALIAS) {
-    unalias(cmd.VarNum, varlist);
-  } else if (command == UNSET) {
-    unset_wrapper(cmd.VarNum, varlist);
+    unalias(cmd.argc, cmd.argv);
   } else if (command == WHICH) {
-    which(cmd.VarNum, varlist);
+    which(cmd.argc, cmd.argv);
   }
 }
 
 
 static char *
-cd(const int argc, const char **argv)
+cd(const int argc, char **argv)
 {
   size_t len = 1024;
   char *dir = malloc(len);
@@ -188,7 +172,7 @@ cd(const int argc, const char **argv)
 }
 
 static void
-history_wrapper(const int argc, const char **argv)
+history_wrapper(const int argc, char **argv)
 {
   if (argc == 2) {  // set the history size
     if (strncmp(argv[0], "-s", strlen("-s")) == 0) {
@@ -205,26 +189,8 @@ history_wrapper(const int argc, const char **argv)
   }
 }
 
-static int
-printenv_wrapper(const int argc, const char **argv)
-{
-  return 0;
-}
-
-static int
-setenv_wrapper(const int argc, const char **argv)
-{
-  return 0;
-}
-
-static int
-unset_wrapper(const int argc, const char **argv)
-{
-  return 0;
-}
-
 static void
-which(const int argc, const char **argv)
+which(const int argc, char **argv)
 {
   char *p = getenv("PATH");
   size_t pathlen = strlen(p) + 1;
@@ -280,7 +246,7 @@ which_print_matches(char *path, const char *filename)
 }
 
 static int
-dirs(const int argc, const char** argv)
+dirs(const int argc, char** argv)
 {
   UNUSED(argc);
   UNUSED(argv);
@@ -302,7 +268,7 @@ dirs(const int argc, const char** argv)
 }
 
 static int
-popd(const int argc, const char** argv)
+popd(const int argc, char** argv)
 {
   UNUSED(argc);
 
@@ -320,7 +286,7 @@ popd(const int argc, const char** argv)
 }
 
 static int
-pushd(const int argc, const char** argv)
+pushd(const int argc, char** argv)
 {
   if (argc < 1) {
     printf("-bsh: pushd: no other directory\n");

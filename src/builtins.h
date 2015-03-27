@@ -1,12 +1,13 @@
 #ifndef BUILTINS_H
 #define BUILTINS_H
 #include "linked_list.h"
+#include "job.h"
 #include "stack.h"
 #include "parse.h"
 
 enum BuiltinCommands { NO_SUCH_BUILTIN=0, ALIAS, BG, CD, DIRS, EXIT, FG, HELP,
-                       HISTORY, JOBS, KILL, POPD, PRINTENV, PUSHD, SETENV,
-                       UNALIAS, UNSET, WHICH };
+                       HISTORY, JOBS, KILL, POPD, PUSHD, SETENV, UNALIAS,
+                       WHICH };
 
 
 /* Initialize all data structures for builtin commands. */
@@ -23,6 +24,5 @@ is_builtin_command(const char *cmd);
 
 /* Execute the builtin command in the same process as the caller. */
 void
-execute_builtin_command(const enum BuiltinCommands command,
-                        const struct Command cmd);
+execute_builtin_command(const enum BuiltinCommands command, process cmd);
 #endif
