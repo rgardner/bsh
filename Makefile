@@ -1,7 +1,7 @@
 TARGET=bsh
 
 CC=gcc
-CFLAGS=-Wextra -Wall -Wunreachable-code -Wformat=2 -DUNIX
+CFLAGS=-Wall -Wextra -Werror -Wunreachable-code -Wformat=2 -DUNIX
 FLAGS = -lreadline -lcurses
 DEBUG =-g -DDEBUG
 
