@@ -13,8 +13,8 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wunreachable-code -Wformat=2 -DUNIX")
-set(CMAKE_C_FLAGS_DEBUG "-DDEBUG")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Werror -Wunreachable-code -Wformat=2 -DUNIX")
+set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
 
 find_package(Readline REQUIRED)
 include_directories(
