@@ -4,6 +4,7 @@ set(LIB_SOURCES
   builtins.c
   history.c
   linked_list.c
+  job.c
   node.c
   parse.c
   stack.c
@@ -21,6 +22,7 @@ set(HEADERS
   builtins.h
   history.h
   linked_list.h
+  job.h
   node.h
   parse.h
   stack.h
