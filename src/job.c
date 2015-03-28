@@ -6,6 +6,8 @@
 
 /* Function prototypes. */
 int init_process(process *, const struct Command);
+void process_free(process *);
+void job_free(job *);
 
 
 /* The active jobs are linked into a list. This is its head. */
@@ -54,12 +56,12 @@ init_process(process *p, const struct Command cmd)
   p->next = NULL;
   p->argc = cmd.VarNum;
 
-  char *argv[p->argc+2]; // command, *args, NULL
-  argv[0] = cmd.command;
+  p->argv = malloc((p->argc+2) * sizeof(char *));  // command, *args, NULL
+  p->argv[0] = cmd.command;
   for (int i = 0; i < p->argc; i++) {
-    argv[i + 1] = cmd.VarList[i];
+    p->argv[i + 1] = cmd.VarList[i];
   }
-  argv[cmd.VarNum + 1] = NULL;
+  p->argv[cmd.VarNum + 1] = NULL;
 
   p->pid = 0;
   p->completed = false;
@@ -105,4 +107,25 @@ init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes
   j->stderr = STDERR_FILENO;
 
   return 0;
+}
+
+void
+process_free(process *p)
+{
+  for (int i = 0; i < p->argc; i++) {
+    free(p->argv[i]);
+  }
+
+  for (process *next = p->next; next; next = next->next) {
+    process_free(next);
+  }
+}
+
+void
+job_free(job *j)
+{
+  free(j->command);
+  for (process *p = j->first_process; p; p = p->next) {
+    process_free(p);
+  }
 }

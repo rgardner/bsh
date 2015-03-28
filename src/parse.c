@@ -14,12 +14,6 @@
 /* Function prototypes. */
 int copy_substring(char *, const char *, const int, const int);
 
-bool
-is_bg_job(const struct ParseInfo *info)
-{
-  return info->runInBackground == true;
-}
-
 void
 init_info(struct ParseInfo *p)
 {

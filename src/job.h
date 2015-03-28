@@ -30,4 +30,7 @@ typedef struct job {
 
 int
 init_job(job *, const struct ParseInfo *, pid_t, struct termios);
+
+void
+job_free(job *);
 #endif

@@ -285,6 +285,6 @@ main(int argc, char **argv)
     free_info(info);
 
     launch_job(j, foreground);
-    if (!is_bg_job(info)) free_info(info);
+    if (foreground) job_free(j);
   }
 }
