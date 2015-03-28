@@ -32,6 +32,18 @@ Welcome to Bob shell.
 15. terminal support
 16. port to Windows
 
+## Resources
+These resources have been invaluable to me while working on this project:
+
+1. Cornell CS414 Summer 2004 by Jeanna Matthews
+  - ["Parse.c" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html)
+  - ["Writing Your Own Shell" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html)
+2. [GNU History Library](http://cnswww.cns.cwru.edu/php/chet/readline/history.html)
+3. [Bash source code](https://ftp.gnu.org/gnu/bash/)
+4. [Implementing a Job Control Shell](http://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html#Implementing-a-Shell)
+5. [The C Programming Language, 2nd
+   Edition](http://smile.amazon.com/dp/0131103628/ref=cm_sw_r_tw_dp_.lqevb1B3CJ24)
+
 ## Credit
 The awesome "geek tortoise" ascii art was found on
 [Retrojunkie](http://www.retrojunkie.com/asciiart/animals/turtles.htm).
