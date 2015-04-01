@@ -42,7 +42,7 @@ history_init()
   history_length = state.length;
   state.size = HISTSIZE;
   history_max_entries = state.size;
-  state.entries = malloc(sizeof(HIST_ENTRY) * state.size);
+  state.entries = malloc(sizeof(HIST_ENTRY *) * state.size);
   for (int i = 0; i < state.size; i++) {
     state.entries[i] = NULL;
   }

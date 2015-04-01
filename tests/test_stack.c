@@ -29,6 +29,7 @@ START_TEST(test_push_normal)
   stack_push(s, elem);
   ck_assert_msg(stack_peak(s) == elem,
                 "element should be on the top of the stack");
+  free(elem);
 }
 END_TEST
 
@@ -38,6 +39,8 @@ START_TEST(test_pop_normal)
   stack_push(s, elem);
   char *other = stack_pop(s);
   ck_assert_msg(elem == other, "pop should remove an element");
+  free(elem);
+  free(other);
 }
 END_TEST
 
@@ -48,6 +51,7 @@ START_TEST(test_push_pop)
   stack_pop(s);
   ck_assert_msg(stack_peak(s) == NULL,
                 "stack should be empty after push + pop");
+  free(elem);
 }
 END_TEST
 

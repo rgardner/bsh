@@ -255,6 +255,7 @@ dirs(const int argc, char** argv)
   char *cwd = malloc(len);
   if (!getcwd(cwd, len)) {
     fprintf(stderr, "Error. Could not obtain current working directory.\n");
+    free(cwd);
     return -1;
   }
   printf("%s", cwd);
@@ -277,7 +278,7 @@ popd(const int argc, char** argv)
     return -1;
   }
 
-  char *dir = (char *)stack_pop(directory_stack);
+  char *dir = stack_pop(directory_stack);
   const int new_argc = 1;
   argv[0] = dir;
   cd(new_argc, argv);
@@ -297,8 +298,10 @@ pushd(const int argc, char** argv)
   char *cwd = malloc(len);
   if (!getcwd(cwd, len)) {
     fprintf(stderr, "Error. Could not obtain current working directory.\n");
+  } else {
+    stack_push(directory_stack, cwd);
   }
-  stack_push(directory_stack, cwd);
   cd(argc, argv);
+  free(cwd);
   return 0;
 }

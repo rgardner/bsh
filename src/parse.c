@@ -13,6 +13,7 @@
 
 /* Function prototypes. */
 int copy_substring(char *, const char *, const int, const int);
+void free_command(const struct Command *);
 
 void
 init_info(struct ParseInfo *p)
@@ -60,6 +61,7 @@ parse(const char *cmdline)
         fprintf(stderr,
                 "Error. The command exceeds the %d character limit.\n",
                 MAXLINE);
+        free_command(cmd);
         free_info(Result);
         return NULL;
       }
@@ -108,6 +110,7 @@ parse(const char *cmdline)
     }
   }
   Result->CommArray[Result->pipeNum] = *cmd;
+  free(cmd);
   Result->pipeNum++;
 
   return Result;
@@ -157,12 +160,20 @@ void
 free_info(const struct ParseInfo *info)
 {
   if (!info) return;
+
   for (int i = 0; i < info->pipeNum; i++) {
-    struct Command cmd = info->CommArray[i];
-    if (cmd.command) free(cmd.command);
-    for (int j = 0; j < cmd.VarNum; j++) {
-      free(cmd.VarList[j]);
-    }
+    const struct Command *cmd = &info->CommArray[i];
+    if (cmd) free_command(cmd);
   }
   free((void*)info);
+}
+
+void
+free_command(const struct Command *cmd)
+{
+  if (cmd->command) free(cmd->command);
+  for (int i = 0; i < cmd->VarNum; i++) {
+    if (cmd->VarList[i]) free(cmd->VarList[i]);
+  }
+  free((void*)cmd);
 }

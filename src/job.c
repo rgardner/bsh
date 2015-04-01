@@ -81,7 +81,7 @@ init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes
   for (int i = 0; i < info->pipeNum; i++) {
     process *p = malloc(sizeof(process));
     init_process(p, info->CommArray[i]);
-    if (j->first_process) {
+    if (j->first_process && prev) {
       prev->next = p;
     } else {
       j->first_process = p;

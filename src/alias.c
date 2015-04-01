@@ -53,6 +53,8 @@ alias(const int argc, char **argv)
     name = strdup(name);
     char *value = strdup(argv[0]);
     alias_add(name, value, 1);
+    free(value);
+    free(name);
     return 0;
   }
 
@@ -140,6 +142,7 @@ alias_add(const char *name, const char *value, const bool overwrite)
     previous = current;
   }
   ll_add_after(aliases, previous, new);
+  free(new);
   return true;
 }
 

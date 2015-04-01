@@ -44,12 +44,14 @@ bsh_setenv_help()
 int
 bsh_printenv(const char *name)
 {
-  bool found = name ? false : true;
+  if (!name) return 1;
+
+  bool found = false;
   for (struct Node *curr = variables->head; curr; curr = curr->next) {
     struct Variable *var = curr->data;
-    if (var != NULL) continue;
+    if (!var) continue;
 
-    if (!name || strncmp(name, var->name, strlen(name))) {
+    if (strncmp(name, var->name, strlen(name))) {
       printf("%s\n", var->value);
       found = true;
     }
@@ -81,6 +83,7 @@ bsh_setenv(char *name, char *value, int overwrite)
     previous = curr;
   }
   ll_add_after(variables, previous, new);
+  free(new);
   return 0;
 }
 
@@ -112,9 +115,8 @@ bsh_unsetenv(const char *name)
 
 char *
 bsh_getenv(const char *name) {
-  struct Node *current = NULL;
   for (struct Node *curr = variables->head; curr; curr = curr->next) {
-    struct Variable *var = current->data;
+    struct Variable *var = curr->data;
     if (!var) break;
 
     if (strncmp(var->name, name, strlen(var->name)) == 0) return var->value;
