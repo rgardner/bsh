@@ -16,7 +16,6 @@
 #include "history.h"
 #include "job.h"
 #include "parse.h"
-#include "variables.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -39,7 +38,6 @@ builtins_init()
   aliases_init();
   jobs_init();
   directory_stack = stack_init();
-  variables_init();
   history_init();
 }
 
@@ -153,7 +151,7 @@ cd(const int argc, char **argv)
   } else if (strncmp(argv[0], "~", strlen("~")) == 0) {
     dir = getenv("HOME");
   } else if (strncmp(argv[0], "-", strlen("-")) == 0) {
-    dir = bsh_getenv("OLDPWD");
+    dir = getenv("OLDPWD");
   } else {
     strncpy(dir, argv[0], sizeof(strlen(argv[0])));
   }
@@ -162,7 +160,7 @@ cd(const int argc, char **argv)
   if (!getcwd(cwd, len)) {
     fprintf(stderr, "Error. Could not obtain current working directory.\n");
   }
-  bsh_setenv("OLDPWD", cwd, 1);
+  setenv("OLDPWD", cwd, 1);
 
   int ret = chdir(dir);
   if (ret != 0) {
