@@ -2,10 +2,11 @@
 
 #include <fcntl.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 /* Function prototypes. */
-int init_process(process *, const struct Command);
+void init_process(process *, const struct Command);
 void process_free(process *);
 void job_free(job *);
 
@@ -50,16 +51,16 @@ job_is_completed(job *j)
   return 1;
 }
 
-int
+void
 init_process(process *p, const struct Command cmd)
 {
   p->next = NULL;
   p->argc = cmd.VarNum;
 
   p->argv = malloc((p->argc+2) * sizeof(char *));  // command, *args, NULL
-  p->argv[0] = cmd.command;
+  p->argv[0] = strndup(cmd.command, strlen(cmd.command));
   for (int i = 0; i < p->argc; i++) {
-    p->argv[i + 1] = cmd.VarList[i];
+    p->argv[i + 1] = strndup(cmd.VarList[i], strlen(cmd.VarList[i]));
   }
   p->argv[cmd.VarNum + 1] = NULL;
 
@@ -67,10 +68,9 @@ init_process(process *p, const struct Command cmd)
   p->completed = false;
   p->stopped = false;
   p->status = 0;
-  return 0;
 }
 
-int
+void
 init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes)
 {
   j->next = NULL;
@@ -105,8 +105,6 @@ init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes
   }
 
   j->stderr = STDERR_FILENO;
-
-  return 0;
 }
 
 void

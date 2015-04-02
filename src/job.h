@@ -28,7 +28,7 @@ typedef struct job {
   int stdin, stdout, stderr;  /* standard i/o channels */
 } job;
 
-int
+void
 init_job(job *, const struct ParseInfo *, pid_t, struct termios);
 
 void
