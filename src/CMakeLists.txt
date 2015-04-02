@@ -29,5 +29,6 @@ set(HEADERS
 
 add_library(bsh STATIC ${LIB_SOURCES} ${HEADERS})
 
-add_executable(main ${HEADERS} ${MAIN_SOURCES})
-target_link_libraries(main bsh ${READLINE_LIBRARIES})
+add_executable(bsh-bin ${HEADERS} ${MAIN_SOURCES})
+target_link_libraries(bsh-bin bsh ${READLINE_LIBRARIES})
+set_target_properties(bsh-bin PROPERTIES OUTPUT_NAME bsh)
