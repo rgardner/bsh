@@ -11,8 +11,7 @@ extern int history_length;
 extern int history_max_entries;
 
 /* Required before using history functions. */
-void
-history_init();
+void history_init();
 
 /* Expand string, placing the result into output, a pointer to a string.
  *
@@ -21,21 +20,16 @@ history_init();
  *  1:  if expansions did take place
  *  -1: if there was an error in expansion
  */
-int
-history_exp(const char *string, char **output);
+int history_exp(const char *string, char **output);
 
 /* Place string at the end of the history list. */
-void
-history_add(const char *string);
+void history_add(const char *string);
 
 /* Stifle the history list, remembering only the last max entries. */
-void
-history_stifle(const int max);
+void history_stifle(const int max);
 
 /* Print out history list. */
-void
-history_print(const int num);
+void history_print(const int num);
 
-void
-history_help();
+void history_help();
 #endif

@@ -3,18 +3,14 @@
 #include <stdlib.h>
 #include "node.h"
 
-struct LinkedList *
-ll_init()
-{
+struct LinkedList *ll_init() {
   struct LinkedList *list = malloc(sizeof(struct LinkedList));
   list->head = NULL;
   list->size = 0;
   return list;
 }
 
-void
-ll_free(const struct LinkedList *list)
-{
+void ll_free(const struct LinkedList *list) {
   struct Node *current = list->head;
   while (current) {
     struct Node *cp = current->next;
@@ -24,9 +20,7 @@ ll_free(const struct LinkedList *list)
   free((struct LinkedList *)list);
 }
 
-int
-ll_add(struct LinkedList *list, const int index, const void *element)
-{
+int ll_add(struct LinkedList *list, const int index, const void *element) {
   struct Node *new = node_init(element);
   list->size++;
 
@@ -44,15 +38,12 @@ ll_add(struct LinkedList *list, const int index, const void *element)
   return i;
 }
 
-void
-ll_add_first(struct LinkedList *list, const void *element)
-{
+void ll_add_first(struct LinkedList *list, const void *element) {
   ll_add(list, 0, element);
 }
 
-void
-ll_add_after(struct LinkedList *list, struct Node *n, const void *element)
-{
+void ll_add_after(struct LinkedList *list, struct Node *n,
+                  const void *element) {
   struct Node *new = node_init(element);
   if (n) {
     new->next = n->next;
@@ -62,9 +53,7 @@ ll_add_after(struct LinkedList *list, struct Node *n, const void *element)
   }
 }
 
-void *
-ll_get(const struct LinkedList *list, const int index)
-{
+void *ll_get(const struct LinkedList *list, const int index) {
   struct Node *current = list->head;
   if (index == 0) {
     if (current) return current->data;
@@ -75,9 +64,7 @@ ll_get(const struct LinkedList *list, const int index)
   return NULL;
 }
 
-void *
-ll_remove(struct LinkedList *list)
-{
+void *ll_remove(struct LinkedList *list) {
   struct Node *n = list->head;
   if (n == NULL) return NULL;
 
@@ -86,8 +73,4 @@ ll_remove(struct LinkedList *list)
   return n->data;
 }
 
-int
-ll_size(const struct LinkedList *list)
-{
-  return list->size;
-}
+int ll_size(const struct LinkedList *list) { return list->size; }

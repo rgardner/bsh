@@ -23,10 +23,8 @@ struct termios shell_tmodes;
 int shell_terminal;
 int shell_is_interactive;
 
-char *
-buildPrompt()
-{
-  char *prompt = malloc(MAX_PROMPT_LENGTH*sizeof(char));
+char *buildPrompt() {
+  char *prompt = malloc(MAX_PROMPT_LENGTH * sizeof(char));
   char cwd[1024];
   if (!getcwd(cwd, sizeof(cwd))) {
     fprintf(stderr, "Error. Could not obtain current working directory.");
@@ -35,9 +33,7 @@ buildPrompt()
   return prompt;
 }
 
-void
-print_login_message()
-{
+void print_login_message() {
   printf("                __\n");
   printf("    ___        |  \"---.\n");
   printf("  .\"   \". -o)  |      |\n");
@@ -46,9 +42,7 @@ print_login_message()
   printf("Welcome to Bob shell.\n");
 }
 
-void
-shell_init()
-{
+void shell_init() {
   /* See if we are running interactively.  */
   shell_terminal = STDIN_FILENO;
   shell_is_interactive = isatty(shell_terminal);
@@ -69,9 +63,9 @@ shell_init()
 
     /* Put ourselves in our own process group.  */
     shell_pgid = getpid();
-    if (setpgid (shell_pgid, shell_pgid) < 0) {
-      perror ("Couldn't put the shell in its own process group");
-      exit(1);
+    if (setpgid(shell_pgid, shell_pgid) < 0) {
+      perror("Couldn't put the shell in its own process group");
+      exit(EXIT_FAILURE);
     }
 
     /* Grab control of the terminal.  */
@@ -82,10 +76,8 @@ shell_init()
   }
 }
 
-void
-launch_process(process *p, pid_t pgid, int infile, int outfile, int errfile,
-               bool foreground)
-{
+void launch_process(process *p, pid_t pgid, int infile, int outfile,
+                    int errfile, bool foreground) {
   pid_t pid;
   if (shell_is_interactive) {
     /* Put the process into the process group and give the process group the
@@ -97,12 +89,12 @@ launch_process(process *p, pid_t pgid, int infile, int outfile, int errfile,
     if (foreground) tcsetpgrp(shell_terminal, pgid);
 
     /* Set the handling for job control signals back to the default. */
-      signal(SIGINT, SIG_DFL);
-      signal(SIGQUIT, SIG_DFL);
-      signal(SIGTSTP, SIG_DFL);
-      signal(SIGTTIN, SIG_DFL);
-      signal(SIGTTOU, SIG_DFL);
-      signal(SIGCHLD, SIG_DFL);
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
+    signal(SIGTSTP, SIG_DFL);
+    signal(SIGTTIN, SIG_DFL);
+    signal(SIGTTOU, SIG_DFL);
+    signal(SIGCHLD, SIG_DFL);
   }
   if (infile != STDIN_FILENO) {
     dup2(infile, STDIN_FILENO);
@@ -122,9 +114,7 @@ launch_process(process *p, pid_t pgid, int infile, int outfile, int errfile,
   }
 }
 
-void
-launch_job(job *j, const bool foreground)
-{
+void launch_job(job *j, const bool foreground) {
   // Currently, bsh does not support pipes with builtin commands.
   enum BuiltinCommands command = is_builtin_command(j->first_process->argv[0]);
   if (command != NO_SUCH_BUILTIN) {
@@ -151,12 +141,12 @@ launch_job(job *j, const bool foreground)
 
     // Fork the child process.
     pid = fork();
-    if ((pid = fork()) == 0) { // child process
+    if ((pid = fork()) == 0) {  // child process
       launch_process(p, j->pgid, infile, outfile, j->stderr, foreground);
-     } else if (pid < 0) {  // fork failed
+    } else if (pid < 0) {  // fork failed
       perror("fork");
       exit(EXIT_FAILURE);
-    } else {                // parent process
+    } else {  // parent process
       p->pid = pid;
       if (shell_is_interactive) {
         if (!j->pgid) {
@@ -185,9 +175,7 @@ launch_job(job *j, const bool foreground)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   // Ignore argc and argv until we add command line arguments.
   UNUSED(argc);
   UNUSED(argv);
@@ -270,9 +258,9 @@ main(int argc, char **argv)
     print_info(info);
 #endif
 
-    //com contains the info. of the command before the first "|"
-    const struct Command *cmd=&info->CommArray[0];
-    if (!cmd  || !cmd->command) {
+    // com contains the info. of the command before the first "|"
+    const struct Command *cmd = &info->CommArray[0];
+    if (!cmd || !cmd->command) {
       free_info(info);
       free(cmdLine);
       continue;

@@ -25,12 +25,9 @@ struct ParseInfo {
 };
 
 /* Function prototypes. */
-struct ParseInfo *
-parse(const char *);
+struct ParseInfo *parse(const char *);
 
-void
-free_info(const struct ParseInfo *);
+void free_info(const struct ParseInfo *);
 
-void
-print_info(const struct ParseInfo *);
+void print_info(const struct ParseInfo *);
 #endif
