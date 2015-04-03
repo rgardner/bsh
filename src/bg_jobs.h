@@ -16,27 +16,20 @@ extern int num_bg_jobs;
 extern struct BGJob *background_jobs[MAX_BG_JOBS];
 
 /* Function prototypes. */
-struct BGJob *
-job_init(const pid_t, const struct ParseInfo *, const struct Command *);
+struct BGJob *job_init(const pid_t, const struct ParseInfo *,
+                       const struct Command *);
 
-void
-free_job(struct BGJob *job);
+void free_job(struct BGJob *job);
 
-void
-handle_sigchld(const int signum);
+void handle_sigchld(const int signum);
 
-bool
-has_bg_jobs();
+bool has_bg_jobs();
 
-void
-print_running_jobs();
+void print_running_jobs();
 
-void
-jobs_help();
+void jobs_help();
 
-void
-bg_help();
+void bg_help();
 
-void
-fg_help();
+void fg_help();
 #endif

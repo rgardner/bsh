@@ -6,10 +6,8 @@ struct Node {
 };
 
 /* Return a newly allocated node. */
-struct Node *
-node_init(const void *data);
+struct Node *node_init(const void *data);
 
 /* Free the node. */
-void *
-node_free(const struct Node *n);
+void *node_free(const struct Node *n);
 #endif

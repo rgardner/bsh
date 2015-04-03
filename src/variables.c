@@ -19,31 +19,23 @@ void variable_free(struct Variable *);
 /* Global variables. */
 struct LinkedList *variables;
 
-void
-variables_init()
-{
-  variables = ll_init();
+void variables_init() { variables = ll_init(); }
+
+void bsh_printenv_help() {
+  printf(
+      "usage: printenv [name]\n\n"
+      "prints out the names and values of the variables in the "
+      "environment, with one name/value pair per line. If name is "
+      "specified, only its value is printed.\n");
 }
 
-void
-bsh_printenv_help()
-{
-  printf("usage: printenv [name]\n\n"
-         "prints out the names and values of the variables in the "
-         "environment, with one name/value pair per line. If name is "
-         "specified, only its value is printed.\n");
+void bsh_setenv_help() {
+  printf(
+      "usage: setenv <name> <value>\n\n"
+      "change or add an environment variable.\n");
 }
 
-void
-bsh_setenv_help()
-{
-  printf("usage: setenv <name> <value>\n\n"
-         "change or add an environment variable.\n");
-}
-
-int
-bsh_printenv(const char *name)
-{
+int bsh_printenv(const char *name) {
   bool found = name ? false : true;
   for (struct Node *curr = variables->head; curr; curr = curr->next) {
     struct Variable *var = curr->data;
@@ -57,9 +49,7 @@ bsh_printenv(const char *name)
   return found ? 0 : 1;
 }
 
-int
-bsh_setenv(char *name, char *value, int overwrite)
-{
+int bsh_setenv(char *name, char *value, int overwrite) {
   /* Search to see if variable already exists. */
   struct Node *curr;
   for (curr = variables->head; curr; curr = curr->next) {
@@ -72,7 +62,7 @@ bsh_setenv(char *name, char *value, int overwrite)
 
   /* Add a new alias. */
   struct Variable *new = malloc(sizeof(struct Variable));
-  *new = (struct Variable ) { .name = name, .value = value };
+  *new = (struct Variable){.name = name, .value = value};
 
   struct Node *previous = NULL;
   for (curr = variables->head; curr; curr = curr->next) {
@@ -84,9 +74,7 @@ bsh_setenv(char *name, char *value, int overwrite)
   return 0;
 }
 
-int
-bsh_unsetenv(const char *name)
-{
+int bsh_unsetenv(const char *name) {
   struct Node *prev = NULL;
   for (struct Node *curr = variables->head; curr; curr = curr->next) {
     struct Variable *alias = curr->data;
@@ -110,8 +98,7 @@ bsh_unsetenv(const char *name)
   return 1;
 }
 
-char *
-bsh_getenv(const char *name) {
+char *bsh_getenv(const char *name) {
   struct Node *current = NULL;
   for (struct Node *curr = variables->head; curr; curr = curr->next) {
     struct Variable *var = current->data;
@@ -122,9 +109,7 @@ bsh_getenv(const char *name) {
   return NULL;
 }
 
-void
-variable_free(struct Variable *var)
-{
+void variable_free(struct Variable *var) {
   if (var->name) free(var->name);
   if (var->value) free(var->value);
   free(var);

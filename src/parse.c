@@ -14,34 +14,26 @@
 /* Function prototypes. */
 int copy_substring(char *, const char *, const int, const int);
 
-bool
-is_bg_job(const struct ParseInfo *info)
-{
+bool is_bg_job(const struct ParseInfo *info) {
   return info->runInBackground == true;
 }
 
-void
-init_info(struct ParseInfo *p)
-{
-  *p = (struct ParseInfo){ .hasInputRedirection = false,
-                    .hasOutputRedirection = false,
-                    .runInBackground = false,
-                    .pipeNum = 0,
-                    .inFile = "",
-                    .outFile = "" };
+void init_info(struct ParseInfo *p) {
+  *p = (struct ParseInfo){.hasInputRedirection = false,
+                          .hasOutputRedirection = false,
+                          .runInBackground = false,
+                          .pipeNum = 0,
+                          .inFile = "",
+                          .outFile = ""};
 }
 
-void
-init_command(struct Command *p)
-{
-  *p = (struct Command){ .command = malloc(MAXLINE*sizeof(char)),
-                      .VarList = {NULL},
-                      .VarNum = 0};
+void init_command(struct Command *p) {
+  *p = (struct Command){.command = malloc(MAXLINE * sizeof(char)),
+                        .VarList = {NULL},
+                        .VarNum = 0};
 }
 
-struct ParseInfo *
-parse(const char *cmdline)
-{
+struct ParseInfo *parse(const char *cmdline) {
   // Check if this is a valid string.
   if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
 
@@ -50,7 +42,8 @@ parse(const char *cmdline)
 
   // Skip blank characters at the start of the cmdline
   int i = 0;
-  for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++);
+  for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++)
+    ;
   if (cmdline[i] == '\n' && cmdline[i] == '\0') return NULL;
 
   struct ParseInfo *Result = malloc(sizeof(struct ParseInfo));
@@ -63,8 +56,7 @@ parse(const char *cmdline)
     if (strcmp(cmd->command, "") == 0) {
       i = copy_substring(cmd->command, cmdline, i, MAXLINE);
       if (i == -1) {
-        fprintf(stderr,
-                "Error. The command exceeds the %d character limit.\n",
+        fprintf(stderr, "Error. The command exceeds the %d character limit.\n",
                 MAXLINE);
         free_info(Result);
         return NULL;
@@ -72,16 +64,21 @@ parse(const char *cmdline)
     } else if (Result->hasInputRedirection && strcmp(Result->inFile, "") == 0) {
       i = copy_substring(Result->inFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
-        fprintf(stderr, "Error. The input redirection filename exceeds the " \
-                        "%d character limit.\n", FILE_MAX_SIZE);
+        fprintf(stderr,
+                "Error. The input redirection filename exceeds the "
+                "%d character limit.\n",
+                FILE_MAX_SIZE);
         free_info(Result);
         return NULL;
       }
-    } else if (Result->hasOutputRedirection && strcmp(Result->outFile, "") == 0) {
+    } else if (Result->hasOutputRedirection &&
+               strcmp(Result->outFile, "") == 0) {
       i = copy_substring(Result->outFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
-        fprintf(stderr, "Error. The output redirection filename exceeds the " \
-                        "%d character limit.\n", FILE_MAX_SIZE);
+        fprintf(stderr,
+                "Error. The output redirection filename exceeds the "
+                "%d character limit.\n",
+                FILE_MAX_SIZE);
         free_info(Result);
         return NULL;
       }
@@ -124,20 +121,18 @@ parse(const char *cmdline)
  * is encountered. Returns the index of the last valid character found. Returns
  * -1 if the length of the new string is greater than the supplied limit.
  */
-int
-copy_substring(char *dest, const char *src, const int begin, const int limit)
-{
+int copy_substring(char *dest, const char *src, const int begin,
+                   const int limit) {
   int end = begin;
-  for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++);
+  for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++)
+    ;
   if (end - begin > limit) return -1;  // length of string to copy too large
   strncpy(dest, src + begin, end - begin);
   dest[end] = '\0';
   return end;
 }
 
-void
-print_info(const struct ParseInfo *info)
-{
+void print_info(const struct ParseInfo *info) {
   for (int i = 0; i < info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
     for (int j = 0; j < info->CommArray[i].VarNum; j++) {
@@ -159,9 +154,7 @@ print_info(const struct ParseInfo *info)
   printf("background: %s\n", (info->runInBackground) ? "yes" : "no");
 }
 
-void
-free_info(const struct ParseInfo *info)
-{
+void free_info(const struct ParseInfo *info) {
   if (!info) return;
   for (int i = 0; i < info->pipeNum; i++) {
     struct Command cmd = info->CommArray[i];
@@ -170,5 +163,5 @@ free_info(const struct ParseInfo *info)
       free(cmd.VarList[j]);
     }
   }
-  free((void*)info);
+  free((void *)info);
 }

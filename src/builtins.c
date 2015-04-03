@@ -35,9 +35,7 @@ static int unset_wrapper(const int, const char **);
 /* Global variables */
 struct Stack *directory_stack;
 
-void
-builtins_init()
-{
+void builtins_init() {
   aliases_init();
   directory_stack = stack_init();
   variables_init();
@@ -45,38 +43,41 @@ builtins_init()
 }
 
 /* Print helpful information. */
-void
-help(int command)
-{
+void help(int command) {
   if (command == ALIAS) {
     alias_help();
   } else if (command == BG) {
     bg_help();
   } else if (command == CD) {
-    printf("usage: cd <directory>\n\n"
-           "change the working directory to <directory>.\n"
-           "<directory> can be an absolute or relative path.\n");
+    printf(
+        "usage: cd <directory>\n\n"
+        "change the working directory to <directory>.\n"
+        "<directory> can be an absolute or relative path.\n");
   } else if (command == DIRS) {
-    printf("usage: dirs\n\n"
-           "list directories on the directory stack.\n");
+    printf(
+        "usage: dirs\n\n"
+        "list directories on the directory stack.\n");
   } else if (command == EXIT) {
-    printf("usage: exit\n\n"
-           "terminate the shell process unless there are background processes.\n");
+    printf(
+        "usage: exit\n\n"
+        "terminate the shell process unless there are background processes.\n");
   } else if (command == FG) {
     fg_help();
   } else if (command == HELP) {
-    printf("bsh: a simple alternative to every other shell.\n"
-           "usage: bsh\n\n"
-           "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
-           "use `help <command>` to learn more about a specific command.\n");
+    printf(
+        "bsh: a simple alternative to every other shell.\n"
+        "usage: bsh\n\n"
+        "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
+        "use `help <command>` to learn more about a specific command.\n");
   } else if (command == HISTORY) {
     history_help();
   } else if (command == JOBS) {
     jobs_help();
   } else if (command == KILL) {
-    printf("usage: kill %%num\n\n"
-           "terminate the process numbered `num` in the list of background "
-           "processes return by `jobs` (by sending it SIGKILL).\n");
+    printf(
+        "usage: kill %%num\n\n"
+        "terminate the process numbered `num` in the list of background "
+        "processes return by `jobs` (by sending it SIGKILL).\n");
   } else if (command == POPD) {
   } else if (command == PRINTENV) {
     bsh_printenv_help();
@@ -86,13 +87,12 @@ help(int command)
   } else if (command == UNALIAS) {
     unalias_help();
   } else if (command == WHICH) {
-   printf("usage: which program ...\n");
- }
+    printf("usage: which program ...\n");
+  }
 }
 
 /* Returns an enum of type BuiltinCommands. */
-enum BuiltinCommands
-is_builtin_command(const char * cmd) {
+enum BuiltinCommands is_builtin_command(const char *cmd) {
   if (strncmp(cmd, "alias", strlen("alias")) == 0) return ALIAS;
   if (strncmp(cmd, "bg", strlen("bg")) == 0) return BG;
   if (strncmp(cmd, "cd", strlen("cd")) == 0) return CD;
@@ -113,9 +113,8 @@ is_builtin_command(const char * cmd) {
   return NO_SUCH_BUILTIN;
 }
 
-void
-execute_builtin_command(const enum BuiltinCommands command, struct Command cmd)
-{
+void execute_builtin_command(const enum BuiltinCommands command,
+                             struct Command cmd) {
   const char **varlist = (const char **)cmd.VarList;
   if (command == ALIAS) {
     alias(cmd.VarNum, varlist);
@@ -156,10 +155,7 @@ execute_builtin_command(const enum BuiltinCommands command, struct Command cmd)
   }
 }
 
-
-static char *
-cd(const int argc, const char **argv)
-{
+static char *cd(const int argc, const char **argv) {
   size_t len = 1024;
   char *dir = malloc(len);
 
@@ -186,9 +182,7 @@ cd(const int argc, const char **argv)
   return dir;
 }
 
-static void
-history_wrapper(const int argc, const char **argv)
-{
+static void history_wrapper(const int argc, const char **argv) {
   if (argc == 2) {  // set the history size
     if (strncmp(argv[0], "-s", strlen("-s")) == 0) {
       int hist_size = strtol(argv[1], (char **)NULL, 10);
@@ -196,7 +190,7 @@ history_wrapper(const int argc, const char **argv)
     } else {
       help(HISTORY);
     }
-   } else if (argc == 1) {  // return the last num commands
+  } else if (argc == 1) {  // return the last num commands
     int num = strtol(argv[0], (char **)NULL, history_length);
     history_print(num);
   } else {  // print the entire history
@@ -204,27 +198,13 @@ history_wrapper(const int argc, const char **argv)
   }
 }
 
-static int
-printenv_wrapper(const int argc, const char **argv)
-{
-  return 0;
-}
+static int printenv_wrapper(const int argc, const char **argv) { return 0; }
 
-static int
-setenv_wrapper(const int argc, const char **argv)
-{
-  return 0;
-}
+static int setenv_wrapper(const int argc, const char **argv) { return 0; }
 
-static int
-unset_wrapper(const int argc, const char **argv)
-{
-  return 0;
-}
+static int unset_wrapper(const int argc, const char **argv) { return 0; }
 
-static void
-which(const int argc, const char **argv)
-{
+static void which(const int argc, const char **argv) {
   char *p = getenv("PATH");
   size_t pathlen = strlen(p) + 1;
   char *path = malloc(pathlen);
@@ -235,26 +215,20 @@ which(const int argc, const char **argv)
   }
 }
 
-static bool
-which_is_there(const char *candidate)
-{
+static bool which_is_there(const char *candidate) {
   struct stat fin;
 
   /* XXX work around access(2) false positives for superuser */
-  if (access(candidate, X_OK) == 0 &&
-      stat(candidate, &fin) == 0 &&
+  if (access(candidate, X_OK) == 0 && stat(candidate, &fin) == 0 &&
       S_ISREG(fin.st_mode) &&
-      (getuid() != 0 ||
-      (fin.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)) {
-        printf("%s\n", candidate);
-        return true;
+      (getuid() != 0 || (fin.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) != 0)) {
+    printf("%s\n", candidate);
+    return true;
   }
   return false;
 }
 
-static int
-which_print_matches(char *path, const char *filename)
-{
+static int which_print_matches(char *path, const char *filename) {
   if (strchr(filename, '/')) {
     return which_is_there(filename) ? 0 : -1;
   }
@@ -266,9 +240,9 @@ which_print_matches(char *path, const char *filename)
     if (*d == '\0') {
       d = ".";
     }
-    if (snprintf(candidate, sizeof(candidate), "%s/%s", d,
-        filename) >= (int)sizeof(candidate)) {
-          continue;
+    if (snprintf(candidate, sizeof(candidate), "%s/%s", d, filename) >=
+        (int)sizeof(candidate)) {
+      continue;
     }
     if (which_is_there(candidate)) {
       found = true;
@@ -278,9 +252,7 @@ which_print_matches(char *path, const char *filename)
   return (found ? 0 : -1);
 }
 
-static int
-dirs(const int argc, const char** argv)
-{
+static int dirs(const int argc, const char **argv) {
   UNUSED(argc);
   UNUSED(argv);
 
@@ -300,9 +272,7 @@ dirs(const int argc, const char** argv)
   return 0;
 }
 
-static int
-popd(const int argc, const char** argv)
-{
+static int popd(const int argc, const char **argv) {
   UNUSED(argc);
 
   if (stack_empty(directory_stack)) {
@@ -318,9 +288,7 @@ popd(const int argc, const char** argv)
   return 0;
 }
 
-static int
-pushd(const int argc, const char** argv)
-{
+static int pushd(const int argc, const char **argv) {
   if (argc < 1) {
     printf("-bsh: pushd: no other directory\n");
     return -1;

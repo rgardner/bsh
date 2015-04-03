@@ -14,7 +14,6 @@ typedef struct _hist_entry {
   histdata_t data;
 } HIST_ENTRY;
 
-
 /* A structure used to pass around the current state of the history. */
 typedef struct _hist_state {
   HIST_ENTRY **entries; /* Pointer to the entries themselves. */
@@ -34,9 +33,7 @@ int history_max_entries;
 /* Private global variables. */
 HISTORY_STATE state;
 
-void
-history_init()
-{
+void history_init() {
   state.count = -1;
   state.length = 0;
   history_length = state.length;
@@ -48,9 +45,7 @@ history_init()
   }
 }
 
-int
-history_exp(const char *string, char **output)
-{
+int history_exp(const char *string, char **output) {
   int i = 0;
   int length = strlen(string) + 1;
   *output = malloc(sizeof(char) * length);
@@ -63,7 +58,8 @@ history_exp(const char *string, char **output)
   if (string[0] == '\0') return 0;
 
   // Skip blank characters at the start of the string.
-  for (; isspace(string[i]) && string[i] != '\n' && string[i] != '\0'; i++);
+  for (; isspace(string[i]) && string[i] != '\n' && string[i] != '\0'; i++)
+    ;
   if (string[i] != '!') return 0;
 
   // Start of expansion.
@@ -86,10 +82,7 @@ history_exp(const char *string, char **output)
   return 1;
 }
 
-
-void
-history_add(const char *string)
-{
+void history_add(const char *string) {
   int length;        // length of string
   int pre;           // previous element in history
   int timestamp;     // timestamp to save
@@ -111,7 +104,7 @@ history_add(const char *string)
   entry = malloc(sizeof(HIST_ENTRY));
 
   // Calculate timestamp.
-  pre = (state.count-1) % state.size;
+  pre = (state.count - 1) % state.size;
   if (pre < 0) pre = state.size;
   timestamp = (state.entries[pre]) ? state.entries[pre]->timestamp : 0;
 
@@ -121,10 +114,8 @@ history_add(const char *string)
   state.entries[state.count % state.size] = entry;
 }
 
-void
-history_stifle(const int max)
-{
-  if (max < 0) return;  // can't record a negative number of commands
+void history_stifle(const int max) {
+  if (max < 0) return;            // can't record a negative number of commands
   if (state.size == max) return;  // nothing to change
 
   if (state.length > max) {
@@ -140,24 +131,20 @@ history_stifle(const int max)
     state.length = max;
     state.count = max - 1;
   } else if (state.length < max) {
-    state.entries = realloc(state.entries, sizeof(HIST_ENTRY)*max);
+    state.entries = realloc(state.entries, sizeof(HIST_ENTRY) * max);
   }
   state.size = max;
   history_max_entries = state.size;
 }
 
-histdata_t
-free_hist_entry(const HIST_ENTRY *histent)
-{
+histdata_t free_hist_entry(const HIST_ENTRY *histent) {
   if (histent->line) free(histent->line);
   histdata_t data = histent->data;
   free((HIST_ENTRY *)histent);
   return data;
 }
 
-void
-history_print(const int num)
-{
+void history_print(const int num) {
   assert(num < state.length);
   int start = state.count % state.size + 1;
   if (start >= state.length) start = 0;
@@ -174,14 +161,13 @@ history_print(const int num)
   }
 }
 
-void
-history_help()
-{
-  printf("usage: history [num] [-s num]\n\n"
-         "history: print the list of previously executed commands.\n"
-         "history num: return the last `num` commands.\n"
-         "history -s num: set the size of the history buffer.\n"
-         "!1 repeats the command numbered `1` in the list of commands "
-         "return by history.\n"
-         "!-1 repeats the last command.\n");
+void history_help() {
+  printf(
+      "usage: history [num] [-s num]\n\n"
+      "history: print the list of previously executed commands.\n"
+      "history num: return the last `num` commands.\n"
+      "history -s num: set the size of the history buffer.\n"
+      "!1 repeats the command numbered `1` in the list of commands "
+      "return by history.\n"
+      "!-1 repeats the last command.\n");
 }
