@@ -1,19 +1,12 @@
 # Object files
 *.a
-*.o
+obj/
 
 # Executables
-bsh
-test
+bin/
 
-# CMake
-CMakeCache.txt
-CMakeFiles
-Makefile
-cmake_install.cmake
-install_manifest.txt
-Testing
-CTestTestfile.cmake
+# CMake out of source build
+build/
 
 # Debug
 *.dSYM
