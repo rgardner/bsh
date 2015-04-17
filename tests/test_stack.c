@@ -40,7 +40,6 @@ START_TEST(test_pop_normal)
   char *other = stack_pop(s);
   ck_assert_msg(elem == other, "pop should remove an element");
   free(elem);
-  free(other);
 }
 END_TEST
 
