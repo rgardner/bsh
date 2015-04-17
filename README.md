@@ -1,4 +1,6 @@
 # bsh
+[![Build Status](https://travis-ci.org/rgardner/bsh.svg?branch=master)](https://travis-ci.org/rgardner/bsh)
+
 Bob's finally coming out of his shell.
 
 ```
