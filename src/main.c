@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <sys/wait.h>
 #include <readline/readline.h>
 #include <termios.h>
 #include <unistd.h>
