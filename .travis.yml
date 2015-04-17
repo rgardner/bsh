@@ -2,7 +2,7 @@ language: c
 sudo: required
 
 compiler:
-  - clang
+  - gcc
 
 before_install:
   - sudo apt-get install check -qq
