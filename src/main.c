@@ -124,27 +124,26 @@ void launch_job(job *j, const bool foreground) {
 
   // set up piping
   pid_t pid;
-  int infile = j->stdin;
+  int infile = j->infile;
   int pipefd[2];
-  process *p;
-  for (p = j->first_process; p; p = p->next) {
+  for (process *p = j->first_process; p; p = p->next) {
     int outfile;
     if (p->next) {
       if (pipe(pipefd) < 0) {
-        perror("pipe");
+        perror("failed to create pipe");
         exit(EXIT_FAILURE);
       }
       outfile = pipefd[1];
     } else {
-      outfile = j->stdout;
+      outfile = j->outfile;
     }
 
     // Fork the child process.
     pid = fork();
     if ((pid = fork()) == 0) {  // child process
-      launch_process(p, j->pgid, infile, outfile, j->stderr, foreground);
+      launch_process(p, j->pgid, infile, outfile, j->errfile, foreground);
     } else if (pid < 0) {  // fork failed
-      perror("fork");
+      perror("failed to fork process");
       exit(EXIT_FAILURE);
     } else {  // parent process
       p->pid = pid;
@@ -156,10 +155,10 @@ void launch_job(job *j, const bool foreground) {
       }
     }
     // clean up pipes
-    if (infile != j->stdin) {
+    if (infile != j->infile) {
       close(infile);
     }
-    if (outfile != j->stdout) {
+    if (outfile != j->outfile) {
       close(outfile);
     }
     infile = pipefd[0];
@@ -269,7 +268,7 @@ int main(int argc, char **argv) {
     // Convert ParseInfo to Job.
     job *j = malloc(sizeof(job));
     init_job(j, info, shell_pgid, shell_tmodes);
-    bool foreground = info->runInBackground;
+    bool foreground = !info->runInBackground;
     free_info(info);
 
     launch_job(j, foreground);

@@ -1,6 +1,7 @@
 #include "job.h"
 
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -93,18 +94,18 @@ init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes
   j->tmodes = tmodes;
 
   if (info->hasInputRedirection) {
-    j->stdin = open(info->inFile, O_RDONLY);
+    j->infile = open(info->inFile, O_RDONLY);
   } else {
-    j->stdin = STDIN_FILENO;
+    j->infile = STDIN_FILENO;
   }
 
   if (info->hasOutputRedirection) {
-    j->stdout = open(info->outFile, O_WRONLY | O_CREAT, 0644);
+    j->outfile = open(info->outFile, O_WRONLY | O_CREAT, 0644);
   } else {
-    j->stdout = STDOUT_FILENO;
+    j->outfile = STDOUT_FILENO;
   }
 
-  j->stderr = STDERR_FILENO;
+  j->errfile = STDERR_FILENO;
 }
 
 void
@@ -125,5 +126,23 @@ job_free(job *j)
   free(j->command);
   for (process *p = j->first_process; p; p = p->next) {
     process_free(p);
+  }
+}
+
+void
+process_print(process *p)
+{
+  printf("prog: %s\n", p->argv[0]);
+  for (int i = 0; i < p->argc; i++) {
+    printf("%s, ", p->argv[i]);
+  }
+  printf("\n");
+}
+
+void
+job_print(job *j)
+{
+  for (process *p = j->first_process; p; p = p->next) {
+    process_print(p);
   }
 }

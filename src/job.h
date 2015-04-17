@@ -25,12 +25,18 @@ typedef struct job {
   pid_t pgid;                 /* process group ID */
   bool notified;              /* true if user told about stopped job */
   struct termios tmodes;      /* saved terminal modes */
-  int stdin, stdout, stderr;  /* standard i/o channels */
+  int infile, outfile, errfile;  /* standard i/o channels */
 } job;
+
+void
+process_free(process *);
 
 void
 init_job(job *, const struct ParseInfo *, pid_t, struct termios);
 
 void
 job_free(job *);
+
+void
+job_print(job *);
 #endif
