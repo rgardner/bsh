@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "linked_List.h"
+#include "linked_list.h"
 
 /* Structs. */
 struct Alias {
