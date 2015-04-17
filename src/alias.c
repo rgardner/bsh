@@ -32,7 +32,7 @@ static struct Alias *alias_init(const char *name, const char *value) {
   return alias;
 }
 
-int alias(const int argc, const char **argv) {
+int alias(const int argc, char **argv) {
   /* Print all aliases. */
   if (argc == 0) {
     aliases_print();
@@ -72,7 +72,7 @@ void alias_help() {
       "`alias name=value`: create / modify name to be an alias for value.\n");
 }
 
-int unalias(const int argc, const char **argv) {
+int unalias(const int argc, char **argv) {
   if (argc == 0) {
     unalias_help();
     return 2;

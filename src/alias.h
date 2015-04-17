@@ -8,13 +8,13 @@ void aliases_init();
  *
  * Returns 0 on success; any positive non-zero value on failure.
  */
-int alias(int argc, const char** argv);
+int alias(int argc, char** argv);
 
 /* Print helpful information about the alias command, then exit. */
 void alias_help();
 
 /* The unalias program. Unalias a name with its corresponding value. */
-int unalias(int argc, const char** argv);
+int unalias(int argc, char** argv);
 
 void unalias_help();
 

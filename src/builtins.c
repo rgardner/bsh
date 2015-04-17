@@ -164,7 +164,7 @@ static char *cd(const int argc, char **argv) {
   return dir;
 }
 
-static void history_wrapper(const int argc, const char **argv) {
+static void history_wrapper(const int argc, char **argv) {
   if (argc == 2) {  // set the history size
     if (strncmp(argv[0], "-s", strlen("-s")) == 0) {
       int hist_size = strtol(argv[1], (char **)NULL, 10);
