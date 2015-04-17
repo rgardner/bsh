@@ -1,6 +1,11 @@
 language: c
+sudo: required
+
 compiler:
   - clang
+
+before_install:
+  - sudo apt-get install check -qq
 
 before_script:
   - mkdir build
