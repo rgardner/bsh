@@ -12,6 +12,7 @@ include_directories(${CHECK_INCLUDE_DIRS})
 set(TEST_BSH_SOURCES
   test_stack.c
   test_bsh_main.c
+  test_bsh_parse.c
 )
 set(TEST_BSH_HEADERS test_bsh.h)
 add_executable(check_bsh ${TEST_BSH_HEADERS} ${TEST_BSH_SOURCES})
