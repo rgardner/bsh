@@ -9,9 +9,10 @@ set(CHECK_INSTALL_DIR "/usr/local/Cellar/check/")
 find_package(Check REQUIRED)
 include_directories(${CHECK_INCLUDE_DIRS})
 
-set(TEST_SOURCES
+set(TEST_BSH_SOURCES
   test_stack.c
+  test_bsh_main.c
 )
-
-add_executable(check_bsh ${TEST_SOURCES})
+set(TEST_BSH_HEADERS test_bsh.h)
+add_executable(check_bsh ${TEST_BSH_HEADERS} ${TEST_BSH_SOURCES})
 target_link_libraries(check_bsh bsh ${CHECK_LIBRARIES})
