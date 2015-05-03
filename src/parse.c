@@ -40,7 +40,9 @@ struct ParseInfo *parse(const char *cmdline) {
   int i = 0;
   for (; isspace(cmdline[i]) && cmdline[i] != '\n' && cmdline[i] != '\0'; i++)
     ;
-  if (cmdline[i] == '\n' && cmdline[i] == '\0') return NULL;
+
+  // After removing blanks, is the string now empty?
+  if (cmdline[i] == '\n' || cmdline[i] == '\0') return NULL;
 
   struct ParseInfo *Result = malloc(sizeof(struct ParseInfo));
   init_info(Result);

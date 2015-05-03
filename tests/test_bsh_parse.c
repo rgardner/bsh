@@ -13,6 +13,12 @@ START_TEST(test_empty) {
 }
 END_TEST
 
+START_TEST(test_blanks) {
+  struct ParseInfo *p = parse("       ");
+  ck_assert(p == NULL);
+}
+END_TEST
+
 Suite *make_parse_suite(void) {
   Suite *s = suite_create("Parse");
 
@@ -22,6 +28,7 @@ Suite *make_parse_suite(void) {
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, parse_setup, parse_teardown);
   tcase_add_test(tc, test_empty);
+  tcase_add_test(tc, test_blanks);
 
   return s;
 }
