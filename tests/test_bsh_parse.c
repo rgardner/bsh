@@ -17,11 +17,11 @@ Suite *make_parse_suite(void) {
   Suite *s = suite_create("Parse");
 
   /* Core test case. */
-  TCase *tc_core = tcase_create("Core");
+  TCase *tc = tcase_create("Core");
 
-  tcase_add_checked_fixture(tc_core, parse_setup, parse_teardown);
-  tcase_add_test(tc_core, test_empty);
-  suite_add_tcase(s, tc_core);
+  suite_add_tcase(s, tc);
+  tcase_add_checked_fixture(tc, parse_setup, parse_teardown);
+  tcase_add_test(tc, test_empty);
 
   return s;
 }
