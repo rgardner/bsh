@@ -133,6 +133,7 @@ int copy_substring(char *dest, const char *src, const int begin,
 }
 
 void print_info(const struct ParseInfo *info) {
+  if (!info) return;
   for (int i = 0; i < info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
     for (int j = 0; j < info->CommArray[i].VarNum; j++) {
