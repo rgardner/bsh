@@ -3,9 +3,9 @@
 #include "test_bsh.h"
 #include "../src/parse.h"
 
-void setup(void) {}
+void parse_setup(void) {}
 
-void teardown(void) {}
+void parse_teardown(void) {}
 
 START_TEST(test_empty) {
   struct ParseInfo *p = parse("");
@@ -19,7 +19,7 @@ Suite *make_parse_suite(void) {
   /* Core test case. */
   TCase *tc_core = tcase_create("Core");
 
-  tcase_add_checked_fixture(tc_core, setup, teardown);
+  tcase_add_checked_fixture(tc_core, parse_setup, parse_teardown);
   tcase_add_test(tc_core, test_empty);
   suite_add_tcase(s, tc_core);
 
