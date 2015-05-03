@@ -7,13 +7,13 @@ void parse_setup(void) {}
 
 void parse_teardown(void) {}
 
-START_TEST(test_empty) {
+START_TEST(test_parse_empty) {
   struct ParseInfo *p = parse("");
   ck_assert(p == NULL);
 }
 END_TEST
 
-START_TEST(test_blanks) {
+START_TEST(test_parse_blanks) {
   struct ParseInfo *p = parse("       ");
   ck_assert(p == NULL);
 }
@@ -27,8 +27,8 @@ Suite *make_parse_suite(void) {
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, parse_setup, parse_teardown);
-  tcase_add_test(tc, test_empty);
-  tcase_add_test(tc, test_blanks);
+  tcase_add_test(tc, test_parse_empty);
+  tcase_add_test(tc, test_parse_blanks);
 
   return s;
 }
