@@ -25,8 +25,3 @@ include_directories(
 # Subdirectories
 add_subdirectory(src)
 add_subdirectory(tests)
-
-###############################################################################
-# Unit tests
-enable_testing()
-add_test(NAME check_bsh COMMAND check_bsh)
