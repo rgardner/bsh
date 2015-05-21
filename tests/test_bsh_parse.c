@@ -28,6 +28,21 @@ START_TEST(test_parse_file_redirection) {
 }
 END_TEST
 
+START_TEST(test_parse_background) {
+  struct ParseInfo *p = parse("long_running_task &\n");
+  ck_assert(p->runInBackground == true);
+}
+END_TEST
+
+START_TEST(test_parse_piping) {
+  struct ParseInfo *p = parse("command1 | command2 | command3\n");
+  ck_assert(p->pipeNum == 3);
+  ck_assert(!strncmp(p->CommArray[0].command, "command1", strlen("command1")));
+  ck_assert(!strncmp(p->CommArray[1].command, "command2", strlen("command2")));
+  ck_assert(!strncmp(p->CommArray[2].command, "command3", strlen("command3")));
+}
+END_TEST
+
 START_TEST(test_parse_free_null) {
   // This should not segfault.
   free_info(NULL);
@@ -51,6 +66,8 @@ Suite *make_parse_suite(void) {
   tcase_add_test(tc, test_parse_empty);
   tcase_add_test(tc, test_parse_blanks);
   tcase_add_test(tc, test_parse_file_redirection);
+  tcase_add_test(tc, test_parse_background);
+  tcase_add_test(tc, test_parse_piping);
   tcase_add_test(tc, test_parse_free_null);
   tcase_add_test(tc, test_parse_print_null);
 
