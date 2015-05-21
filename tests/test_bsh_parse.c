@@ -44,6 +44,15 @@ START_TEST(test_parse_piping) {
 }
 END_TEST
 
+START_TEST(test_parse_variables) {
+  struct ParseInfo *p = parse("command var1 var2 var3\n");
+  ck_assert(p->CommArray[0].VarNum == 3);
+  ck_assert(!strncmp(p->CommArray[0].VarList[0], "var1", strlen("var1")));
+  ck_assert(!strncmp(p->CommArray[0].VarList[1], "var2", strlen("var2")));
+  ck_assert(!strncmp(p->CommArray[0].VarList[2], "var3", strlen("var3")));
+}
+END_TEST
+
 START_TEST(test_parse_free_null) {
   // This should not segfault.
   free_info(NULL);
@@ -69,6 +78,7 @@ Suite *make_parse_suite(void) {
   tcase_add_test(tc, test_parse_file_redirection);
   tcase_add_test(tc, test_parse_background);
   tcase_add_test(tc, test_parse_piping);
+  tcase_add_test(tc, test_parse_variables);
   tcase_add_test(tc, test_parse_free_null);
   tcase_add_test(tc, test_parse_print_null);
 
