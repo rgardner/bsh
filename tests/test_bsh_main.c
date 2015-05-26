@@ -4,7 +4,8 @@
 
 
 int main(void) {
-  SRunner *sr = srunner_create(make_stack_suite());
+  SRunner *sr = srunner_create(make_history_suite());
+  srunner_add_suite(sr, make_stack_suite());
   srunner_add_suite(sr, make_parse_suite());
   srunner_run_all(sr, CK_VERBOSE);
   int num_failed = srunner_ntests_failed(sr);
