@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include <check.h>
 #include "test_bsh.h"
 #include "../src/parse.h"
