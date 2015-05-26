@@ -16,6 +16,13 @@ START_TEST(test_history_exp_new_command) {
 }
 END_TEST
 
+START_TEST(test_history_exp_error) {
+  char *expansion;
+  const int his_res = history_exp("!invalid", &expansion);
+  ck_assert(his_res == -1);
+}
+END_TEST
+
 Suite *make_history_suite(void) {
   Suite *s = suite_create("History");
 
@@ -25,6 +32,7 @@ Suite *make_history_suite(void) {
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, history_setup, history_teardown);
   tcase_add_test(tc, test_history_exp_new_command);
+  tcase_add_test(tc, test_history_exp_error);
 
   return s;
 }
