@@ -46,7 +46,6 @@ void history_init() {
 }
 
 int history_exp(const char *string, char **output) {
-  int i = 0;
   int length = strlen(string) + 1;
   *output = malloc(sizeof(char) * length);
   strncpy(*output, string, length);
@@ -58,6 +57,7 @@ int history_exp(const char *string, char **output) {
   if (string[0] == '\0') return 0;
 
   // Skip blank characters at the start of the string.
+  int i = 0;
   for (; isspace(string[i]) && string[i] != '\n' && string[i] != '\0'; i++)
     ;
   if (string[i] != '!') return 0;
@@ -68,6 +68,7 @@ int history_exp(const char *string, char **output) {
   if (ret != 1) return -1;
 
   // Ensure command is within the bounds of the size of the history.
+  printf("HITME\n");
   if (command < 0) {
     if (command <= -HISTSIZE) return -1;
     command = state.count + command + 1;
@@ -83,14 +84,9 @@ int history_exp(const char *string, char **output) {
 }
 
 void history_add(const char *string) {
-  int length;        // length of string
-  int pre;           // previous element in history
-  int timestamp;     // timestamp to save
-  char *dup_string;  // copy of string
-
   // Copy string.
-  length = strlen(string) + 1;
-  dup_string = strndup(string, sizeof(char) * length);
+  int length = strlen(string) + 1;
+  char *dup_string = strndup(string, sizeof(char) * length);
 
   state.count++;
   HIST_ENTRY *entry = state.entries[state.count % state.size];
@@ -104,9 +100,9 @@ void history_add(const char *string) {
   entry = malloc(sizeof(HIST_ENTRY));
 
   // Calculate timestamp.
-  pre = (state.count - 1) % state.size;
-  if (pre < 0) pre = state.size;
-  timestamp = (state.entries[pre]) ? state.entries[pre]->timestamp : 0;
+  int prev = (state.count - 1) % state.size;
+  if (prev < 0) prev = state.size;
+  int timestamp = (state.entries[prev]) ? state.entries[prev]->timestamp : 0;
 
   entry->line = dup_string;
   entry->timestamp = timestamp + 1;

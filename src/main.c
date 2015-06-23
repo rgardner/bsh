@@ -225,8 +225,8 @@ int main(int argc, char **argv) {
     history_add(expansion);
 
     // Copy expansion into cmdLine.
-    const int length = strlen(expansion) + 1;
-    cmdLine = realloc(cmdLine, sizeof(char) * length);
+    const int length = strlen(expansion);
+    cmdLine = realloc(cmdLine, sizeof(char) * (length + 1));
     strncpy(cmdLine, expansion, length);
     free(expansion);
 
