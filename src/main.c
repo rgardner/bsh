@@ -231,12 +231,14 @@ int main(int argc, char **argv) {
     free(expansion);
 
     // Call the parser.
+    printf("Calling parse.\n");
     const struct ParseInfo *info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
       continue;
     }
 
+    printf("Entering alias.\n");
     // Expand aliases in info commands.
     for (int i = 0; i < info->pipeNum; i++) {
       const struct Command *cmd = &info->CommArray[i];

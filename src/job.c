@@ -61,7 +61,7 @@ init_process(process *p, const struct Command cmd)
   p->argv = malloc((p->argc+2) * sizeof(char *));  // command, *args, NULL
   p->argv[0] = strndup(cmd.command, strlen(cmd.command));
   for (int i = 0; i < p->argc; i++) {
-    p->argv[i + 1] = strndup(cmd.VarList[i], strlen(cmd.VarList[i]));
+    p->argv[i + 1] = strdup(cmd.VarList[i]);
   }
   p->argv[cmd.VarNum + 1] = NULL;
 
@@ -74,8 +74,9 @@ init_process(process *p, const struct Command cmd)
 void
 init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes)
 {
+  /* TODO(rgardner): allow multiple jobs. */
   j->next = NULL;
-  /* FIXME: use original command entered here, not stored in info. */
+  /* TODO: use original command entered here, not stored in info. */
   j->command = NULL;
 
   process *prev = NULL;
@@ -100,6 +101,7 @@ init_job(job *j, const struct ParseInfo *info, pid_t pgid, struct termios tmodes
   }
 
   if (info->hasOutputRedirection) {
+    // The created file has -rw-r--r-- permissions
     j->outfile = open(info->outFile, O_WRONLY | O_CREAT, 0644);
   } else {
     j->outfile = STDOUT_FILENO;
