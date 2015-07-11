@@ -10,11 +10,15 @@ void history_setup(void) { history_init(); }
 
 void history_teardown(void) {}
 
-START_TEST(test_history_add_increments_length) {
-  char *static_str = "new_command";
+char *create_test_string(char* static_str) {
   const int len = strlen(static_str);
   char *new_str = malloc(sizeof(char) * (len + 1));
   strncpy(new_str, static_str, len);
+  return new_str;
+}
+
+START_TEST(test_history_add_increments_length) {
+  char *new_str = create_test_string("new_command\n");
   history_add(new_str);
   ck_assert_int_eq(history_length, 1);
   free(new_str);
@@ -23,7 +27,7 @@ END_TEST
 
 START_TEST(test_history_exp_new_command) {
   char *expansion;
-  const int his_res = history_exp("new_command\n", &expansion);
+  const int his_res = history_exp("new_command", &expansion);
   ck_assert_int_eq(his_res, 0);
 }
 END_TEST
@@ -36,10 +40,13 @@ START_TEST(test_history_exp_error) {
 END_TEST
 
 START_TEST(test_history_exp_occurred) {
-  history_add("new_command\n");
+  char *new_str = create_test_string("new_command");
+  history_add(new_str);
   char *expansion;
   const int his_res = history_exp("!-1\n", &expansion);
   ck_assert_int_eq(his_res, 1);
+  ck_assert_str_eq(expansion, "new_command");
+  free(new_str);
 }
 END_TEST
 

@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "dbg.h"
+
 typedef void *histdata_t;
 
 typedef struct _hist_entry {
@@ -34,7 +36,7 @@ int history_max_entries;
 HISTORY_STATE state;
 
 void history_init() {
-  state.count = -1;
+  state.count = 0;
   state.length = 0;
   history_length = state.length;
   state.size = HISTSIZE;
@@ -49,9 +51,6 @@ int history_exp(const char *string, char **output) {
   int length = strlen(string) + 1;
   *output = malloc(sizeof(char) * length);
   strncpy(*output, string, length);
-
-  // Check if this is a valid string.
-  if (string[-1] == '\n' && string[-1] == '\0') return 0;
 
   // Ensure string is nonempty.
   if (string[0] == '\0') return 0;
@@ -68,27 +67,24 @@ int history_exp(const char *string, char **output) {
   if (ret != 1) return -1;
 
   // Ensure command is within the bounds of the size of the history.
-  printf("HITME\n");
   if (command < 0) {
-    if (command <= -HISTSIZE) return -1;
-    command = state.count + command + 1;
+    if (command <= -state.size) return -1;
+    command = state.count + command;
   } else {
     if (command < (state.count - HISTSIZE) || command > state.count) return -1;
   }
 
   char *line = state.entries[command]->line;
-  length = strlen(line) + 1;
-  *output = realloc(*output, sizeof(char) * length);
+  length = strlen(line);
+  *output = realloc(*output, sizeof(char) * (length+1));
   strncpy(*output, line, length);
+  output[length] = "\0";
   return 1;
 }
 
 void history_add(const char *string) {
-  // Copy string.
-  int length = strlen(string) + 1;
-  char *dup_string = strndup(string, sizeof(char) * length);
+  char *dup_string = strdup(string);
 
-  state.count++;
   HIST_ENTRY *entry = state.entries[state.count % state.size];
   if (entry) {
     histdata_t data = free_hist_entry(entry);
@@ -97,17 +93,20 @@ void history_add(const char *string) {
     state.length++;
     history_length++;
   }
+
   entry = malloc(sizeof(HIST_ENTRY));
 
   // Calculate timestamp.
   int prev = (state.count - 1) % state.size;
-  if (prev < 0) prev = state.size;
-  int timestamp = (state.entries[prev]) ? state.entries[prev]->timestamp : 0;
+  if (prev < 0) prev = state.size - 1;
+  int prev_timestamp = state.entries[prev] ? state.entries[prev]->timestamp : 0;
 
   entry->line = dup_string;
-  entry->timestamp = timestamp + 1;
+  entry->timestamp = prev_timestamp + 1;
   entry->data = NULL;
   state.entries[state.count % state.size] = entry;
+
+  state.count++;
 }
 
 void history_stifle(const int max) {
