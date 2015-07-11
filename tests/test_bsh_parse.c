@@ -22,35 +22,35 @@ START_TEST(test_parse_blanks) {
 END_TEST
 
 START_TEST(test_parse_file_redirection) {
-  struct ParseInfo *p = parse("echo <infile >outfile\n");
-  ck_assert(p->hasInputRedirection == true);
-  ck_assert(p->hasOutputRedirection == true);
-  ck_assert(!strncmp(p->inFile, "infile", strlen("infile")));
-  ck_assert(!strncmp(p->outFile, "outfile", strlen("outfile")));
+  struct ParseInfo *p = parse("echo <infile >outfile");
+  ck_assert(p->hasInputRedirection);
+  ck_assert(p->hasOutputRedirection);
+  ck_assert_str_eq(p->inFile, "infile");
+  ck_assert_str_eq(p->outFile, "outfile");
 }
 END_TEST
 
 START_TEST(test_parse_background) {
-  struct ParseInfo *p = parse("long_running_task &\n");
-  ck_assert(p->runInBackground == true);
+  struct ParseInfo *p = parse("long_running_task &");
+  ck_assert(p->runInBackground);
 }
 END_TEST
 
 START_TEST(test_parse_piping) {
-  struct ParseInfo *p = parse("command1 | command2 | command3\n");
-  ck_assert(p->pipeNum == 3);
-  ck_assert(!strncmp(p->CommArray[0].command, "command1", strlen("command1")));
-  ck_assert(!strncmp(p->CommArray[1].command, "command2", strlen("command2")));
-  ck_assert(!strncmp(p->CommArray[2].command, "command3", strlen("command3")));
+  struct ParseInfo *p = parse("command1 | command2 | command3");
+  ck_assert_int_eq(p->pipeNum, 3);
+  ck_assert_str_eq(p->CommArray[0].command, "command1");
+  ck_assert_str_eq(p->CommArray[1].command, "command2");
+  ck_assert_str_eq(p->CommArray[2].command, "command3");
 }
 END_TEST
 
 START_TEST(test_parse_variables) {
-  struct ParseInfo *p = parse("command var1 var2 var3\n");
-  ck_assert(p->CommArray[0].VarNum == 3);
-  ck_assert(!strncmp(p->CommArray[0].VarList[0], "var1", strlen("var1")));
-  ck_assert(!strncmp(p->CommArray[0].VarList[1], "var2", strlen("var2")));
-  ck_assert(!strncmp(p->CommArray[0].VarList[2], "var3", strlen("var3")));
+  struct ParseInfo *p = parse("command var1 var2 var3");
+  ck_assert_int_eq(p->CommArray[0].VarNum, 3);
+  ck_assert_str_eq(p->CommArray[0].VarList[0], "var1");
+  ck_assert_str_eq(p->CommArray[0].VarList[1], "var2");
+  ck_assert_str_eq(p->CommArray[0].VarList[2], "var3");
 }
 END_TEST
 

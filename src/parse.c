@@ -30,9 +30,6 @@ void init_command(struct Command *p) {
 }
 
 struct ParseInfo *parse(const char *cmdline) {
-  // Check if this is a valid string.
-  if (cmdline[-1] == '\n' && cmdline[-1] == '\0') return NULL;
-
   // Ensure string is nonempty.
   if (cmdline[0] == '\0') return NULL;
 
@@ -129,7 +126,7 @@ int copy_substring(char *dest, const char *src, const int begin,
   if (end - begin > limit) return -1;  // length of string to copy too large
   strncpy(dest, src + begin, end - begin);
   dest[end] = '\0';
-  return end;
+  return end - 1;
 }
 
 void print_info(const struct ParseInfo *info) {
