@@ -19,6 +19,7 @@ set(HEADERS
   alias.h
   bg_jobs.h
   builtins.h
+  dbg.h
   history.h
   linked_list.h
   job.h
