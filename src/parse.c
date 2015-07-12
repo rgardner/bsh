@@ -48,6 +48,8 @@ struct ParseInfo *parse(const char *cmdline) {
   init_command(cmd);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
+    if (isspace(cmdline[i])) continue;
+
     if (strcmp(cmd->command, "") == 0) {
       i = copy_substring(cmd->command, cmdline, i, MAXLINE);
       if (i == -1) {
