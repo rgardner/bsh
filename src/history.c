@@ -6,8 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dbg.h"
-
 typedef void *histdata_t;
 
 typedef struct _hist_entry {
@@ -48,9 +46,10 @@ void history_init() {
 }
 
 int history_exp(const char *string, char **output) {
-  int length = strlen(string) + 1;
-  *output = malloc(sizeof(char) * length);
+  size_t length = strlen(string);
+  *output = malloc(sizeof(char) * (length + 1));
   strncpy(*output, string, length);
+  output[length] = "\0";
 
   // Ensure string is nonempty.
   if (string[0] == '\0') return 0;
@@ -75,8 +74,9 @@ int history_exp(const char *string, char **output) {
   }
 
   char *line = state.entries[command]->line;
+
   length = strlen(line);
-  *output = realloc(*output, sizeof(char) * (length+1));
+  *output = realloc(*output, sizeof(char) * (length + 1));
   strncpy(*output, line, length);
   output[length] = "\0";
   return 1;
