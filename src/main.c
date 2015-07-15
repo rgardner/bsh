@@ -141,7 +141,7 @@ void launch_job(job *j, const bool foreground) {
 
     // Fork the child process.
     pid = fork();
-    if ((pid = fork()) == 0) {  // child process
+    if (pid == 0) {  // child process
       launch_process(p, j->pgid, infile, outfile, j->errfile, foreground);
     } else if (pid < 0) {  // fork failed
       perror("failed to fork process");
@@ -164,7 +164,8 @@ void launch_job(job *j, const bool foreground) {
     }
     infile = pipefd[0];
   }
-  if (!shell_is_interactive) {
+
+  if (shell_is_interactive) {
     int status;
     waitpid(pid, &status, 0);
   } else if (foreground) {
@@ -212,6 +213,12 @@ int main(int argc, char **argv) {
     // check command line length
     if (strlen(cmdLine) > MAXLINE) {
       fprintf(stderr, "The command you entered is too long.\n");
+      free(cmdLine);
+      continue;
+    }
+
+    // skip empty input
+    if (strcmp(cmdLine, "") == 0) {
       free(cmdLine);
       continue;
     }
