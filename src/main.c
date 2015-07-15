@@ -200,6 +200,7 @@ int main(int argc, char **argv) {
 #ifdef UNIX
     cmdLine = readline(buildPrompt());
     if (!cmdLine) {
+      /* Quit on EOF terminated empty line. */
       printf("\n");
       exit(EXIT_SUCCESS);
     }
@@ -215,30 +216,40 @@ int main(int argc, char **argv) {
       continue;
     }
 
+    // remove newline
+    const size_t cmdLine_len = strlen(cmdLine);
+    if (cmdLine[cmdLine_len - 1] == '\n') {
+      cmdLine[cmdLine_len - 1] = '\0';
+    }
+
     // Look up in history.
     char *expansion;
     const int his_res = history_exp(cmdLine, &expansion);
     if (his_res < 0 || his_res == 2) {  // error or should not execute.
       free(expansion);
+      free(cmdLine);
       continue;
     }
     history_add(expansion);
 
-    // Copy expansion into cmdLine.
-    const int length = strlen(expansion);
-    cmdLine = realloc(cmdLine, sizeof(char) * (length + 1));
-    strncpy(cmdLine, expansion, length);
+    if (his_res == 1) {
+      // Copy expansion into cmdLine.
+      const size_t exp_length = strlen(expansion);
+      if (strlen(cmdLine) != exp_length) {
+        cmdLine = realloc(cmdLine, (exp_length + 1) * sizeof(char));
+      }
+      strncpy(cmdLine, expansion, exp_length);
+      cmdLine[exp_length + 1] = '\0';
+    }
     free(expansion);
 
     // Call the parser.
-    printf("Calling parse.\n");
     const struct ParseInfo *info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
       continue;
     }
 
-    printf("Entering alias.\n");
     // Expand aliases in info commands.
     for (int i = 0; i < info->pipeNum; i++) {
       const struct Command *cmd = &info->CommArray[i];
