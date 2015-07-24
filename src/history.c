@@ -47,9 +47,9 @@ void history_init() {
 
 int history_exp(const char *string, char **output) {
   size_t length = strlen(string);
+  *output = NULL;
   *output = malloc(sizeof(char) * (length + 1));
-  strncpy(*output, string, length);
-  output[length] = "\0";
+  strcpy(*output, string);
 
   // Ensure string is nonempty.
   if (string[0] == '\0') return 0;
@@ -77,8 +77,7 @@ int history_exp(const char *string, char **output) {
 
   length = strlen(line);
   *output = realloc(*output, sizeof(char) * (length + 1));
-  strncpy(*output, line, length);
-  output[length] = "\0";
+  strcpy(*output, line);
   return 1;
 }
 

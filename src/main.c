@@ -2,7 +2,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <readline/readline.h>
 #include <termios.h>
@@ -230,7 +230,7 @@ int main(int argc, char **argv) {
     }
 
     // Look up in history.
-    char *expansion;
+    char *expansion = NULL;
     const int his_res = history_exp(cmdLine, &expansion);
     if (his_res < 0 || his_res == 2) {  // error or should not execute.
       free(expansion);
