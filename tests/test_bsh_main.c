@@ -2,9 +2,9 @@
 #include <check.h>
 #include "test_bsh.h"
 
-
 int main(void) {
-  SRunner *sr = srunner_create(make_history_suite());
+  SRunner *sr = srunner_create(make_bhash_suite());
+  srunner_add_suite(sr, make_history_suite());
   srunner_add_suite(sr, make_stack_suite());
   srunner_add_suite(sr, make_parse_suite());
   srunner_run_all(sr, CK_VERBOSE);
