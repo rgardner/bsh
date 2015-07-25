@@ -1,6 +1,7 @@
 set(LIB_SOURCES
   alias.c
   bg_jobs.c
+  bhash.c
   builtins.c
   history.c
   linked_list.c
@@ -18,6 +19,7 @@ set(HEADERS
   ${CONFIG_HEADERS}
   alias.h
   bg_jobs.h
+  bhash.h
   builtins.h
   dbg.h
   history.h
