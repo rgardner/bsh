@@ -21,6 +21,28 @@ START_TEST(test_parse_blanks) {
 }
 END_TEST
 
+START_TEST(test_parse_command_too_long) {
+  char command[MAXLINE];
+  for (int i = 0; i <= MAXLINE; i++) command[i] = 'x';
+  struct ParseInfo *p = parse(command);
+  ck_assert(p == NULL);
+}
+END_TEST
+
+START_TEST(test_parse_files_too_long) {
+  const int length = FILE_MAX_SIZE + 1;
+  char file[length + 1];
+  for (int i = 0; i <= length; i++) file[i] = 'x';
+  file[length] = '\0';
+
+  char cmd[MAXLINE] = "command < ";
+  strcat(cmd, file);
+
+  struct ParseInfo *p = parse(cmd);
+  ck_assert(p == NULL);
+}
+END_TEST
+
 START_TEST(test_parse_normal) {
   struct ParseInfo *p = parse("command");
   ck_assert(p->hasInputRedirection == false);
@@ -88,6 +110,8 @@ Suite *make_parse_suite(void) {
   tcase_add_checked_fixture(tc, parse_setup, parse_teardown);
   tcase_add_test(tc, test_parse_empty);
   tcase_add_test(tc, test_parse_blanks);
+  tcase_add_test(tc, test_parse_command_too_long);
+  tcase_add_test(tc, test_parse_files_too_long);
   tcase_add_test(tc, test_parse_normal);
   tcase_add_test(tc, test_parse_file_redirection);
   tcase_add_test(tc, test_parse_background);
