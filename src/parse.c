@@ -5,7 +5,6 @@
 
 #include "parse.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,7 +109,6 @@ struct ParseInfo *parse(const char *cmdline) {
   }
   Result->CommArray[Result->pipeNum] = *cmd;
   free(cmd);
-  Result->pipeNum++;
 
   return Result;
 }

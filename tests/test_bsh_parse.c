@@ -21,6 +21,18 @@ START_TEST(test_parse_blanks) {
 }
 END_TEST
 
+START_TEST(test_parse_normal) {
+  struct ParseInfo *p = parse("command");
+  ck_assert(p->hasInputRedirection == false);
+  ck_assert(p->hasOutputRedirection == false);
+  ck_assert(p->runInBackground == false);
+  ck_assert_str_eq(p->CommArray[0].command, "command");
+  ck_assert_int_eq(p->pipeNum, 0);
+  ck_assert_str_eq(p->inFile, "");
+  ck_assert_str_eq(p->outFile, "");
+}
+END_TEST
+
 START_TEST(test_parse_file_redirection) {
   struct ParseInfo *p = parse("echo <infile >outfile");
   ck_assert(p->hasInputRedirection);
@@ -38,7 +50,7 @@ END_TEST
 
 START_TEST(test_parse_piping) {
   struct ParseInfo *p = parse("command1 | command2 | command3");
-  ck_assert_int_eq(p->pipeNum, 3);
+  ck_assert_int_eq(p->pipeNum, 2);
   ck_assert_str_eq(p->CommArray[0].command, "command1");
   ck_assert_str_eq(p->CommArray[1].command, "command2");
   ck_assert_str_eq(p->CommArray[2].command, "command3");
@@ -76,6 +88,7 @@ Suite *make_parse_suite(void) {
   tcase_add_checked_fixture(tc, parse_setup, parse_teardown);
   tcase_add_test(tc, test_parse_empty);
   tcase_add_test(tc, test_parse_blanks);
+  tcase_add_test(tc, test_parse_normal);
   tcase_add_test(tc, test_parse_file_redirection);
   tcase_add_test(tc, test_parse_background);
   tcase_add_test(tc, test_parse_piping);
