@@ -139,8 +139,8 @@ histdata_t free_hist_entry(const HIST_ENTRY *histent) {
 }
 
 void history_print(const int num) {
-  assert(num < state.length);
-  int start = state.count % state.size + 1;
+  if (num < state.length) return;
+  int start = state.count % state.size;
   if (start >= state.length) start = 0;
 
   for (int i = start; (i < state.length) && (i < num); i++) {
