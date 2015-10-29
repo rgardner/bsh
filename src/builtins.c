@@ -141,25 +141,32 @@ static char *cd(const int argc, char **argv) {
   size_t len = 1024;
   char *dir = malloc(len);
 
-  if (argc == 0) {
+  if (argc == 0 || strncmp(argv[1], "~", strlen("~")) == 0) {
     dir = getenv("HOME");
-  } else if (strncmp(argv[0], "~", strlen("~")) == 0) {
-    dir = getenv("HOME");
-  } else if (strncmp(argv[0], "-", strlen("-")) == 0) {
+    if (!dir) {
+      fprintf(stderr, "-bsh: cd: HOME not set\n");
+      return NULL;
+    }
+  } else if (strncmp(argv[1], "-", strlen("-")) == 0) {
     dir = getenv("OLDPWD");
+    if (!dir) {
+      fprintf(stderr, "-bsh: cd: OLDPWD not set\n");
+      return NULL;
+    }
   } else {
-    strncpy(dir, argv[1], sizeof(strlen(argv[0])));
+    strncpy(dir, argv[1], sizeof(strlen(argv[1])));
   }
 
   char *cwd = malloc(len);
   if (!getcwd(cwd, len)) {
-    fprintf(stderr, "Error. Could not obtain current working directory.\n");
+    fprintf(stderr, "Error. Could not obtain current working directory\n");
+    return NULL;
   }
-  setenv("OLDPWD", cwd, 1);
 
   int ret = chdir(dir);
   if (ret != 0) {
     fprintf(stderr, "-bsh: cd: %s: No such file or directory\n", dir);
+    return NULL;
   }
   return dir;
 }
