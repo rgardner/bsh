@@ -8,6 +8,7 @@ set(LIB_SOURCES
   node.c
   parse.c
   stack.c
+  utils.c
 )
 
 set(MAIN_SOURCES
@@ -26,6 +27,7 @@ set(HEADERS
   node.h
   parse.h
   stack.h
+  utils.h
 )
 
 add_library(bsh STATIC ${LIB_SOURCES} ${HEADERS})

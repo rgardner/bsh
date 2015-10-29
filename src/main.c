@@ -14,6 +14,7 @@
 #include "history.h"
 #include "parse.h"
 #include "job.h"
+#include "utils.h"
 
 #define MAX_PROMPT_LENGTH 1024
 #define COMMAND_NOT_FOUND_EXIT_CODE 127
@@ -224,10 +225,7 @@ int main(int argc, char **argv) {
     }
 
     // remove newline
-    const size_t cmdLine_len = strlen(cmdLine);
-    if (cmdLine[cmdLine_len - 1] == '\n') {
-      cmdLine[cmdLine_len - 1] = '\0';
-    }
+    cmdLine = trim(cmdLine);
 
     // Look up in history.
     char *expansion = NULL;
