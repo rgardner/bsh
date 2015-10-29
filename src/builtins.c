@@ -188,10 +188,18 @@ static void history_wrapper(const int argc, char **argv) {
 }
 
 static void which(const int argc, char **argv) {
+  if (argc == 0) {
+    printf("usage: which program ...\n");
+    return;
+  }
   char *p = getenv("PATH");
+  if (!p) {
+    fprintf(stderr, "-bsh: which: PATH not set\n");
+    return;
+  }
   size_t pathlen = strlen(p) + 1;
   char *path = malloc(pathlen);
-  for (int i = 0; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     memcpy(path, p, pathlen);
     if (strlen(argv[i]) >= FILE_MAX_SIZE) continue;
     which_print_matches(path, argv[i]);
