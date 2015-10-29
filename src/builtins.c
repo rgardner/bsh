@@ -148,7 +148,7 @@ static char *cd(const int argc, char **argv) {
   } else if (strncmp(argv[0], "-", strlen("-")) == 0) {
     dir = getenv("OLDPWD");
   } else {
-    strncpy(dir, argv[0], sizeof(strlen(argv[0])));
+    strncpy(dir, argv[1], sizeof(strlen(argv[0])));
   }
 
   char *cwd = malloc(len);
