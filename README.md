@@ -12,6 +12,44 @@ bsh             __
 Welcome to Bob shell.
 ```
 
+## Installation
+This project requires [CMake](https://cmake.org/) version 2.8 to build. If this
+is not already installed on your system, then
+```sh
+brew install cmake  # OS X
+sudo apt-get install cmake  # Ubuntu/Debian
+```
+
+After `cmake` is installed,
+```sh
+git clone https://github.com/rgardner/bsh
+cd bsh
+mkdir build && cd build
+cmake ..
+make
+```
+
+After building `bsh`, you can run the executable: `build/bin/bsh`.
+
+### Testing
+To run the test suite, you need the [Check](http://check.sourceforge.net/) unit
+testing framework. You can find more info on downloading / setting it up on
+their [install page](http://check.sourceforge.net/web/install.html), but the
+short of it is:
+```sh
+brew install check  # OS X
+sudo apt-get install check  # Ubuntu/Debian
+```
+
+You can run the test suite by:
+```sh
+mkdir -p build && cd build
+cmake ..
+make
+bin/check_bsh
+```
+
+
 ## Feature Roadmap
 1. ~~write the parser~~
   - ~~http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html~~
