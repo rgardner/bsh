@@ -1,0 +1,7 @@
+---
+# Based on Mozilla style, but with minor adjustments
+BasedOnStyle: Mozilla
+AllowShortIfStatementsOnASingleLine: true
+ColumnLimit: 79
+SpacesBeforeTrailingComments: 2
+---
