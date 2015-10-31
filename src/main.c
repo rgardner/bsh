@@ -14,7 +14,7 @@
 #include "history.h"
 #include "parse.h"
 #include "job.h"
-#include "utils.h"
+#include "util.h"
 
 #define MAX_PROMPT_LENGTH 1024
 #define COMMAND_NOT_FOUND_EXIT_CODE 127

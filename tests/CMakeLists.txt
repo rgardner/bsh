@@ -14,7 +14,12 @@ set(TEST_BSH_SOURCES
   test_bsh_main.c
   test_bsh_stack.c
   test_bsh_parse.c
+  test_bsh_util.c
+  test_util.c
 )
-set(TEST_BSH_HEADERS test_bsh.h)
+set(TEST_BSH_HEADERS
+  test_bsh.h
+  test_util.h
+)
 add_executable(check_bsh ${TEST_BSH_HEADERS} ${TEST_BSH_SOURCES})
 target_link_libraries(check_bsh bsh ${CHECK_LIBRARIES})

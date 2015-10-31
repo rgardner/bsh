@@ -1,28 +1,21 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <check.h>
 #include "test_bsh.h"
+#include "test_util.h"
 #include "../src/history.h"
 
 void history_setup(void) { history_init(); }
 
 void history_teardown(void) {}
 
-char *create_test_string(char* static_str) {
-  const size_t len = strlen(static_str);
-  char *new_str = malloc(sizeof(char) * (len + 1));
-  strncpy(new_str, static_str, len);
-  new_str[len] = '\0';
-  return new_str;
-}
-
 START_TEST(test_history_add_increments_length) {
-  char *new_str = create_test_string("new_command");
-  history_add(new_str);
+  ck_assert_int_eq(history_length, 0);
+  char *s = new_str("new_command");
+  history_add(s);
   ck_assert_int_eq(history_length, 1);
-  free(new_str);
+  free(s);
 }
 END_TEST
 
@@ -41,13 +34,13 @@ START_TEST(test_history_exp_error) {
 END_TEST
 
 START_TEST(test_history_exp_occurred) {
-  char *new_str = create_test_string("new_command");
-  history_add(new_str);
+  char *s = new_str("new_command");
+  history_add(s);
   char *expansion;
   const int his_res = history_exp("!-1\n", &expansion);
   ck_assert_int_eq(his_res, 1);
   ck_assert_str_eq(expansion, "new_command");
-  free(new_str);
+  free(s);
 }
 END_TEST
 
