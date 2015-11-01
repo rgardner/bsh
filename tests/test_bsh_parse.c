@@ -5,46 +5,61 @@
 #include "test_bsh.h"
 #include "../src/parse.h"
 
-void parse_setup(void) {}
+void
+parse_setup(void)
+{
+}
 
-void parse_teardown(void) {}
+void
+parse_teardown(void)
+{
+}
 
-START_TEST(test_parse_empty) {
-  struct ParseInfo *p = parse("");
+START_TEST(test_parse_empty)
+{
+  struct ParseInfo* p = parse("");
   ck_assert(p == NULL);
 }
 END_TEST
 
-START_TEST(test_parse_blanks) {
-  struct ParseInfo *p = parse("       ");
+START_TEST(test_parse_blanks)
+{
+  struct ParseInfo* p = parse("       ");
   ck_assert(p == NULL);
 }
 END_TEST
 
-START_TEST(test_parse_command_too_long) {
+START_TEST(test_parse_command_too_long)
+{
   char command[MAXLINE];
-  for (int i = 0; i <= MAXLINE; i++) command[i] = 'x';
-  struct ParseInfo *p = parse(command);
+  for (int i = 0; i <= MAXLINE; i++) {
+    command[i] = 'x';
+  }
+  struct ParseInfo* p = parse(command);
   ck_assert(p == NULL);
 }
 END_TEST
 
-START_TEST(test_parse_files_too_long) {
-  const int length = FILE_MAX_SIZE + 1;
-  char file[length + 1];
-  for (int i = 0; i <= length; i++) file[i] = 'x';
-  file[length] = '\0';
+START_TEST(test_parse_files_too_long)
+{
+  const int length = FILE_MAX_SIZE + 2;  // max_size, one char past, NULL
+  char file[length];
+  for (int i = 0; i < length; i++) {
+    file[i] = 'x';
+  }
+  file[length - 1] = '\0';
 
   char cmd[MAXLINE] = "command < ";
   strcat(cmd, file);
 
-  struct ParseInfo *p = parse(cmd);
+  struct ParseInfo* p = parse(cmd);
   ck_assert(p == NULL);
 }
 END_TEST
 
-START_TEST(test_parse_normal) {
-  struct ParseInfo *p = parse("command");
+START_TEST(test_parse_normal)
+{
+  struct ParseInfo* p = parse("command");
   ck_assert(p->hasInputRedirection == false);
   ck_assert(p->hasOutputRedirection == false);
   ck_assert(p->runInBackground == false);
@@ -55,8 +70,9 @@ START_TEST(test_parse_normal) {
 }
 END_TEST
 
-START_TEST(test_parse_file_redirection) {
-  struct ParseInfo *p = parse("echo <infile >outfile");
+START_TEST(test_parse_file_redirection)
+{
+  struct ParseInfo* p = parse("echo <infile >outfile");
   ck_assert(p->hasInputRedirection);
   ck_assert(p->hasOutputRedirection);
   ck_assert_str_eq(p->inFile, "infile");
@@ -64,14 +80,16 @@ START_TEST(test_parse_file_redirection) {
 }
 END_TEST
 
-START_TEST(test_parse_background) {
-  struct ParseInfo *p = parse("long_running_task &");
+START_TEST(test_parse_background)
+{
+  struct ParseInfo* p = parse("long_running_task &");
   ck_assert(p->runInBackground);
 }
 END_TEST
 
-START_TEST(test_parse_piping) {
-  struct ParseInfo *p = parse("command1 | command2 | command3");
+START_TEST(test_parse_piping)
+{
+  struct ParseInfo* p = parse("command1 | command2 | command3");
   ck_assert_int_eq(p->pipeNum, 2);
   ck_assert_str_eq(p->CommArray[0].command, "command1");
   ck_assert_str_eq(p->CommArray[1].command, "command2");
@@ -79,8 +97,9 @@ START_TEST(test_parse_piping) {
 }
 END_TEST
 
-START_TEST(test_parse_variables) {
-  struct ParseInfo *p = parse("command var1 var2 var3");
+START_TEST(test_parse_variables)
+{
+  struct ParseInfo* p = parse("command var1 var2 var3");
   ck_assert_int_eq(p->CommArray[0].VarNum, 3);
   ck_assert_str_eq(p->CommArray[0].VarList[0], "var1");
   ck_assert_str_eq(p->CommArray[0].VarList[1], "var2");
@@ -88,23 +107,27 @@ START_TEST(test_parse_variables) {
 }
 END_TEST
 
-START_TEST(test_parse_free_null) {
+START_TEST(test_parse_free_null)
+{
   // This should not segfault.
   free_info(NULL);
 }
 END_TEST
 
-START_TEST(test_parse_print_null) {
+START_TEST(test_parse_print_null)
+{
   // This should not segfault.
   print_info(NULL);
 }
 END_TEST
 
-Suite *make_parse_suite(void) {
-  Suite *s = suite_create("Parse");
+Suite*
+make_parse_suite(void)
+{
+  Suite* s = suite_create("Parse");
 
   /* Core test case. */
-  TCase *tc = tcase_create("Core");
+  TCase* tc = tcase_create("Core");
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, parse_setup, parse_teardown);

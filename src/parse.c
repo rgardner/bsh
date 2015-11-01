@@ -19,13 +19,13 @@ void init_info(struct ParseInfo *p) {
                           .runInBackground = false,
                           .pipeNum = 0,
                           .inFile = "",
-                          .outFile = ""};
+                          .outFile = "" };
 }
 
 void init_command(struct Command *p) {
   *p = (struct Command){.command = malloc(MAXLINE * sizeof(char)),
-                        .VarList = {NULL},
-                        .VarNum = 0};
+                        .VarList = { NULL },
+                        .VarNum = 0 };
 }
 
 struct ParseInfo *parse(const char *cmdline) {
@@ -58,12 +58,12 @@ struct ParseInfo *parse(const char *cmdline) {
         free_info(Result);
         return NULL;
       }
-    } else if (Result->hasInputRedirection && strcmp(Result->inFile, "") == 0) {
+    } else if (Result->hasInputRedirection &&
+               strcmp(Result->inFile, "") == 0) {
       i = copy_substring(Result->inFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
-        fprintf(stderr,
-                "Error. The input redirection filename exceeds the "
-                "%d character limit.\n",
+        fprintf(stderr, "Error. The input redirection filename exceeds the "
+                        "%d character limit.\n",
                 FILE_MAX_SIZE);
         free_info(Result);
         return NULL;
@@ -72,9 +72,8 @@ struct ParseInfo *parse(const char *cmdline) {
                strcmp(Result->outFile, "") == 0) {
       i = copy_substring(Result->outFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
-        fprintf(stderr,
-                "Error. The output redirection filename exceeds the "
-                "%d character limit.\n",
+        fprintf(stderr, "Error. The output redirection filename exceeds the "
+                        "%d character limit.\n",
                 FILE_MAX_SIZE);
         free_info(Result);
         return NULL;
@@ -131,7 +130,7 @@ int copy_substring(char *dest, const char *src, const int begin,
 
 void print_info(const struct ParseInfo *info) {
   if (!info) return;
-  for (int i = 0; i < info->pipeNum; i++) {
+  for (int i = 0; i <= info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
     for (int j = 0; j < info->CommArray[i].VarNum; j++) {
       printf("arg%d: %s\n", j, info->CommArray[i].VarList[j]);

@@ -117,6 +117,7 @@ void launch_process(process *p, pid_t pgid, int infile, int outfile,
 }
 
 void launch_job(job *j, const bool foreground) {
+  job_print(j);
   // Currently, bsh does not support pipes with builtin commands.
   enum BuiltinCommands command = is_builtin_command(j->first_process->argv[0]);
   if (command != NO_SUCH_BUILTIN) {
