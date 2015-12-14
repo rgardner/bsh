@@ -45,6 +45,13 @@ void history_init() {
   }
 }
 
+/* Perform history expansions
+ *
+ * Returns:
+ *  0  if no history expansion occurred
+ *  -1 if an error occurred
+ *  1  if an expansion occurred
+ */
 int history_exp(const char *string, char **output) {
   size_t length = strlen(string);
   *output = NULL;

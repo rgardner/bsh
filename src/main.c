@@ -25,8 +25,10 @@ struct termios shell_tmodes;
 int shell_terminal;
 int shell_is_interactive;
 
-char *buildPrompt() {
-  char *prompt = malloc(MAX_PROMPT_LENGTH * sizeof(char));
+char*
+buildPrompt()
+{
+  char* prompt = malloc(MAX_PROMPT_LENGTH * sizeof(char));
   char cwd[1024];
   if (!getcwd(cwd, sizeof(cwd))) {
     fprintf(stderr, "Error. Could not obtain current working directory.");
@@ -35,7 +37,9 @@ char *buildPrompt() {
   return prompt;
 }
 
-void print_login_message() {
+void
+print_login_message()
+{
   printf("                __\n");
   printf("    ___        |  \"---.\n");
   printf("  .\"   \". -o)  |      |\n");
@@ -44,7 +48,9 @@ void print_login_message() {
   printf("Welcome to Bob shell.\n");
 }
 
-void shell_init() {
+void
+shell_init()
+{
   /* See if we are running interactively.  */
   shell_terminal = STDIN_FILENO;
   shell_is_interactive = isatty(shell_terminal);
@@ -78,8 +84,10 @@ void shell_init() {
   }
 }
 
-void launch_process(process *p, pid_t pgid, int infile, int outfile,
-                    int errfile, bool foreground) {
+void
+launch_process(process* p, pid_t pgid, int infile, int outfile, int errfile,
+               bool foreground)
+{
   pid_t pid;
   if (shell_is_interactive) {
     /* Put the process into the process group and give the process group the
@@ -116,7 +124,9 @@ void launch_process(process *p, pid_t pgid, int infile, int outfile,
   }
 }
 
-void launch_job(job *j, const bool foreground) {
+void
+launch_job(job* j, const bool foreground)
+{
   job_print(j);
   // Currently, bsh does not support pipes with builtin commands.
   enum BuiltinCommands command = is_builtin_command(j->first_process->argv[0]);
@@ -129,7 +139,7 @@ void launch_job(job *j, const bool foreground) {
   pid_t pid;
   int infile = j->infile;
   int pipefd[2];
-  for (process *p = j->first_process; p; p = p->next) {
+  for (process* p = j->first_process; p; p = p->next) {
     int outfile;
     if (p->next) {
       if (pipe(pipefd) < 0) {
@@ -178,7 +188,9 @@ void launch_job(job *j, const bool foreground) {
   }
 }
 
-int main(int argc, char **argv) {
+int
+main(int argc, char** argv)
+{
   // Ignore argc and argv until we add command line arguments.
   UNUSED(argc);
   UNUSED(argv);
@@ -199,7 +211,7 @@ int main(int argc, char **argv) {
   print_login_message();
 
   while (true) {
-    char *cmdLine;
+    char* cmdLine;
 #ifdef UNIX
     cmdLine = readline(buildPrompt());
     if (!cmdLine) {
@@ -229,7 +241,7 @@ int main(int argc, char **argv) {
     cmdLine = trim(cmdLine);
 
     // Look up in history.
-    char *expansion = NULL;
+    char* expansion = NULL;
     const int his_res = history_exp(cmdLine, &expansion);
     if (his_res < 0 || his_res == 2) {  // error or should not execute.
       free(expansion);
@@ -250,7 +262,7 @@ int main(int argc, char **argv) {
     free(expansion);
 
     // Call the parser.
-    const struct ParseInfo *info = parse(cmdLine);
+    const struct ParseInfo* info = parse(cmdLine);
     if (!info) {
       free(cmdLine);
       continue;
@@ -258,8 +270,8 @@ int main(int argc, char **argv) {
 
     // Expand aliases in info commands.
     for (int i = 0; i < info->pipeNum; i++) {
-      const struct Command *cmd = &info->CommArray[i];
-      char *expansion;
+      const struct Command* cmd = &info->CommArray[i];
+      char* expansion;
       const int alias_res = alias_exp(cmd->command, &expansion);
       if (alias_res < 0 || alias_res == 2) {
         free(expansion);
@@ -268,7 +280,7 @@ int main(int argc, char **argv) {
 
       // Copy expansion into command.
       const int length = strlen(expansion) + 1;
-      char *command = realloc(cmd->command, sizeof(char) * length);
+      char* command = realloc(cmd->command, sizeof(char) * length);
       strncpy(command, expansion, length);
       free(expansion);
     }
@@ -278,7 +290,7 @@ int main(int argc, char **argv) {
 #endif
 
     // com contains the info. of the command before the first "|"
-    const struct Command *cmd = &info->CommArray[0];
+    const struct Command* cmd = &info->CommArray[0];
     if (!cmd || !cmd->command) {
       free_info(info);
       free(cmdLine);
@@ -286,7 +298,7 @@ int main(int argc, char **argv) {
     }
 
     // Convert ParseInfo to Job.
-    job *j = malloc(sizeof(job));
+    job* j = malloc(sizeof(job));
     init_job(j, info, shell_pgid, shell_tmodes);
     bool foreground = !info->runInBackground;
     free_info(info);
