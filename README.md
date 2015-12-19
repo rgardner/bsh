@@ -20,6 +20,12 @@ $ brew install cmake  # OS X
 $ sudo apt-get install cmake  # Ubuntu/Debian
 ```
 
+You may need other dependencies,
+
+```bash
+$ sudo-apt get install libreadline-dev pkg-config
+```
+
 After `cmake` is installed,
 ```bash
 $ git clone https://github.com/rgardner/bsh
