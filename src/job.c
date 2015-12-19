@@ -57,9 +57,9 @@ init_process(process* p, const struct Command cmd)
   p->argc = cmd.VarNum + 1;  // command, *args
 
   p->argv = malloc((p->argc + 1) * sizeof(char*));  // command, *args, NULL
-  p->argv[0] = strndup(cmd.command, strlen(cmd.command));
-  for (int i = 1; i < p->argc; i++) {
-    p->argv[i] = strdup(cmd.VarList[i]);
+  p->argv[0] = strdup(cmd.command);
+  for (int i = 0; i < cmd.VarNum; i++) {
+    p->argv[i+1] = strdup(cmd.VarList[i]);
   }
   p->argv[p->argc] = NULL;
 

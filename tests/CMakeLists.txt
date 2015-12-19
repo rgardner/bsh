@@ -11,6 +11,7 @@ include_directories(${CHECK_INCLUDE_DIRS})
 
 set(TEST_BSH_SOURCES
   test_bsh_history.c
+  test_bsh_job.c
   test_bsh_main.c
   test_bsh_stack.c
   test_bsh_parse.c
