@@ -25,16 +25,18 @@ struct termios shell_tmodes;
 int shell_terminal;
 int shell_is_interactive;
 
-char*
-buildPrompt()
+/** @brief Build command prompt
+ *
+ *  @param buf Copies the prompt into the memory referenced by buf.
+ *  @param size The size, in bytes, of the array referenced by buf.
+ */
+void
+build_prompt(char* buf, size_t size)
 {
-  char* prompt = malloc(MAX_PROMPT_LENGTH * sizeof(char));
-  char cwd[1024];
-  if (!getcwd(cwd, sizeof(cwd))) {
-    fprintf(stderr, "Error. Could not obtain current working directory.");
+  if (!getcwd(buf, size)) {
+    perror("getcwd");
   }
-  snprintf(prompt, MAX_PROMPT_LENGTH, "%s$ ", cwd);
-  return prompt;
+  strlcat(buf, "$ ", size);
 }
 
 void
@@ -200,7 +202,7 @@ main(int argc, char** argv)
   builtins_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
-    perror("An error occurred while setting the SIGCHLD signal handler.");
+    handle_error("signal");
   }
 
 #ifdef UNIX
@@ -211,9 +213,12 @@ main(int argc, char** argv)
   print_login_message();
 
   while (true) {
-    char* cmdLine;
+    char* cmdLine = NULL;
+
 #ifdef UNIX
-    cmdLine = readline(buildPrompt());
+    char prompt[MAX_PROMPT_LENGTH];
+    build_prompt(prompt, sizeof(prompt));
+    cmdLine = readline(prompt);
     if (!cmdLine) {
       /* Quit on EOF terminated empty line. */
       printf("\n");
