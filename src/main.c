@@ -242,8 +242,8 @@ main(int argc, char** argv)
       continue;
     }
 
-    // remove newline
-    cmdLine = trim(cmdLine);
+    // remove trailing whitespace (especially the newline)
+    trim_right(cmdLine);
 
     // Look up in history.
     char* expansion = NULL;
