@@ -279,14 +279,14 @@ main(int argc, char** argv)
       char* expansion;
       const int alias_res = alias_exp(cmd->command, &expansion);
       if (alias_res < 0 || alias_res == 2) {
-        free(expansion);
+        if (expansion) free(expansion);
         continue;
       }
 
       // Copy expansion into command.
-      const int length = strlen(expansion) + 1;
-      char* command = realloc(cmd->command, sizeof(char) * length);
-      strncpy(command, expansion, length);
+      const size_t commandsize = sizeof(char) * (strlen(expansion) + 1);
+      char* command = realloc(cmd->command, commandsize);
+      strlcpy(command, expansion, commandsize);
       free(expansion);
     }
 
