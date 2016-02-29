@@ -3,6 +3,7 @@
 #include "linked_list.h"
 #include "stack.h"
 
+#include <err.h>
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <signal.h>
@@ -138,36 +139,41 @@ void execute_builtin_command(const enum BuiltinCommands command, process cmd) {
 }
 
 static char *cd(const int argc, char **argv) {
-  size_t len = 1024;
-  char *dir = malloc(len);
+  char* dir = NULL;
 
-  if (argc == 0 || strncmp(argv[1], "~", strlen("~")) == 0) {
-    dir = getenv("HOME");
-    if (!dir) {
-      fprintf(stderr, "-bsh: cd: HOME not set\n");
+  if (argc == 1 || (strlen(argv[1]) == 1 && *argv[1] == '~')) {
+    /* Destination is home directory. */
+    if (!(dir = getenv("HOME"))) {
+      warnx("-bsh: cd: HOME not set");
       return NULL;
     }
-  } else if (strncmp(argv[1], "-", strlen("-")) == 0) {
-    dir = getenv("OLDPWD");
-    if (!dir) {
-      fprintf(stderr, "-bsh: cd: OLDPWD not set\n");
+  } else if (strlen(argv[1]) == 1 && *argv[1] == '-') {
+    /* Destination is previous working directory. */
+    if (!(dir = getenv("OLDPWD"))) {
+      warnx("-bsh: cd: OLDPWD not set");
       return NULL;
     }
   } else {
-    strncpy(dir, argv[1], sizeof(strlen(argv[1])));
+    /* Destination is the argument to cd. */
+    const size_t dirsize = (strlen(argv[1]) + 1) * sizeof(char);
+    if (!(dir = malloc(dirsize))) {
+      err(1, "malloc");
+    }
+    strlcpy(dir, argv[1], dirsize);
   }
 
-  char *cwd = malloc(len);
-  if (!getcwd(cwd, len)) {
-    fprintf(stderr, "Error. Could not obtain current working directory\n");
+  char* cwd = NULL;
+  if (!(cwd = getcwd(NULL, 0))) {
+    warnx("unable to obtain current working directory.");
+  }
+
+  if (chdir(dir) < 0) {
+    warnx("-bsh cd: %s: No such file or directory", dir);
     return NULL;
   }
 
-  int ret = chdir(dir);
-  if (ret != 0) {
-    fprintf(stderr, "-bsh: cd: %s: No such file or directory\n", dir);
-    return NULL;
-  }
+  if (cwd) setenv("OLDPWD", cwd, 1);
+
   return dir;
 }
 
