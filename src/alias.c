@@ -88,17 +88,22 @@ int unalias(const int argc, char **argv) {
 void unalias_help() { printf("usage: unalias [-a] name [name ...]\n"); }
 
 int alias_exp(const char *string, char **output) {
-  int length = strlen(string) + 1;
-  *output = malloc(sizeof(char) * length);
-  strncpy(*output, string, length);
+  /* Copy string into output. */
+  const size_t size = sizeof(char) * (strlen(string) + 1);
+  *output = malloc(size);
+  strlcpy(*output, string, size);
 
+  /* Return if no alias exists for string. */
   struct Alias *result = alias_search(string);
   if (!result) return -1;
 
-  const char *value = result->value;
-  length = strlen(value) + 1;
-  *output = realloc(*output, sizeof(char) * length);
-  strncpy(*output, value, length);
+  /* Copy alias into *output, reallocating *output if necessary. */
+  size_t len = strlcpy(*output, result->value, size);
+  if (len >= size) {
+    const size_t newsize = sizeof(char) * (len + 1);
+    *output = realloc(*output, newsize);
+    strlcpy(*output, result->value, newsize);
+  }
   return 1;
 }
 
