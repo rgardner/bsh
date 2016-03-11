@@ -13,20 +13,25 @@ Welcome to Bob shell.
 ```
 
 ## Installation
-This project requires [CMake](https://cmake.org/) version 2.8 or higher to
-build. If this is not already installed on your system, then
-```bash
-$ brew install cmake  # OS X
-$ sudo apt-get install cmake  # Ubuntu/Debian
+OS X and Ubuntu Linux are currently supported and tested. This project
+requires [CMake](https://cmake.org/) version 2.8 or higher to build.
+
+For OS X, you need the following development dependencies:
+```sh
+$ brew install cmake
 ```
 
-After `cmake` is installed,
+For Ubuntu, you additionally need `libbsd-dev`:
+```sh
+$ sudo apt-get install cmake libbsd-dev
+```
+
+After these depenencies are installed:
 ```bash
 $ git clone https://github.com/rgardner/bsh
 $ cd bsh
 $ mkdir build && cd build
-$ cmake ..
-$ make
+$ cmake .. && make
 ```
 
 After building `bsh`, you can run the executable: `build/bin/bsh`.
@@ -38,16 +43,29 @@ their [install page](http://check.sourceforge.net/web/install.html), but the
 short of it is:
 ```bash
 $ brew install check  # OS X
-$ sudo apt-get install check  # Ubuntu/Debian
+$ sudo apt-get install check  # Ubuntu
 ```
 
 You can run the test suite by:
 ```sh
 $ mkdir -p build && cd build
-$ cmake ..
-$ make
+$ cmake .. && make
 $ bin/check_bsh
 ```
+
+### Dependencies Explained
+**CMake** is the build system used for this project. Originally, this started as
+a simple Makefile, but it grew more complicated until eventually `cmake` became
+the more viable option.
+
+**libbsd-dev** is required on Ubuntu to get access to `strlcpy` and `strlcat`,
+two functions that make working with strings much easier. [This
+paper](https://www.sudo.ws/todd/papers/strlcpy.html) does a good job of
+explaining the design intentions of these functions.
+
+**check** is the unit-testing framework chosen for this project. It is one of
+the most popular C unit-testing frameworks and works well with `cmake`.
+
 
 ## Feature Roadmap
 1. ~~write the parser~~

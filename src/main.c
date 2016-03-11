@@ -2,7 +2,11 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#ifdef __linux__
+  #include <bsd/string.h>
+#else
+  #include <string.h>
+#endif
 #include <sys/wait.h>
 #include <readline/readline.h>
 #include <termios.h>

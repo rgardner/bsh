@@ -8,6 +8,7 @@ set(CHECK_INSTALL_DIR "/usr/local/Cellar/check/")
 
 find_package(Check REQUIRED)
 include_directories(${CHECK_INCLUDE_DIRS})
+find_package(Threads)
 
 set(TEST_BSH_SOURCES
   test_bsh_history.c
@@ -23,4 +24,4 @@ set(TEST_BSH_HEADERS
   test_util.h
 )
 add_executable(check_bsh ${TEST_BSH_HEADERS} ${TEST_BSH_SOURCES})
-target_link_libraries(check_bsh bsh ${CHECK_LIBRARIES})
+target_link_libraries(check_bsh bsh ${CMAKE_THREAD_LIBS_INIT} ${CHECK_LIBRARIES})
