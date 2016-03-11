@@ -33,5 +33,9 @@ set(HEADERS
 add_library(bsh STATIC ${LIB_SOURCES} ${HEADERS})
 
 add_executable(bsh-bin ${HEADERS} ${MAIN_SOURCES})
-target_link_libraries(bsh-bin bsh ${READLINE_LIBRARIES})
+if(APPLE)
+  target_link_libraries(bsh-bin bsh ${READLINE_LIBRARIES})
+else(UNIX)
+  target_link_libraries(bsh-bin bsh ${READLINE_LIBRARIES} ${BSD_LIBRARY})
+endif(APPLE)
 set_target_properties(bsh-bin PROPERTIES OUTPUT_NAME bsh)

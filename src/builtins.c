@@ -9,8 +9,12 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#ifdef __linux__
+  #include <bsd/string.h>
+#else
+  #include <string.h>
+#endif
 
 #include "alias.h"
 #include "bg_jobs.h"

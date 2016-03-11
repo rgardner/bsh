@@ -17,9 +17,11 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Werror -Wunreachab
 set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
 
 find_package(Readline REQUIRED)
-include_directories(
-  ${READLINE_INCLUDE_DIR}
-)
+include_directories(${READLINE_INCLUDE_DIR})
+if(UNIX AND NOT APPLE)
+  find_package(BSD)
+  include_directories(${BSD_INCLUDE_DIR})
+endif(UNIX AND NOT APPLE)
 
 ###############################################################################
 # Subdirectories
