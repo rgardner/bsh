@@ -7,8 +7,9 @@ compiler:
 addons:
   apt:
     packages:
-    - check
     - cmake
+    - libbsd-dev
+    - check
 
 before_script:
   - mkdir build
