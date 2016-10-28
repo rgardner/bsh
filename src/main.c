@@ -278,8 +278,8 @@ main(int argc, char** argv)
     }
 
     // Expand aliases in info commands.
-    for (int i = 0; i < info->pipeNum; i++) {
       const struct Command* cmd = &info->CommArray[i];
+    for (int i = 0; i <= info->pipeNum; i++) {
       char* expansion;
       const int alias_res = alias_exp(cmd->command, &expansion);
       if (alias_res < 0 || alias_res == 2) {

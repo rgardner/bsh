@@ -1,5 +1,6 @@
 #include "alias.h"
 
+#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,57 +12,72 @@
 
 #include "linked_list.h"
 
-/* Structs. */
-struct Alias {
-  const char *name;
-  const char *value;
-};
+/** Alias mapping name to value. */
+typedef struct {
+  const char* name;
+  char* value;
+} Alias;
 
-/* Function prototypes. */
-static bool alias_add(const char *, const char *, bool);
-static bool alias_remove(const char *);
-static struct Alias *alias_search(const char *);
+// Global variables
+struct LinkedList* aliases;
+
+// Function prototypes
+static Alias* alias_init(const char* const name, const char* const value);
+static void alias_free(Alias* a);
+static bool alias_add(
+  const char* const name,
+  const char* const value,
+  bool overwrite);
+static bool alias_remove(const char* name);
+static void alias_insert_sorted(Alias* a);
+static Alias *alias_search(const char* name);
 static void aliases_print();
-static void alias_free(const struct Alias *);
-
-/* Global variables. */
-struct LinkedList *aliases;
 
 void aliases_init() { aliases = ll_init(); }
 
-static struct Alias *alias_init(const char *name, const char *value) {
-  struct Alias al = {.name = name, .value = value};
-  struct Alias *alias = malloc(sizeof(struct Alias));
-  memcpy(alias, &al, sizeof(struct Alias));
+/** Initialize a new alias.
+ *
+ *  @param name This is copied.
+ *  @param value This is copied.
+ *  @return Heap allocated alias.
+ */
+static Alias* alias_init(const char* const name, const char* const value) {
+  const char* const name_h = strdup(name);
+  char* value_h = strdup(value);
+  Alias al = {.name = name_h, .value = value_h};
+  Alias *alias = malloc(sizeof(Alias));
+  memcpy(alias, &al, sizeof(Alias));
   return alias;
 }
 
-int alias(const int argc, char **argv) {
-  /* Print all aliases. */
+int alias(const int argc, char** argv) {
+  // Print all aliases.
   if (argc == 0) {
     aliases_print();
     return 0;
   }
 
-  /* Create an alias between a name/value pair. */
-  char *name;
-  if ((name = strsep((char **)&argv[0], "="))) {
-    name = strdup(name);
-    char *value = strdup(argv[0]);
-    alias_add(name, value, 1);
-    free(value);
-    free(name);
+  // Create an alias between a name/value pair.
+  // copy arg1 so that argv is not mutated
+  char* arg1, * tofree;
+  tofree = arg1 = strdup(argv[1]);
+  char* name = strsep(&arg1, "=");
+  if (arg1) {
+    alias_add(name, arg1, true);
+    free(tofree);
     return 0;
   }
 
-  /* Print all aliases matching name arguments. */
+  free(tofree);
+
+  // Print all aliases matching name arguments.
   bool all_found = true;
-  for (int i = 0; i < argc; i++) {
-    struct Alias *al = alias_search(argv[i]);
+  for (int i = 1; i < argc; i++) {
+    Alias *al = alias_search(argv[i]);
     if (al) {
-      printf("alias %s = %s\n", al->name, al->value);
+      printf("alias %s=%s\n", al->name, al->value);
     } else {
-      printf("bsh: alias: %s not found.\n", argv[i]);
+      printf("bsh: alias: %s: not found\n", argv[i]);
       all_found = false;
     }
   }
@@ -84,75 +100,91 @@ int unalias(const int argc, char **argv) {
 
   bool all_found = true;
   for (int i = 0; i < argc; i++) {
-    all_found = alias_remove(argv[i]);
+    if (!alias_remove(argv[i])) {
+      all_found = false;
+    }
   }
+  
   return all_found ? 0 : 1;
 }
 
 void unalias_help() { printf("usage: unalias [-a] name [name ...]\n"); }
 
-int alias_exp(const char *string, char **output) {
-  /* Copy string into output. */
-  const size_t size = sizeof(char) * (strlen(string) + 1);
-  *output = malloc(size);
-  strlcpy(*output, string, size);
-
-  /* Return if no alias exists for string. */
-  struct Alias *result = alias_search(string);
-  if (!result) return -1;
-
-  /* Copy alias into *output, reallocating *output if necessary. */
-  size_t len = strlcpy(*output, result->value, size);
-  if (len >= size) {
-    const size_t newsize = sizeof(char) * (len + 1);
-    *output = realloc(*output, newsize);
-    strlcpy(*output, result->value, newsize);
+int alias_exp(const char* string, char** output) {
+  // Return if no alias exists for string.
+  Alias* result = alias_search(string);
+  if (!result) {
+    return 0;
   }
+
+  // Copy string into output
+  *output = strdup(result->value);
   return 1;
 }
 
-static bool alias_add(const char *name, const char *value,
-                      const bool overwrite) {
-  /* Search to see if alias already exists. */
-  struct Node *current = NULL;
-  for (current = aliases->head; current; current = current->next) {
-    struct Alias *alias = current->data;
-    if (strncmp(name, alias->name, strlen(name)) != 0) continue;
-    if (!overwrite) return false;
-    alias->value = value;
+/** Add name->value mapping.
+ *
+ *  @param name Name of alias. This is copied.
+ *  @param value The command to run when the alias is entered. This is copied.
+ *  @param overwrite Should the value be overwritten if an alias already exists.
+ *  @return
+ *  true if an alias was inserted/updated;
+ *  false if overwrite was true and the alias already existed.
+ */
+static bool alias_add(const char* const name, const char* const value, bool overwrite) {
+  // Search to see if alias already exists.
+  for (Node* curr = aliases->head; curr; curr = curr->next) {
+    Alias* alias = curr->data;
+    if (strcmp(name, alias->name) != 0) {
+      continue;
+    }
+
+    if (!overwrite) {
+      return false;
+    }
+
+    char* value_h = strdup(value);
+    free(alias->value);
+    alias->value = value_h;
     return true;
   }
 
-  /* Add a new alias. */
-  struct Alias *new = alias_init(name, value);
-
-  struct Node *previous = NULL;
-  for (current = aliases->head; current; current = current->next) {
-    struct Alias *alias = current->data;
-    if (strncmp(name, alias->name, strlen(name)) < 0) break;
-    previous = current;
-  }
-  ll_add_after(aliases, previous, new);
-  free(new);
+  Alias* new = alias_init(name, value);
+  alias_insert_sorted(new);
   return true;
 }
 
-/* Remove the alias corresponding to the name.
+static void alias_insert_sorted(Alias* a) {
+  Node* prev = NULL;
+  for (Node* curr = aliases->head; curr; curr = curr->next) {
+    Alias* curr_alias = curr->data;
+    if (strcmp(a->name, curr_alias->name) < 0) {
+      break;
+    }
+    prev = curr;
+  }
+  ll_add_after(aliases, prev, a);
+}
+
+/** Remove the alias corresponding to the name.
  *
- * Returns true if found; false otherwise. */
-static bool alias_remove(const char *name) {
-  struct Node *curr = NULL;
-  struct Node *prev = NULL;
-  for (curr = aliases->head; curr; curr = curr->next) {
-    struct Alias *alias = curr->data;
+ *  @return true if found; false otherwise.
+ */
+static bool alias_remove(const char* name) {
+  Node* prev = NULL;
+  for (Node* curr = aliases->head; curr; curr = curr->next) {
+    Alias* alias = curr->data;
     int cmp = strncmp(name, alias->name, strlen(name));
-    if (cmp > 0) break;
+    if (cmp > 0) {
+      break;
+    }
+
     if (cmp < 0) {
       prev = curr;
       continue;
     }
 
-    /* Found the node. */
+    // Found the node
     if (prev) {
       prev->next = curr->next;
     } else {  // first element in the list
@@ -165,28 +197,42 @@ static bool alias_remove(const char *name) {
   return false;
 }
 
-static struct Alias *alias_search(const char *name) {
-  struct Node *current = NULL;
-  for (current = aliases->head; current; current = current->next) {
-    struct Alias *al = current->data;
-    if (!al) break;
+/** Find alias by its name.
+ *
+ * Do not deallocate pointer.
+ * @see alias_remove
+ * @return Pointer to alias if found; NULL if not found.
+ */
+static Alias*
+alias_search(const char* name)
+{
+  for (Node* curr = aliases->head; curr; curr = curr->next) {
+    Alias *al = curr->data;
+    if (!al) {
+      // TODO: should this be continue?
+      break;
+    }
 
-    if (strncmp(al->name, name, strlen(al->name)) == 0) return al;
+    if (strncmp(al->name, name, strlen(al->name)) == 0) {
+      return al;
+    }
   }
   return NULL;
 }
 
-/* Print all aliases matching names. If names is NULL, print all aliases. */
+/** Print all aliases. */
 static void aliases_print() {
-  struct Node *current;
-  for (current = aliases->head; current; current = current->next) {
-    struct Alias *al = current->data;
-    printf("alias %s = %s\n", al->name, al->value);
+  for (Node* curr = aliases->head; curr; curr = curr->next) {
+    Alias* al = curr->data;
+    printf("alias %s=%s\n", al->name, al->value);
   }
 }
 
-static void alias_free(const struct Alias *alias) {
-  if (alias->name) free((char *)alias->name);
-  if (alias->value) free((char *)alias->value);
-  free((struct Alias *)alias);
+static void alias_free(Alias* alias) {
+  assert(alias->name);
+  assert(alias->value);
+
+  free((char*)alias->name);
+  free(alias->value);
+  free(alias);
 }
