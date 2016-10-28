@@ -30,7 +30,7 @@ struct termios shell_tmodes;
 int shell_terminal;
 int shell_is_interactive;
 
-/** @brief Build command prompt
+/** Build command prompt
  *
  *  @param buf Copies the prompt into the memory referenced by buf.
  *  @param size The size, in bytes, of the array referenced by buf.
@@ -58,12 +58,12 @@ print_login_message()
 void
 shell_init()
 {
-  /* See if we are running interactively.  */
+  // See if we are running interactively.
   shell_terminal = STDIN_FILENO;
   shell_is_interactive = isatty(shell_terminal);
 
   if (shell_is_interactive) {
-    /* Loop until we are in the foreground.  */
+    // Loop until we are in the foreground.
     while (tcgetpgrp(shell_terminal) != (shell_pgid = getpgrp())) {
       kill(-shell_pgid, SIGTTIN);
     }
@@ -200,7 +200,7 @@ main(int argc, char** argv)
   UNUSED(argc);
   UNUSED(argv);
 
-  /* Initialization. */
+  // Initialization
   shell_init();
   builtins_init();
 
@@ -208,53 +208,43 @@ main(int argc, char** argv)
     err(EXIT_FAILURE, NULL);
   }
 
-#ifdef UNIX
-  printf("This is the UNIX version.\n");
-#elif WINDOWS
-  printf("This is the WINDOWS version.\n");
-#endif
   print_login_message();
 
   while (true) {
-    char* cmdLine = NULL;
+    // Read input, parse history, parse alias, execute.
+    char* cmd_line = NULL;
 
-#ifdef UNIX
     char prompt[MAX_PROMPT_LENGTH];
     build_prompt(prompt, sizeof(prompt));
-    cmdLine = readline(prompt);
-    if (!cmdLine) {
-      /* Quit on EOF terminated empty line. */
+    if (!(cmd_line = readline(prompt))) {
+      // Quit on EOF terminated empty line.
       printf("\n");
       exit(EXIT_SUCCESS);
     }
-#elif WINDOWS
-    fprintf(stderr, "ERROR: Windows is currently not supported.\n");
-    exit(EXIT_FAILURE);
-#endif
 
     // check command line length
-    if (strlen(cmdLine) > MAXLINE) {
-      fprintf(stderr, "The command you entered is too long.\n");
-      free(cmdLine);
+    if (strlen(cmd_line) > MAXLINE) {
       warnx("The command you entered is too long.\n");
+      free(cmd_line);
       continue;
     }
 
     // skip empty input
-    if (strcmp(cmdLine, "") == 0) {
-      free(cmdLine);
+    if (strcmp(cmd_line, "") == 0) {
+      free(cmd_line);
       continue;
     }
 
     // remove trailing whitespace (especially the newline)
-    trim_right(cmdLine);
+    trim_right(cmd_line);
 
     // Look up in history.
     char* expansion = NULL;
-    const int his_res = history_exp(cmdLine, &expansion);
-    if (his_res < 0 || his_res == 2) {  // error or should not execute.
+    const int his_res = history_exp(cmd_line, &expansion);
+    if (his_res < 0 || his_res == 2) {
+      // error or should not execute
       free(expansion);
-      free(cmdLine);
+      free(cmd_line);
       continue;
     }
     history_add(expansion);
@@ -262,36 +252,35 @@ main(int argc, char** argv)
     if (his_res == 1) {
       // Copy expansion into cmdLine.
       const size_t exp_length = strlen(expansion);
-      if (strlen(cmdLine) != exp_length) {
-        cmdLine = realloc(cmdLine, (exp_length + 1) * sizeof(char));
+      if (strlen(cmd_line) != exp_length) {
+        if (!(cmd_line = reallocf(cmd_line, (exp_length + 1) * sizeof(char)))) {
+          free(expansion);
+          continue;
+        }
       }
-      strncpy(cmdLine, expansion, exp_length);
-      cmdLine[exp_length + 1] = '\0';
+      strncpy(cmd_line, expansion, exp_length);
+      cmd_line[exp_length + 1] = '\0';
     }
     free(expansion);
 
     // Call the parser.
-    const struct ParseInfo* info = parse(cmdLine);
+    struct ParseInfo* info = parse(cmd_line);
     if (!info) {
-      free(cmdLine);
+      free(cmd_line);
       continue;
     }
 
     // Expand aliases in info commands.
-      const struct Command* cmd = &info->CommArray[i];
     for (int i = 0; i <= info->pipeNum; i++) {
+      struct Command* const cmd = &info->CommArray[i];
       char* expansion;
-      const int alias_res = alias_exp(cmd->command, &expansion);
-      if (alias_res < 0 || alias_res == 2) {
-        if (expansion) free(expansion);
+      if (alias_exp(cmd->command, &expansion) <= 0) {
         continue;
       }
 
-      // Copy expansion into command.
-      const size_t commandsize = sizeof(char) * (strlen(expansion) + 1);
-      char* command = realloc(cmd->command, commandsize);
-      strlcpy(command, expansion, commandsize);
-      free(expansion);
+      // replace command with alias expansion
+      free(cmd->command);
+      cmd->command = expansion;
     }
 
 #ifdef DEBUG
@@ -302,7 +291,7 @@ main(int argc, char** argv)
     const struct Command* cmd = &info->CommArray[0];
     if (!cmd || !cmd->command) {
       free_info(info);
-      free(cmdLine);
+      free(cmd_line);
       continue;
     }
 
@@ -313,6 +302,8 @@ main(int argc, char** argv)
     free_info(info);
 
     launch_job(j, foreground);
-    if (foreground) job_free(j);
+    if (foreground) {
+      job_free(j);
+    }
   }
 }
