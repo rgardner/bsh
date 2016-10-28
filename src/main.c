@@ -1,3 +1,4 @@
+#include <err.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
@@ -38,7 +39,7 @@ void
 build_prompt(char* buf, size_t size)
 {
   if (!getcwd(buf, size)) {
-    perror("getcwd");
+    warn(NULL);
   }
   strlcat(buf, "$ ", size);
 }
@@ -149,8 +150,7 @@ launch_job(job* j, const bool foreground)
     int outfile;
     if (p->next) {
       if (pipe(pipefd) < 0) {
-        perror("failed to create pipe");
-        exit(EXIT_FAILURE);
+        err(EXIT_FAILURE, NULL);
       }
       outfile = pipefd[1];
     } else {
@@ -162,8 +162,7 @@ launch_job(job* j, const bool foreground)
     if (pid == 0) {  // child process
       launch_process(p, j->pgid, infile, outfile, j->errfile, foreground);
     } else if (pid < 0) {  // fork failed
-      perror("failed to fork process");
-      exit(EXIT_FAILURE);
+      err(EXIT_FAILURE, NULL);
     } else {  // parent process
       p->pid = pid;
       if (shell_is_interactive) {
@@ -206,7 +205,7 @@ main(int argc, char** argv)
   builtins_init();
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
-    handle_error("signal");
+    err(EXIT_FAILURE, NULL);
   }
 
 #ifdef UNIX
@@ -237,6 +236,7 @@ main(int argc, char** argv)
     if (strlen(cmdLine) > MAXLINE) {
       fprintf(stderr, "The command you entered is too long.\n");
       free(cmdLine);
+      warnx("The command you entered is too long.\n");
       continue;
     }
 

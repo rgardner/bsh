@@ -3,9 +3,9 @@
 
 #include <stddef.h>
 
-/* Remove trailing whitespace */
+/** Remove trailing whitespace.
+ *
+ *  @return New length of s.
+ */
 size_t trim_right(char* s);
-
-/* Call perror(s) and exit. */
-void handle_error(const char* s);
 #endif
