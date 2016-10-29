@@ -36,6 +36,25 @@ $ cmake .. && make
 
 After building `bsh`, you can run the executable: `build/bin/bsh`.
 
+### Documentation
+[Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html) is required to
+build documentation:
+
+```sh
+$ # macOS
+$ brew install doxygen
+$ # Ubuntu
+$ sudo apt-get install doxygen
+```
+
+To generate the documentation:
+
+```sh
+$ mkdir -p build && cd build
+$ cmake ..
+$ make doc
+```
+
 ### Testing
 To run the test suite, you need the [Check](http://check.sourceforge.net/) unit
 testing framework. You can find more info on downloading / setting it up on
