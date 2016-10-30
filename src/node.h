@@ -6,9 +6,10 @@
 typedef struct Node Node;
 
 /** Node in a singly-linked list. */
-struct Node {
-  void* data;  /**< Arbitrary data. */
-  Node* next;  /**< Pointer to next node in singly-linked list. */
+struct Node
+{
+  void* data; /**< Arbitrary data. */
+  Node* next; /**< Pointer to next node in singly-linked list. */
 };
 
 /** Return a newly allocated node.

@@ -1,10 +1,10 @@
 #ifndef JOB_H
 #define JOB_H
 
+#include "parse.h"
 #include <stdbool.h>
 #include <termios.h>
 #include <unistd.h>
-#include "parse.h"
 
 /* A process is a single process.  */
 typedef struct process

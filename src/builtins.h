@@ -1,11 +1,12 @@
 #ifndef BUILTINS_H
 #define BUILTINS_H
-#include "linked_list.h"
 #include "job.h"
-#include "stack.h"
+#include "linked_list.h"
 #include "parse.h"
+#include "stack.h"
 
-enum BuiltinCommands {
+enum BuiltinCommands
+{
   NO_SUCH_BUILTIN = 0,
   ALIAS,
   BG,
@@ -33,7 +34,7 @@ void builtins_init();
 void help(const int command);
 
 /* Return the enum that corresponds to cmd. */
-enum BuiltinCommands is_builtin_command(const char *cmd);
+enum BuiltinCommands is_builtin_command(const char* cmd);
 
 /* Execute the builtin command in the same process as the caller. */
 void execute_builtin_command(const enum BuiltinCommands command, process cmd);

@@ -7,14 +7,16 @@
 #define PIPE_MAX_NUM 10
 #define FILE_MAX_SIZE 40
 
-struct Command {
-  char *command;
-  char *VarList[MAX_VAR_NUM];
+struct Command
+{
+  char* command;
+  char* VarList[MAX_VAR_NUM];
   int VarNum;
 };
 
 /* The parsed command information. */
-struct ParseInfo {
+struct ParseInfo
+{
   bool hasInputRedirection;   // infile specified?
   bool hasOutputRedirection;  // outfile specified?
   bool runInBackground;       // run in background?
@@ -25,9 +27,9 @@ struct ParseInfo {
 };
 
 /* Function prototypes. */
-struct ParseInfo *parse(const char *);
+struct ParseInfo* parse(const char*);
 
-void free_info(const struct ParseInfo *);
+void free_info(const struct ParseInfo*);
 
-void print_info(const struct ParseInfo *);
+void print_info(const struct ParseInfo*);
 #endif

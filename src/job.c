@@ -59,7 +59,7 @@ init_process(process* p, const struct Command cmd)
   p->argv = malloc((p->argc + 1) * sizeof(char*));  // command, *args, NULL
   p->argv[0] = strdup(cmd.command);
   for (int i = 0; i < cmd.VarNum; i++) {
-    p->argv[i+1] = strdup(cmd.VarList[i]);
+    p->argv[i + 1] = strdup(cmd.VarList[i]);
   }
   p->argv[p->argc] = NULL;
 
@@ -70,7 +70,9 @@ init_process(process* p, const struct Command cmd)
 }
 
 void
-init_job(job* j, const struct ParseInfo* info, pid_t pgid,
+init_job(job* j,
+         const struct ParseInfo* info,
+         pid_t pgid,
          struct termios tmodes)
 {
   /* TODO(rgardner): allow multiple jobs. */

@@ -4,12 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef __linux__
-  #include <bsd/string.h>
+#include <bsd/string.h>
 #else
-  #include <string.h>
+#include <string.h>
 #endif
-#include <sys/wait.h>
 #include <readline/readline.h>
+#include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
 
@@ -17,8 +17,8 @@
 #include "bg_jobs.h"
 #include "builtins.h"
 #include "history.h"
-#include "parse.h"
 #include "job.h"
+#include "parse.h"
 #include "util.h"
 
 #define MAX_PROMPT_LENGTH 1024
@@ -92,7 +92,11 @@ shell_init()
 }
 
 void
-launch_process(process* p, pid_t pgid, int infile, int outfile, int errfile,
+launch_process(process* p,
+               pid_t pgid,
+               int infile,
+               int outfile,
+               int errfile,
                bool foreground)
 {
   pid_t pid;

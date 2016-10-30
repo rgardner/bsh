@@ -20,10 +20,10 @@ void history_init();
  *  1:  if expansions did take place
  *  -1: if there was an error in expansion
  */
-int history_exp(const char *string, char **output);
+int history_exp(const char* string, char** output);
 
 /* Place string at the end of the history list. */
-void history_add(const char *string);
+void history_add(const char* string);
 
 /* Stifle the history list, remembering only the last max entries. */
 void history_stifle(const int max);

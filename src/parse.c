@@ -11,9 +11,11 @@
 #include <string.h>
 
 /* Function prototypes. */
-int copy_substring(char *, const char *, const int, const int);
+int copy_substring(char*, const char*, const int, const int);
 
-void init_info(struct ParseInfo *p) {
+void
+init_info(struct ParseInfo* p)
+{
   *p = (struct ParseInfo){.hasInputRedirection = false,
                           .hasOutputRedirection = false,
                           .runInBackground = false,
@@ -22,13 +24,17 @@ void init_info(struct ParseInfo *p) {
                           .outFile = "" };
 }
 
-void init_command(struct Command *p) {
+void
+init_command(struct Command* p)
+{
   *p = (struct Command){.command = malloc(MAXLINE * sizeof(char)),
                         .VarList = { NULL },
                         .VarNum = 0 };
 }
 
-struct ParseInfo *parse(const char *cmdline) {
+struct ParseInfo*
+parse(const char* cmdline)
+{
   // Ensure string is nonempty.
   if (cmdline[0] == '\0') return NULL;
 
@@ -40,10 +46,10 @@ struct ParseInfo *parse(const char *cmdline) {
   // After removing blanks, is the string now empty?
   if (cmdline[i] == '\n' || cmdline[i] == '\0') return NULL;
 
-  struct ParseInfo *Result = malloc(sizeof(struct ParseInfo));
+  struct ParseInfo* Result = malloc(sizeof(struct ParseInfo));
   init_info(Result);
 
-  struct Command *cmd = malloc(sizeof(struct Command));
+  struct Command* cmd = malloc(sizeof(struct Command));
   init_command(cmd);
   for (; cmdline[i] != '\n' && cmdline[i] != '\0'; i++) {
     // command1 < infile | command > outfile &
@@ -58,12 +64,12 @@ struct ParseInfo *parse(const char *cmdline) {
         free_info(Result);
         return NULL;
       }
-    } else if (Result->hasInputRedirection &&
-               strcmp(Result->inFile, "") == 0) {
+    } else if (Result->hasInputRedirection && strcmp(Result->inFile, "") == 0) {
       i = copy_substring(Result->inFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
-        fprintf(stderr, "Error. The input redirection filename exceeds the "
-                        "%d character limit.\n",
+        fprintf(stderr,
+                "Error. The input redirection filename exceeds the "
+                "%d character limit.\n",
                 FILE_MAX_SIZE);
         free_info(Result);
         return NULL;
@@ -72,8 +78,9 @@ struct ParseInfo *parse(const char *cmdline) {
                strcmp(Result->outFile, "") == 0) {
       i = copy_substring(Result->outFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
-        fprintf(stderr, "Error. The output redirection filename exceeds the "
-                        "%d character limit.\n",
+        fprintf(stderr,
+                "Error. The output redirection filename exceeds the "
+                "%d character limit.\n",
                 FILE_MAX_SIZE);
         free_info(Result);
         return NULL;
@@ -92,7 +99,7 @@ struct ParseInfo *parse(const char *cmdline) {
         cmd = malloc(sizeof(struct Command));
         init_command(cmd);
       } else if (!isspace(cmdline[i])) {
-        char *arg = malloc(MAXLINE * sizeof(char));
+        char* arg = malloc(MAXLINE * sizeof(char));
         i = copy_substring(arg, cmdline, i, MAXLINE);
         if (i == -1) {
           fprintf(stderr,
@@ -117,8 +124,9 @@ struct ParseInfo *parse(const char *cmdline) {
  * is encountered. Returns the index of the last valid character found. Returns
  * -1 if the length of the new string is greater than the supplied limit.
  */
-int copy_substring(char *dest, const char *src, const int begin,
-                   const int limit) {
+int
+copy_substring(char* dest, const char* src, const int begin, const int limit)
+{
   int end = begin;
   for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++)
     ;
@@ -128,7 +136,9 @@ int copy_substring(char *dest, const char *src, const int begin,
   return end - 1;
 }
 
-void print_info(const struct ParseInfo *info) {
+void
+print_info(const struct ParseInfo* info)
+{
   if (!info) return;
   for (int i = 0; i <= info->pipeNum; i++) {
     printf("prog: %s\n", info->CommArray[i].command);
@@ -151,7 +161,9 @@ void print_info(const struct ParseInfo *info) {
   printf("background: %s\n", (info->runInBackground) ? "yes" : "no");
 }
 
-void free_info(const struct ParseInfo *info) {
+void
+free_info(const struct ParseInfo* info)
+{
   if (!info) return;
 
   for (int i = 0; i < info->pipeNum; i++) {
@@ -161,5 +173,5 @@ void free_info(const struct ParseInfo *info) {
       if (cmd.VarList[i]) free(cmd.VarList[i]);
     }
   }
-  free((void *)info);
+  free((void*)info);
 }
