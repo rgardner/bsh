@@ -60,7 +60,7 @@ int
 alias(const int argc, char** argv)
 {
   // Print all aliases.
-  if (argc == 0) {
+  if (argc == 1) {
     aliases_print();
     return 0;
   }
@@ -96,23 +96,35 @@ void
 alias_help()
 {
   printf(
-    "usage: alias [name[=value] ... ]\n\n"
-    "`alias`: print all existing aliases.\n"
-    "`alias name`: print the value associated with name.\n"
-    "`alias name=value`: create / modify name to be an alias for value.\n");
+    "usage: alias [name[=value] ... ]\n"
+    "  alias: print all existing aliases.\n"
+    "  alias name: print the value associated with name.\n"
+    "  alias name=value: create / modify name to be an alias for value.\n");
 }
 
 int
 unalias(const int argc, char** argv)
 {
-  if (argc == 0) {
+  if (argc == 1) {
     unalias_help();
     return 2;
   }
 
+  // remove all aliases
+  if (strcmp(argv[1], "-a") == 0) {
+    for (Node* curr = aliases->head; curr; curr = curr->next) {
+      Alias* al = curr->data;
+      bool success = alias_remove(al->name);
+      assert(success);
+    }
+
+    return 0;
+  }
+  
   bool all_found = true;
-  for (int i = 0; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     if (!alias_remove(argv[i])) {
+      fprintf(stderr, "-bsh: unalias: %s: not found\n", argv[i]);
       all_found = false;
     }
   }
@@ -123,12 +135,17 @@ unalias(const int argc, char** argv)
 void
 unalias_help()
 {
-  printf("usage: unalias [-a] name [name ...]\n");
+  printf(
+    "usage: unalias [-a] name [name ...]\n"
+    "  Remove NAMEs from the list of defined aliases. If the -a option is\n"
+    "  given, then remove all alias definitions.\n");
 }
 
 int
 alias_exp(const char* string, char** output)
 {
+  *output = NULL;
+
   // Return if no alias exists for string.
   Alias* result = alias_search(string);
   if (!result) {
@@ -185,6 +202,7 @@ alias_insert_sorted(Alias* a)
     }
     prev = curr;
   }
+
   ll_add_after(aliases, prev, a);
 }
 

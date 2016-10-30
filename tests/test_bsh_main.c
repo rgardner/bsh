@@ -5,7 +5,8 @@
 int
 main(void)
 {
-  SRunner* sr = srunner_create(make_history_suite());
+  SRunner* sr = srunner_create(make_alias_suite());
+  srunner_add_suite(sr, make_history_suite());
   srunner_add_suite(sr, make_job_suite());
   srunner_add_suite(sr, make_stack_suite());
   srunner_add_suite(sr, make_parse_suite());

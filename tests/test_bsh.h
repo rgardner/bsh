@@ -2,12 +2,13 @@
 #define TEST_BSH_H
 #include <check.h>
 
-void stack_setup(void);
-void stack_teardown(void);
+void stack_setup();
+void stack_teardown();
 
-Suite* make_history_suite(void);
-Suite* make_job_suite(void);
-Suite* make_stack_suite(void);
-Suite* make_parse_suite(void);
-Suite* make_util_suite(void);
+Suite* make_alias_suite();
+Suite* make_history_suite();
+Suite* make_job_suite();
+Suite* make_stack_suite();
+Suite* make_parse_suite();
+Suite* make_util_suite();
 #endif /* TEST_BSH_H */

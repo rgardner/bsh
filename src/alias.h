@@ -40,10 +40,11 @@ void unalias_help();
 /** Expand alias value for string.
  *
  *  @param name The name of the alias.
- *  @param[out] output The memory area to copy the alias's value to.
+ *  @param[out] output The memory area to copy the alias's value to. Remember to
+ *                     free this.
  *  @return
  *  0 if no expansion occurred;
- *  1 if an expansion occurred, remember to free *output;
+ *  1 if an expansion occurred;
  *  -1 if there was an error in the expansion.
  */
 int alias_exp(const char* name, char** output);

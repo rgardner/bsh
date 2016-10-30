@@ -11,6 +11,7 @@ include_directories(${CHECK_INCLUDE_DIRS})
 find_package(Threads)
 
 set(TEST_BSH_SOURCES
+  test_bsh_alias.c
   test_bsh_history.c
   test_bsh_job.c
   test_bsh_main.c
