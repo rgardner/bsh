@@ -1,6 +1,5 @@
 #include "../src/job.h"
 #include "../src/parse.h"
-#include "test_util.h"
 #include <check.h>
 #include <stdlib.h>
 #include <termios.h>

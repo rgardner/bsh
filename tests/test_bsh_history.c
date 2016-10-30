@@ -1,6 +1,5 @@
 #include "../src/history.h"
 #include "test_bsh.h"
-#include "test_util.h"
 #include <check.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -20,7 +19,7 @@ history_teardown(void)
 START_TEST(test_history_add_increments_length)
 {
   ck_assert_int_eq(history_length, 0);
-  char* s = new_str("new_command");
+  char* s = strdup("new_command");
   history_add(s);
   ck_assert_int_eq(history_length, 1);
   free(s);
@@ -45,7 +44,7 @@ END_TEST
 
 START_TEST(test_history_exp_occurred)
 {
-  char* s = new_str("new_command");
+  char* s = strdup("new_command");
   history_add(s);
   char* expansion;
   const int his_res = history_exp("!-1\n", &expansion);
