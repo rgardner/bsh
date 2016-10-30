@@ -58,6 +58,7 @@ To generate the documentation:
 $ mkdir -p build && cd build
 $ cmake ..
 $ make doc
+$ open doc/html/index.html
 ```
 
 
@@ -72,11 +73,17 @@ two functions that make working with strings much easier. [This
 paper](https://www.sudo.ws/todd/papers/strlcpy.html) does a good job of
 explaining the design intentions of these functions.
 
-**libreadline-dev**
+**libreadline-dev** is required on Ubuntu to embed `readline` in an
+application. `readline` is only used to grab text from the user; its history
+capabilities are not used and are instead re-implemented as a learning
+exercise.
 
-**pkg-config**
+**pkg-config** is required on Ubuntu to help install `libbsd`. It makes it
+easier to port this project to other systems because it helps us avoid
+hard-coding dependencies.
 
-**doxygen**
+**doxygen** is a tool to generate documentation. Source comments are annotated
+using a JavaDoc-like style, which `doxygen` uses to create HTML and PDFs.
 
 **check** is the unit-testing framework chosen for this project. It is one of
 the most popular C unit-testing frameworks and works well with `cmake`.
