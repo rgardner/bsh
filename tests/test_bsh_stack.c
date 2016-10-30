@@ -1,22 +1,32 @@
-#include <stdlib.h>
-#include <check.h>
-#include "test_bsh.h"
 #include "../src/stack.h"
+#include "test_bsh.h"
+#include <check.h>
+#include <stdlib.h>
 
 static char data[1024] = "element 1";
-static struct Stack *s;
+static struct Stack* s;
 
-void stack_setup(void) { s = stack_init(); }
+void
+stack_setup(void)
+{
+  s = stack_init();
+}
 
-void stack_teardown(void) { stack_free(s); }
+void
+stack_teardown(void)
+{
+  stack_free(s);
+}
 
-START_TEST(test_stack_create) {
+START_TEST(test_stack_create)
+{
   ck_assert_msg(s != NULL, "new stack should not be NULL");
 }
 END_TEST
 
-START_TEST(test_push_normal) {
-  char *elem = strndup(data, sizeof(char) * strlen(data));
+START_TEST(test_push_normal)
+{
+  char* elem = strndup(data, sizeof(char) * strlen(data));
   stack_push(s, elem);
   ck_assert_msg(stack_peak(s) == elem,
                 "element should be on the top of the stack");
@@ -24,17 +34,19 @@ START_TEST(test_push_normal) {
 }
 END_TEST
 
-START_TEST(test_pop_normal) {
-  char *elem = strndup(data, strlen(data));
+START_TEST(test_pop_normal)
+{
+  char* elem = strndup(data, strlen(data));
   stack_push(s, elem);
-  char *other = stack_pop(s);
+  char* other = stack_pop(s);
   ck_assert_msg(elem == other, "pop should remove an element");
   free(elem);
 }
 END_TEST
 
-START_TEST(test_push_pop) {
-  char *elem = strndup(data, strlen(data));
+START_TEST(test_push_pop)
+{
+  char* elem = strndup(data, strlen(data));
   stack_push(s, elem);
   stack_pop(s);
   ck_assert_msg(stack_peak(s) == NULL,
@@ -43,11 +55,13 @@ START_TEST(test_push_pop) {
 }
 END_TEST
 
-Suite *make_stack_suite(void) {
-  Suite *s = suite_create("Stack");
+Suite*
+make_stack_suite(void)
+{
+  Suite* s = suite_create("Stack");
 
   /* Core test case. */
-  TCase *tc = tcase_create("Core");
+  TCase* tc = tcase_create("Core");
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, stack_setup, stack_teardown);

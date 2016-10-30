@@ -1,9 +1,10 @@
+#include "../src/util.h"
+#include "test_bsh.h"
 #include <check.h>
 #include <stdlib.h>
-#include "test_bsh.h"
-#include "../src/util.h"
 
-START_TEST(trim_newline) {
+START_TEST(trim_newline)
+{
   char* s = strdup("user_input\n");
   size_t new_len = trim_right(s);
   ck_assert_str_eq(s, "user_input");
@@ -12,7 +13,8 @@ START_TEST(trim_newline) {
 }
 END_TEST
 
-START_TEST(trim_no_newline) {
+START_TEST(trim_no_newline)
+{
   char* s = strdup("user_input");
   size_t new_len = trim_right(s);
   ck_assert_str_eq(s, "user_input");
@@ -21,7 +23,8 @@ START_TEST(trim_no_newline) {
 }
 END_TEST
 
-START_TEST(trim_lots_of_whitespace) {
+START_TEST(trim_lots_of_whitespace)
+{
   char* s = strdup("user_input        \n    ");
   size_t new_len = trim_right(s);
   ck_assert_str_eq(s, "user_input");
@@ -30,11 +33,13 @@ START_TEST(trim_lots_of_whitespace) {
 }
 END_TEST
 
-Suite *make_util_suite(void) {
-  Suite *s = suite_create("Util");
+Suite*
+make_util_suite(void)
+{
+  Suite* s = suite_create("Util");
 
   /* Core test case. */
-  TCase *tc = tcase_create("Core");
+  TCase* tc = tcase_create("Core");
 
   suite_add_tcase(s, tc);
   tcase_add_test(tc, trim_newline);
