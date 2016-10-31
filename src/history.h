@@ -4,7 +4,7 @@
 /** Default maximum number of history entries. */
 #define HISTSIZE 10
 
-/* The number of entries currently stored in the history list. */
+/** The number of entries currently stored in the history list. */
 extern int history_length;
 
 /** Maximum number of history entries.

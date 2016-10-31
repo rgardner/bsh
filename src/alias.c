@@ -120,7 +120,7 @@ unalias(const int argc, char** argv)
 
     return 0;
   }
-  
+
   bool all_found = true;
   for (int i = 1; i < argc; i++) {
     if (!alias_remove(argv[i])) {
