@@ -15,24 +15,23 @@ typedef struct _hist_entry
   histdata_t data;
 } HIST_ENTRY;
 
-/* A structure used to pass around the current state of the history. */
+/** A structure used to pass around the current state of the history. */
 typedef struct _hist_state
 {
-  HIST_ENTRY** entries; /* Pointer to the entries themselves. */
-  int count;            /* The total number of items ever saved. */
-  int length;           /* Number of elements within this array. */
-  int size;             /* Number of slots allocated to this array. */
+  HIST_ENTRY** entries; /**< Pointer to the entries themselves. */
+  int count;            /**< The total number of items ever saved. */
+  int length;           /**< Number of elements within this array. */
+  int size;             /**< Number of slots allocated to this array. */
 } HISTORY_STATE;
 
-/* Function prototypes. */
+// Function prototypes
 histdata_t free_hist_entry(const HIST_ENTRY*);
 
-/* Global variables. */
-/* Public global variables. */
+// Public global variables
 int history_length;
 int history_max_entries;
 
-/* Private global variables. */
+// Private global variables
 HISTORY_STATE state;
 
 void
@@ -52,38 +51,44 @@ history_init()
 int
 history_exp(const char* string, char** output)
 {
-  if (!(*output = strdup(string))) {
-    return -1;
-  }
+  *output = NULL;
 
   // Ensure string is nonempty.
-  if (string[0] == '\0') return 0;
+  if (string[0] == '\0') {
+    return 0;
+  }
 
   // Skip blank characters at the start of the string.
   int i = 0;
   for (; isspace(string[i]) && string[i] != '\n' && string[i] != '\0'; i++)
     ;
-  if (string[i] != '!') return 0;
 
-  // Start of expansion.
-  int command;
-  int ret = sscanf(string + i, "!%d", &command);
-  if (ret != 1) return -1;
-
-  // Ensure command is within the bounds of the size of the history.
-  if (command < 0) {
-    if (command <= -state.size) return -1;
-    command = state.count + command;
-  } else {
-    if (command < (state.count - HISTSIZE) || command > state.count) return -1;
+  if (string[i] != '!') {
+    return 0;
   }
 
-  char* line = state.entries[command]->line;
-  if (!(*output = reallocf(*output, sizeof(char) * (strlen(line) + 1)))) {
+  int command;
+  if (sscanf(string + i, "!%d", &command) != 1) {
     return -1;
   }
 
-  strcpy(*output, line);
+  // Ensure command is within the bounds of the size of the history.
+  if (command < 0) {
+    if (command <= -state.size) {
+      return -1;
+    }
+
+    command = state.count + command;
+  } else {
+    if (command < (state.count - HISTSIZE) || command > state.count) {
+      return -1;
+    }
+  }
+
+  if (!(*output = strdup(state.entries[command]->line))) {
+    return -1;
+  }
+
   return 1;
 }
 

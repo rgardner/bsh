@@ -21,10 +21,11 @@ void history_init();
 
 /** Expand string, placing the result into output, a pointer to a string.
  *
+ * @note Unlike GNU History, output only needs to be freed if expansion occurrs.
  * @return
  *   0: if no expansion took place;
  *   1: if expansions did take place;
- *  -1: if there was an error in expansion.
+ *  -1: if an error occurred.
  */
 int history_exp(const char* string, char** output);
 

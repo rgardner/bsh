@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <err.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -216,10 +217,11 @@ main(int argc, char** argv)
 
   while (true) {
     // Read input, parse history, parse alias, execute.
-    char* cmd_line = NULL;
 
     char prompt[MAX_PROMPT_LENGTH];
     build_prompt(prompt, sizeof(prompt));
+
+    char* cmd_line = NULL;
     if (!(cmd_line = readline(prompt))) {
       // Quit on EOF terminated empty line.
       printf("\n");
@@ -233,44 +235,40 @@ main(int argc, char** argv)
       continue;
     }
 
-    // skip empty input
-    if (strcmp(cmd_line, "") == 0) {
+    if (strlen(cmd_line) == 0) {
       free(cmd_line);
       continue;
     }
 
-    // remove trailing whitespace (especially the newline)
     trim_right(cmd_line);
 
     // Look up in history.
     char* expansion = NULL;
     const int his_res = history_exp(cmd_line, &expansion);
-    if (his_res < 0 || his_res == 2) {
-      // error or should not execute
-      free(expansion);
+    if (his_res < 0) {
       free(cmd_line);
       continue;
-    }
-    history_add(expansion);
-
-    if (his_res == 1) {
-      // Copy expansion into cmdLine.
-      const size_t exp_length = strlen(expansion);
-      if (strlen(cmd_line) != exp_length) {
-        if (!(cmd_line = reallocf(cmd_line, (exp_length + 1) * sizeof(char)))) {
+    } else if (his_res == 1) {
+      const size_t oldsz = (strlen(cmd_line) + 1) * sizeof(char);
+      const size_t newsz = strlcpy(cmd_line, expansion, oldsz);
+      if (newsz > oldsz) {
+        if (!(cmd_line = reallocf(cmd_line, newsz))) {
           free(expansion);
           continue;
         }
+
+        size_t check = strlcpy(cmd_line, expansion, newsz);
+        assert(check == newsz);
       }
-      strncpy(cmd_line, expansion, exp_length);
-      cmd_line[exp_length + 1] = '\0';
+      free(expansion);
     }
-    free(expansion);
+
+    history_add(cmd_line);
 
     // Call the parser.
     struct ParseInfo* info = parse(cmd_line);
+    free(cmd_line);
     if (!info) {
-      free(cmd_line);
       continue;
     }
 
@@ -295,7 +293,6 @@ main(int argc, char** argv)
     const struct Command* cmd = &info->CommArray[0];
     if (!cmd || !cmd->command) {
       free_info(info);
-      free(cmd_line);
       continue;
     }
 
