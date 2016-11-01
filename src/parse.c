@@ -55,7 +55,7 @@ parse(const char* cmdline)
     // command1 < infile | command > outfile &
     if (isspace(cmdline[i])) continue;
 
-    if (strcmp(cmd->command, "") == 0) {
+    if (cmd->command[0] == '\0') {
       i = copy_substring(cmd->command, cmdline, i, MAXLINE);
       if (i == -1) {
         fprintf(stderr, "Error. The command exceeds the %d character limit.\n",
@@ -64,7 +64,7 @@ parse(const char* cmdline)
         free_info(Result);
         return NULL;
       }
-    } else if (Result->hasInputRedirection && strcmp(Result->inFile, "") == 0) {
+    } else if (Result->hasInputRedirection && Result->inFile[0] == '\0') {
       i = copy_substring(Result->inFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
         fprintf(stderr,
@@ -74,8 +74,7 @@ parse(const char* cmdline)
         free_info(Result);
         return NULL;
       }
-    } else if (Result->hasOutputRedirection &&
-               strcmp(Result->outFile, "") == 0) {
+    } else if (Result->hasOutputRedirection && Result->outFile[0] == '\0') {
       i = copy_substring(Result->outFile, cmdline, i, FILE_MAX_SIZE);
       if (i == -1) {
         fprintf(stderr,

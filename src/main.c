@@ -234,14 +234,13 @@ main(int argc, char** argv)
       continue;
     }
 
-    if (strlen(cmd_line) == 0) {
+    if (cmd_line[0] == '\0') {
       free(cmd_line);
       continue;
     }
 
     trim_right(cmd_line);
 
-    // Look up in history.
     char* expansion = NULL;
     const int his_res = history_exp(cmd_line, &expansion);
     if (his_res < 0) {
@@ -259,12 +258,12 @@ main(int argc, char** argv)
         size_t check = strlcpy(cmd_line, expansion, newsz);
         assert(check == newsz);
       }
+
       free(expansion);
     }
 
     history_add(cmd_line);
 
-    // Call the parser.
     struct ParseInfo* info = parse(cmd_line);
     free(cmd_line);
     if (!info) {
