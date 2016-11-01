@@ -124,8 +124,14 @@ history_add(const char* string)
 void
 history_stifle(const int max)
 {
-  if (max < 0) return;            // can't record a negative number of commands
-  if (state.size == max) return;  // nothing to change
+  if (max < 0) {
+    // can't record a negative number of commands
+    return;
+  }
+
+  if (state.size == max) {
+    return;
+  }
 
   if (state.length > max) {
     int start = state.count - max + 1;
@@ -142,6 +148,7 @@ history_stifle(const int max)
   } else if (state.length < max) {
     state.entries = realloc(state.entries, sizeof(HIST_ENTRY) * max);
   }
+
   state.size = max;
   history_max_entries = state.size;
 }
@@ -178,11 +185,19 @@ void
 history_help()
 {
   printf(
-    "usage: history [num] [-s num]\n\n"
-    "history: print the list of previously executed commands.\n"
-    "history num: return the last `num` commands.\n"
-    "history -s num: set the size of the history buffer.\n"
-    "!1 repeats the command numbered `1` in the list of commands "
-    "return by history.\n"
-    "!-1 repeats the last command.\n");
+    "usage: history [-c] [n] [-s n]\n"
+    "\n"
+    "  Display or manipulate the history list.\n"
+    "\n"
+    "  Display the history list. An argument of N lists only the last N "
+    "entries.\n"
+    "\n"
+    "  Options:\n"
+    "    -s       set the size of the history buffer\n"
+    "\n"
+    "HISTORY SUBSTITUTION\n"
+    "  !1 repeats the command numbered `1' in the list of commands returned "
+    "by\n"
+    "  history.\n"
+    "  !-1 repeats the last command.\n");
 }

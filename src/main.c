@@ -24,7 +24,6 @@
 
 #define MAX_PROMPT_LENGTH 1024
 #define COMMAND_NOT_FOUND_EXIT_CODE 127
-#define UNUSED(x) (void)(x)
 
 pid_t shell_pgid;
 struct termios shell_tmodes;

@@ -1,8 +1,5 @@
 #include "builtins.h"
 
-#include "linked_list.h"
-#include "stack.h"
-
 #include <err.h>
 #include <signal.h>
 #include <stdio.h>
@@ -20,11 +17,12 @@
 #include "bg_jobs.h"
 #include "history.h"
 #include "job.h"
+#include "linked_list.h"
 #include "parse.h"
+#include "stack.h"
+#include "util.h"
 
-#define UNUSED(x) (void)(x)
-
-/* Function prototypes. */
+// Function prototypes.
 static char* cd(int, char**);
 static void history_wrapper(int, char**);
 static int dirs(int, char**);
@@ -34,7 +32,7 @@ static void which(int, char**);
 static bool which_is_there(const char*);
 static int which_print_matches(char*, const char*);
 
-/* Global variables */
+// Global variables
 struct Stack* directory_stack;
 
 void
@@ -46,7 +44,7 @@ builtins_init()
   history_init();
 }
 
-/* Print helpful information. */
+/** Print helpful information. */
 void
 help(int command)
 {
@@ -194,18 +192,18 @@ cd(const int argc, char** argv)
 static void
 history_wrapper(const int argc, char** argv)
 {
-  if (argc == 2) {  // set the history size
-    if (strncmp(argv[0], "-s", strlen("-s")) == 0) {
-      int hist_size = strtol(argv[1], (char**)NULL, 10);
-      history_stifle(hist_size);
+  if (argc == 1) {
+    history_print(history_length);
+  } else if (argc == 2) {
+    const int num = atoi(argv[1]);
+    history_print(num);
+  } else {
+    if (strncmp(argv[1], "-s", strlen("-s")) == 0) {
+      const int hist_sz = atoi(argv[2]);
+      history_stifle(hist_sz);
     } else {
       help(HISTORY);
     }
-  } else if (argc == 1) {  // return the last num commands
-    int num = strtol(argv[0], (char**)NULL, history_length);
-    history_print(num);
-  } else {  // print the entire history
-    history_print(history_length);
   }
 }
 

@@ -1,7 +1,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <stddef.h>
+#include <stddef.h>  // size_t
+
+/** Silence unused variable warnings. */
+#define UNUSED(x) (void)(x)
 
 /** Remove trailing whitespace.
  *
