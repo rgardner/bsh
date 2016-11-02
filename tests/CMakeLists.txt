@@ -12,6 +12,7 @@ find_package(Threads)
 
 set(TEST_BSH_SOURCES
   test_bsh_alias.c
+  test_bsh_circular_queue.c
   test_bsh_history.c
   test_bsh_job.c
   test_bsh_main.c

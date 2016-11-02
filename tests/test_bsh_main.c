@@ -1,15 +1,18 @@
 #include "test_bsh.h"
+
 #include <check.h>
 #include <stdlib.h>
 
 int
-main(void)
+main()
 {
   SRunner* sr = srunner_create(make_alias_suite());
+  srunner_add_suite(sr, make_circular_queue_suite());
   srunner_add_suite(sr, make_history_suite());
   srunner_add_suite(sr, make_job_suite());
   srunner_add_suite(sr, make_stack_suite());
   srunner_add_suite(sr, make_parse_suite());
+
   srunner_run_all(sr, CK_VERBOSE);
   int num_failed = srunner_ntests_failed(sr);
   srunner_free(sr);

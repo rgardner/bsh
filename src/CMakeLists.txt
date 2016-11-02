@@ -2,6 +2,7 @@ set(LIB_SOURCES
   alias.c
   bg_jobs.c
   builtins.c
+  circular_queue.c
   history.c
   linked_list.c
   job.c
@@ -20,6 +21,7 @@ set(HEADERS
   alias.h
   bg_jobs.h
   builtins.h
+  circular_queue.h
   dbg.h
   history.h
   linked_list.h

@@ -12,6 +12,12 @@
 /** Silence unused variable warnings. */
 #define UNUSED(x) (void)(x)
 
+/** Get size of struct member.
+ *
+ *  http://stackoverflow.com/a/3553321/4228400
+ */
+#define MEMBER_SIZE(type, member) (sizeof(((type *)0)->member))
+
 /** Remove trailing whitespace.
  *
  *  @return New length of s.

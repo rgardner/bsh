@@ -6,6 +6,7 @@ void stack_setup();
 void stack_teardown();
 
 Suite* make_alias_suite();
+Suite* make_circular_queue_suite();
 Suite* make_history_suite();
 Suite* make_job_suite();
 Suite* make_stack_suite();
