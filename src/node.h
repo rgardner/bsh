@@ -1,4 +1,8 @@
-/** A node in a singly-linked list. */
+/** A node in a singly-linked list.
+ *
+ *  @file
+ *
+ */
 
 #ifndef NODE_H
 #define NODE_H

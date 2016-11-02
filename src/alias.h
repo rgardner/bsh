@@ -1,5 +1,7 @@
 /** Provides alias creation, expansion, and removal capabilities.
  *
+ *  @file
+ *
  *  Aliases map names to commands. Before aliases can be used, the alias data
  *  data structures must be initialized.
  */

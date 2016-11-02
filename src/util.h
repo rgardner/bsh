@@ -1,3 +1,9 @@
+/** Utility functions and macros.
+ *
+ *  @file
+ *
+ */
+
 #ifndef UTIL_H
 #define UTIL_H
 

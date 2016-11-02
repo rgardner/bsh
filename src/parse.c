@@ -1,7 +1,9 @@
-/**************************************************************************
- *    parse.c - Parsing portion of my small shell
- *    Syntax:   myshell command1 [< infile] [| command]* [> outfile] [&]
- *************************************************************************/
+/** Parser implementation.
+ *
+ *  @file
+ *
+ *  Syntax: myshell command1 [< infile] [| command]* [> outfile] [&]
+ */
 
 #include "parse.h"
 
