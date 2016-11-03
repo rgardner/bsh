@@ -248,14 +248,14 @@ main(int argc, char** argv)
       continue;
     } else if (his_res == 1) {
       const size_t oldsz = (strlen(cmd_line) + 1) * sizeof(char);
-      const size_t newsz = strlcpy(cmd_line, expansion, oldsz);
+      const size_t newsz = strlcpy(cmd_line, expansion, oldsz) + 1;
       if (newsz > oldsz) {
         if (!(cmd_line = reallocf(cmd_line, newsz))) {
           free(expansion);
           continue;
         }
 
-        size_t check = strlcpy(cmd_line, expansion, newsz);
+        size_t check = strlcpy(cmd_line, expansion, newsz) + 1;
         assert(check == newsz);
       }
 
