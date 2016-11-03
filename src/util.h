@@ -16,7 +16,7 @@
  *
  *  http://stackoverflow.com/a/3553321/4228400
  */
-#define MEMBER_SIZE(type, member) (sizeof(((type *)0)->member))
+#define MEMBER_SIZE(type, member) (sizeof(((type*)0)->member))
 
 /** Remove trailing whitespace.
  *

@@ -16,7 +16,7 @@ alias_teardown()
 
 START_TEST(test_alias_add_expand)
 {
-  char* argv[] = {"alias", "bob=echo"};
+  char* argv[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv), 0);
 
   char* expansion;
@@ -28,13 +28,13 @@ END_TEST
 
 START_TEST(test_alias_print_several)
 {
-  char* argv[] = {"alias", "bob=echo"};
+  char* argv[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv), 0);
 
-  char* argv2[] = {"alias", "harry=echo"};
+  char* argv2[] = { "alias", "harry=echo" };
   ck_assert_int_eq(alias(2, argv2), 0);
 
-  char* argv_print[] = {"alias", "bob", "harry"};
+  char* argv_print[] = { "alias", "bob", "harry" };
   ck_assert_int_eq(alias(3, argv_print), 0);
 }
 END_TEST
@@ -42,40 +42,40 @@ END_TEST
 START_TEST(test_alias_print_some_do_not_exist)
 {
 
-  char* argv[] = {"alias", "bob=echo"};
+  char* argv[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv), 0);
 
-  char* argv_print[] = {"alias", "bob", "harry"};
+  char* argv_print[] = { "alias", "bob", "harry" };
   ck_assert_int_ne(alias(3, argv_print), 0);
 }
 END_TEST
 
 START_TEST(test_alias_print_all)
 {
-  char* argv[] = {"alias", "bob=echo"};
+  char* argv[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv), 0);
 
-  char* argv2[] = {"alias", "harry=echo"};
+  char* argv2[] = { "alias", "harry=echo" };
   ck_assert_int_eq(alias(2, argv2), 0);
 
-  char* argv_print[] = {"alias"};
+  char* argv_print[] = { "alias" };
   ck_assert_int_eq(alias(1, argv_print), 0);
 }
 END_TEST
 
 START_TEST(test_unalias_no_args)
 {
-  char* argv[] = {"unalias"};
+  char* argv[] = { "unalias" };
   ck_assert_int_ne(unalias(1, argv), 0);
 }
 END_TEST
 
 START_TEST(test_unalias_exists)
 {
-  char* argv_alias[] = {"alias", "bob=echo"};
+  char* argv_alias[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv_alias), 0);
 
-  char* argv_unalias[] = {"unalias", "bob"};
+  char* argv_unalias[] = { "unalias", "bob" };
   ck_assert_int_eq(unalias(2, argv_unalias), 0);
 
   char* expansion;
@@ -86,20 +86,20 @@ END_TEST
 
 START_TEST(test_unalias_does_not_exist)
 {
-  char* argv[] = {"unalias", "bob"};
+  char* argv[] = { "unalias", "bob" };
   ck_assert_int_ne(unalias(2, argv), 0);
 }
 END_TEST
 
 START_TEST(test_unalias_remove_all)
 {
-  char* argv_alias[] = {"alias", "bob=echo"};
+  char* argv_alias[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv_alias), 0);
 
-  char* argv_alias2[] = {"alias", "harry=echo"};
+  char* argv_alias2[] = { "alias", "harry=echo" };
   ck_assert_int_eq(alias(2, argv_alias2), 0);
 
-  char* argv[] = {"unalias", "-a"};
+  char* argv[] = { "unalias", "-a" };
   ck_assert_int_eq(unalias(2, argv), 0);
 }
 END_TEST
@@ -109,7 +109,6 @@ START_TEST(test_alias_expand_does_not_exist)
   char* expansion = NULL;
   ck_assert_int_eq(alias_exp("alias", &expansion), 0);
   ck_assert(!expansion);
-
 }
 END_TEST
 
