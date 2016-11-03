@@ -27,15 +27,27 @@ circular_queue_init(const size_t capacity)
 }
 
 void
+circular_queue_free(circular_queue* queue)
+{
+  if (queue->entries) {
+    free(queue->entries);
+  }
+
+  free(queue);
+}
+
+void*
 circular_queue_push(circular_queue* const queue, void* elem)
 {
+  void* old = NULL;
   void** entry = &(queue->entries[queue->count % queue->capacity]);
   if (*entry) {
-    free(*entry);
+    old = *entry;
   }
 
   *entry = elem;
   queue->count++;
+  return old;
 }
 
 void*
@@ -65,20 +77,4 @@ circular_queue_set_capacity(circular_queue* queue, const size_t capacity)
 {
   UNUSED(queue);
   UNUSED(capacity);
-}
-
-void
-circular_queue_free(circular_queue* queue)
-{
-  if (queue->entries) {
-    for (size_t i = 0; i < queue->capacity; i++) {
-      if (queue->entries[i]) {
-        free(queue->entries[i]);
-      }
-    }
-
-    free(queue->entries);
-  }
-
-  free(queue);
 }

@@ -21,7 +21,7 @@ END_TEST
 START_TEST(test_cq_push_one)
 {
   circular_queue* queue = circular_queue_init(10);
-  void* elem = strdup("0th element");
+  void* elem = "0th element";
   circular_queue_push(queue, elem);
   void* ret = circular_queue_get(queue, 0);
   ck_assert_ptr_eq(ret, elem);
@@ -33,12 +33,12 @@ START_TEST(test_cq_push_above_capacity)
 {
   // 1 capacity: push is in-place swap
   circular_queue* queue1 = circular_queue_init(1);
-  void* elem = strdup("count0");
+  void* elem = "count0";
   circular_queue_push(queue1, elem);
   void* ret = circular_queue_get(queue1, 0);
   ck_assert_ptr_eq(ret, elem);
 
-  void* another_elem = strdup("count1");
+  void* another_elem = "count1";
   circular_queue_push(queue1, another_elem);
   ret = circular_queue_get(queue1, 1);
   ck_assert_ptr_eq(ret, another_elem);
@@ -46,11 +46,11 @@ START_TEST(test_cq_push_above_capacity)
 
   // 2 capacity: simple to reason about
   circular_queue* queue2 = circular_queue_init(2);
-  circular_queue_push(queue2, strdup("count0"));
-  circular_queue_push(queue2, strdup("count1"));
+  circular_queue_push(queue2, "count0");
+  circular_queue_push(queue2, "count1");
   ck_assert(circular_queue_get(queue2, 0));
   ck_assert(circular_queue_get(queue2, 1));
-  circular_queue_push(queue2, strdup("count2"));
+  circular_queue_push(queue2, "count2");
   ck_assert(!circular_queue_get(queue2, 0));
   ck_assert(circular_queue_get(queue2, 1));
   ck_assert(circular_queue_get(queue2, 2));
@@ -63,7 +63,10 @@ START_TEST(test_cq_push_above_capacity)
   for (size_t i = 0; i < elems_to_add; i++) {
     char* dyn_elem;
     asprintf(&dyn_elem, "e%zu", i);
-    circular_queue_push(norm, dyn_elem);
+    char* old = circular_queue_push(norm, dyn_elem);
+    if (old) {
+      free(old);
+    }
   }
 
   for (size_t i = 0; i < elems_to_add - capacity; i++) {
@@ -75,6 +78,7 @@ START_TEST(test_cq_push_above_capacity)
     asprintf(&computed, "e%zu", i);
     char* actual = circular_queue_get(norm, i);
     ck_assert_str_eq(actual, computed);
+    free(actual);
     free(computed);
   }
 
