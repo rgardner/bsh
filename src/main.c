@@ -224,7 +224,7 @@ main(int argc, char** argv)
     if (!(cmd_line = readline(prompt))) {
       // Quit on EOF terminated empty line.
       printf("\n");
-      exit(EXIT_SUCCESS);
+      break;
     }
 
     // check command line length
@@ -305,4 +305,7 @@ main(int argc, char** argv)
       job_free(j);
     }
   }
+
+  history_free();
+  return EXIT_SUCCESS;
 }
