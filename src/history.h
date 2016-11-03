@@ -32,7 +32,8 @@ void history_init();
 
 /** Expand string, placing the result into output, a pointer to a string.
  *
- *  @note Unlike GNU History, output only needs to be freed if expansion occurrs.
+ *  @note Unlike GNU History, output only needs to be freed if expansion
+ *        occurrs.
  *  @param string The history command.
  *  @param[out] output The command found in history if it exists.
  *  @return
