@@ -30,6 +30,8 @@ extern int history_max_entries;
  */
 void history_init();
 
+void history_free();
+
 /** Expand string, placing the result into output, a pointer to a string.
  *
  *  @note Unlike GNU History, output only needs to be freed if expansion
