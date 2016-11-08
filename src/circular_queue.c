@@ -1,10 +1,14 @@
 #include "circular_queue.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "util.h"
+
+bool increase_capacity(circular_queue* queue, size_t capacity);
+bool decrease_capacity(circular_queue* queue, size_t capacity);
 
 circular_queue*
 circular_queue_init(const size_t capacity)
@@ -53,17 +57,11 @@ circular_queue_push(circular_queue* const queue, void* elem)
 void*
 circular_queue_get(const circular_queue* const queue, const size_t pos)
 {
-  if (pos > queue->count) {
+  if (pos >= queue->count) {
     return NULL;
   }
 
-  // because size_t is unsigned and casting to int is dangerous, we can't simply
-  // do: (pos < (queue->count - queue->capacity))
-  if (queue->count < queue->capacity) {
-    if (pos > queue->count) {
-      return NULL;
-    }
-  } else {
+  if (queue->count > queue->capacity) {
     if (pos < (queue->count - queue->capacity)) {
       return NULL;
     }
@@ -72,9 +70,54 @@ circular_queue_get(const circular_queue* const queue, const size_t pos)
   return queue->entries[pos % queue->capacity];
 }
 
-void
+bool
 circular_queue_set_capacity(circular_queue* queue, const size_t capacity)
+{
+  if (capacity == queue->capacity) {
+    return true;
+  } else if (capacity > queue->capacity) {
+    return increase_capacity(queue, capacity);
+  } else {
+    return decrease_capacity(queue, capacity);
+  }
+}
+
+/** Increase capacity of queue in O(capacity) time.
+ *
+ *  If increase_capacity() fails, queue is unchanged and false is returned.
+ *  @return true if queue capacity was successfully increased, false otherwise.
+ */
+bool
+increase_capacity(circular_queue* queue, const size_t capacity)
+{
+  void** temp = malloc(capacity * MEMBER_SIZE(circular_queue, entries));
+  if (!temp) {
+    return false;
+  }
+
+  size_t pivot = queue->count % queue->capacity;
+  for (size_t i = 0; i < pivot; i++) {
+    temp[i] = NULL;
+  }
+
+  for (size_t i = pivot; i < queue->capacity; i++) {
+    temp[i] = queue->entries[i];
+  }
+
+  for (size_t i = 0, j = queue->capacity; i < pivot; i++, j++) {
+    temp[j] = queue->entries[i];
+  }
+
+  free(queue->entries);
+  queue->entries = temp;
+  queue->capacity = capacity;
+  return true;
+}
+
+bool
+decrease_capacity(circular_queue* queue, const size_t capacity)
 {
   UNUSED(queue);
   UNUSED(capacity);
+  return true;
 }

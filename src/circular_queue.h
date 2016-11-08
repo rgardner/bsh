@@ -7,7 +7,8 @@
 #ifndef CIRCULAR_QUEUE_H
 #define CIRCULAR_QUEUE_H
 
-#include <stddef.h>  // size_t
+#include <stdbool.h>  // bool
+#include <stddef.h>   // size_t
 
 typedef struct
 {
@@ -83,5 +84,8 @@ void* circular_queue_push(circular_queue* const queue, void* elem);
  */
 void* circular_queue_get(const circular_queue* const queue, size_t pos);
 
-void circular_queue_set_capacity(circular_queue* queue, size_t capacity);
+/** Change the capacity of the queue, reallocating and copying if necessary.
+ *  @return true if queue capacity was successfully updated; false otherwise.
+ */
+bool circular_queue_set_capacity(circular_queue* queue, size_t capacity);
 #endif

@@ -86,9 +86,74 @@ START_TEST(test_cq_push_above_capacity)
 }
 END_TEST
 
+START_TEST(test_cq_get)
+{
+  circular_queue* queue1 = circular_queue_init(1);
+  ck_assert(!circular_queue_get(queue1, 0));
+  circular_queue_free(queue1);
+}
+END_TEST
+
 START_TEST(test_cq_increase_capacity)
 {
-  ck_assert(false);
+  // increase capacity without re-ordering
+  circular_queue* queue1 = circular_queue_init(5);
+  for (int i = 0; i < 5; i++) {
+    char* elem;
+    asprintf(&elem, "elem%d", i);
+    circular_queue_push(queue1, elem);
+  }
+
+  circular_queue_set_capacity(queue1, 10);
+  for (int i = 5; i < 10; i++) {
+    char* elem;
+    asprintf(&elem, "elem%d", i);
+    circular_queue_push(queue1, elem);
+  }
+
+  for (int i = 0; i < 10; i++) {
+    char* check;
+    asprintf(&check, "elem%d", i);
+    char* actual = circular_queue_get(queue1, i);
+    ck_assert_str_eq(actual, check);
+    free(actual);
+    free(check);
+  }
+
+  circular_queue_free(queue1);
+
+  // increase capacity with reordering
+  circular_queue* queue2 = circular_queue_init(10);
+  for (int i = 0; i < 15; i++) {
+    char* elem;
+    asprintf(&elem, "elem%d", i);
+    char* old = circular_queue_push(queue2, elem);
+    if (old) {
+      free(old);
+    }
+  }
+
+  circular_queue_set_capacity(queue2, 15);
+  for (int i = 0; i < 5; i++) {
+    char* elem;
+    asprintf(&elem, "elem%d", i + 15);
+    circular_queue_push(queue2, elem);
+  }
+
+  for (int i = 0; i < 20; i++) {
+    char* actual = circular_queue_get(queue2, i);
+    if (i < 5) {
+      ck_assert(!actual);
+    } else {
+      char* check;
+      asprintf(&check, "elem%d", i);
+      ck_assert_str_eq(actual, check);
+      free(check);
+      free(actual);
+    }
+  }
+
+  circular_queue_free(queue2);
 }
 END_TEST
 
@@ -108,6 +173,7 @@ make_circular_queue_suite()
   tcase_add_test(tc, test_cq_init_free);
   tcase_add_test(tc, test_cq_push_one);
   tcase_add_test(tc, test_cq_push_above_capacity);
+  tcase_add_test(tc, test_cq_get);
   tcase_add_test(tc, test_cq_increase_capacity);
   tcase_add_test(tc, test_cq_decrease_capacity);
 
