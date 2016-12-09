@@ -6,6 +6,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void
+circular_queue_free_helper(circular_queue* queue)
+{
+  for (size_t i = 0; i < queue->capacity; i++) {
+    void* elem;
+    if (!(elem = circular_queue_get(queue, i))) {
+      free(elem);
+    }
+  }
+
+  circular_queue_free(queue);
+}
+
 START_TEST(test_cq_init_free)
 {
   circular_queue* queue_normal = circular_queue_init(10);
@@ -22,9 +35,9 @@ START_TEST(test_cq_push_one)
 {
   circular_queue* queue = circular_queue_init(10);
   void* elem = "0th element";
-  circular_queue_push(queue, elem);
-  void* ret = circular_queue_get(queue, 0);
-  ck_assert_ptr_eq(ret, elem);
+  ck_assert_ptr_eq(NULL, circular_queue_push(queue, elem));
+  void* retval = circular_queue_get(queue, 0);
+  ck_assert_ptr_eq(retval, elem);
   circular_queue_free(queue);
 }
 END_TEST
@@ -78,11 +91,10 @@ START_TEST(test_cq_push_above_capacity)
     asprintf(&computed, "e%zu", i);
     char* actual = circular_queue_get(norm, i);
     ck_assert_str_eq(actual, computed);
-    free(actual);
     free(computed);
   }
 
-  circular_queue_free(norm);
+  circular_queue_free_helper(norm);
 }
 END_TEST
 
@@ -101,10 +113,10 @@ START_TEST(test_cq_increase_capacity)
   for (int i = 0; i < 5; i++) {
     char* elem;
     asprintf(&elem, "elem%d", i);
-    circular_queue_push(queue1, elem);
+    ck_assert(!circular_queue_push(queue1, elem));
   }
 
-  circular_queue_set_capacity(queue1, 10);
+  circular_queue_set_capacity(queue1, 10, NULL);
   for (int i = 5; i < 10; i++) {
     char* elem;
     asprintf(&elem, "elem%d", i);
@@ -112,15 +124,14 @@ START_TEST(test_cq_increase_capacity)
   }
 
   for (int i = 0; i < 10; i++) {
-    char* check;
-    asprintf(&check, "elem%d", i);
+    char* expected;
+    asprintf(&expected, "elem%d", i);
     char* actual = circular_queue_get(queue1, i);
-    ck_assert_str_eq(actual, check);
-    free(actual);
-    free(check);
+    ck_assert_str_eq(actual, expected);
+    free(expected);
   }
 
-  circular_queue_free(queue1);
+  circular_queue_free_helper(queue1);
 
   // increase capacity with reordering
   circular_queue* queue2 = circular_queue_init(10);
@@ -133,7 +144,7 @@ START_TEST(test_cq_increase_capacity)
     }
   }
 
-  circular_queue_set_capacity(queue2, 15);
+  circular_queue_set_capacity(queue2, 15, NULL);
   for (int i = 0; i < 5; i++) {
     char* elem;
     asprintf(&elem, "elem%d", i + 15);
@@ -149,17 +160,84 @@ START_TEST(test_cq_increase_capacity)
       asprintf(&check, "elem%d", i);
       ck_assert_str_eq(actual, check);
       free(check);
-      free(actual);
     }
   }
 
-  circular_queue_free(queue2);
+  circular_queue_free_helper(queue2);
 }
 END_TEST
 
-START_TEST(test_cq_decrease_capacity)
+START_TEST(test_cq_decrease_capacity_no_rollover)
 {
-  ck_assert(false);
+  // decrease non-rollover queue without loss
+  circular_queue* queue_roll_noloss = circular_queue_init(5);
+  circular_queue_push(queue_roll_noloss, "elem0");
+  circular_queue_push(queue_roll_noloss, "elem1");
+  ck_assert(circular_queue_set_capacity(queue_roll_noloss, 3, NULL));
+  ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 0), "elem0");
+  ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 1), "elem1");
+  circular_queue_free(queue_roll_noloss);
+
+  // decrease non-rollover with loss
+  circular_queue* queue_noroll_loss = circular_queue_init(2);
+  circular_queue_push(queue_noroll_loss, "elem0");
+  circular_queue_push(queue_noroll_loss, "elem1");
+  ck_assert(circular_queue_set_capacity(queue_noroll_loss, 1, NULL));
+  ck_assert(!circular_queue_get(queue_noroll_loss, 0));
+  ck_assert_str_eq(circular_queue_get(queue_noroll_loss, 1), "elem1");
+  circular_queue_free(queue_noroll_loss);
+}
+END_TEST
+
+START_TEST(test_cq_decrease_capacity_rollover)
+{
+  circular_queue* queue_noroll_loss2 = circular_queue_init(5);
+  for (int i = 0; i < 5; i++) {
+    char* elem;
+    asprintf(&elem, "elem%d", i);
+    circular_queue_push(queue_noroll_loss2, elem);
+  }
+
+  ck_assert(circular_queue_set_capacity(queue_noroll_loss2, 3, free));
+  for (int i = 0; i < 5; i++) {
+    char* actual = circular_queue_get(queue_noroll_loss2, i);
+    if (i < 2) {
+      ck_assert(!actual);
+    } else {
+      char* expected;
+      asprintf(&expected, "elem%d", i);
+      ck_assert_str_eq(actual, expected);
+      free(expected);
+    }
+  }
+
+  circular_queue_free_helper(queue_noroll_loss2);
+
+  // decrease rollover with loss
+  circular_queue* queue_roll_loss = circular_queue_init(5);
+  for (int i = 0; i < 7; i++) {
+    char* elem;
+    asprintf(&elem, "elem%d", i);
+    char* old;
+    if ((old = circular_queue_push(queue_roll_loss, elem))) {
+      free(old);
+    }
+  }
+
+  ck_assert(circular_queue_set_capacity(queue_roll_loss, 3, free));
+  for (size_t i = 0; i < queue_roll_loss->count; i++) {
+    char* actual = circular_queue_get(queue_roll_loss, i);
+    if (i < 4) {
+      ck_assert(!actual);
+    } else {
+      char* check;
+      asprintf(&check, "elem%zu", i);
+      ck_assert_str_eq(actual, check);
+      free(check);
+    }
+  }
+
+  circular_queue_free_helper(queue_roll_loss);
 }
 END_TEST
 
@@ -175,7 +253,8 @@ make_circular_queue_suite()
   tcase_add_test(tc, test_cq_push_above_capacity);
   tcase_add_test(tc, test_cq_get);
   tcase_add_test(tc, test_cq_increase_capacity);
-  tcase_add_test(tc, test_cq_decrease_capacity);
+  tcase_add_test(tc, test_cq_decrease_capacity_rollover);
+  tcase_add_test(tc, test_cq_decrease_capacity_no_rollover);
 
   return s;
 }

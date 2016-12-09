@@ -13,8 +13,8 @@
 typedef struct
 {
   void** entries;
-  size_t count;     /**< The total number of entries ever saved. */
-  size_t capacity;  /**< The number of entries allocated for. */
+  size_t count;    /**< The total number of entries ever saved. */
+  size_t capacity; /**< The number of entries allocated for. */
 } circular_queue;
 
 circular_queue* circular_queue_init(size_t capacity);
@@ -53,7 +53,7 @@ void circular_queue_free(circular_queue* queue);
  *  char* old = circular_queue_push(queue, strdup("elem2")));
  *  assert(old);
  *  free(old);
- *  
+ *
  *  for (size_t i = 0; i < queue->capacity; i++) {
  *    // we know the queue is currently full, so this check is technically
  *    // unnecessary here
@@ -84,8 +84,16 @@ void* circular_queue_push(circular_queue* const queue, void* elem);
  */
 void* circular_queue_get(const circular_queue* const queue, size_t pos);
 
+/** Function to free queue elements. */
+typedef void (*free_elem_fn)(void*);
+
 /** Change the capacity of the queue, reallocating and copying if necessary.
+ *
+ *  @param free_item If the queue size shrinks, removed queue elements are
+ *                   freed using this function.
  *  @return true if queue capacity was successfully updated; false otherwise.
  */
-bool circular_queue_set_capacity(circular_queue* queue, size_t capacity);
+bool circular_queue_set_capacity(circular_queue* queue,
+                                 size_t capacity,
+                                 free_elem_fn free_elem);
 #endif

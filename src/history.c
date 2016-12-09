@@ -24,6 +24,7 @@ typedef struct _hist_state
 } HISTORY_STATE;
 
 // Function prototypes
+static void history_free_elem(void* elem);
 histdata_t free_hist_entry(HIST_ENTRY*);
 
 // Public global variables
@@ -153,35 +154,17 @@ history_add(const char* string)
 void
 history_stifle(const int max)
 {
-  circular_queue_set_capacity(state.queue, max);
-  // use below as reference for circular_queue_set_capacity
-  // if (max < 0) {
-  // // can't record a negative number of commands
-  // return;
-  // }
+  circular_queue_set_capacity(state.queue, max, history_free_elem);
+}
 
-  // if (state.size == max) {
-  // return;
-  // }
-
-  // if (state.length > max) {
-  // int start = state.count - max + 1;
-  // HIST_ENTRY** list = malloc(sizeof(HIST_ENTRY) * max);
-  // for (int i = 0; i < max; i++) {
-  // HIST_ENTRY* entry = state.entries[(start + i) % state.size];
-  // list[i] = entry;
-  // }
-
-  // free(state.entries);
-  // state.entries = list;
-  // state.length = max;
-  // state.count = max - 1;
-  // } else if (state.length < max) {
-  // state.entries = realloc(state.entries, sizeof(HIST_ENTRY) * max);
-  // }
-
-  // state.size = max;
-  // history_max_entries = state.size;
+static void
+history_free_elem(void* elem)
+{
+  HIST_ENTRY* entry = elem;
+  histdata_t* data = free_hist_entry(entry);
+  if (data) {
+    free(data);
+  }
 }
 
 histdata_t

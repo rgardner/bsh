@@ -8,7 +8,10 @@
 #include "util.h"
 
 bool increase_capacity(circular_queue* queue, size_t capacity);
-bool decrease_capacity(circular_queue* queue, size_t capacity);
+bool decrease_capacity(circular_queue* queue,
+                       size_t capacity,
+                       free_elem_fn free_elem);
+void copy_queue(circular_queue* src, circular_queue* dst);
 
 circular_queue*
 circular_queue_init(const size_t capacity)
@@ -71,14 +74,16 @@ circular_queue_get(const circular_queue* const queue, const size_t pos)
 }
 
 bool
-circular_queue_set_capacity(circular_queue* queue, const size_t capacity)
+circular_queue_set_capacity(circular_queue* queue,
+                            const size_t capacity,
+                            free_elem_fn free_elem)
 {
   if (capacity == queue->capacity) {
     return true;
   } else if (capacity > queue->capacity) {
     return increase_capacity(queue, capacity);
   } else {
-    return decrease_capacity(queue, capacity);
+    return decrease_capacity(queue, capacity, free_elem);
   }
 }
 
@@ -90,12 +95,15 @@ circular_queue_set_capacity(circular_queue* queue, const size_t capacity)
 bool
 increase_capacity(circular_queue* queue, const size_t capacity)
 {
+  assert(capacity > queue->capacity);
+
   void** temp = malloc(capacity * MEMBER_SIZE(circular_queue, entries));
   if (!temp) {
     return false;
   }
 
-  size_t pivot = queue->count % queue->capacity;
+  // zero-fill front to preserve circular_queue_get() ordering
+  const size_t pivot = queue->count % queue->capacity;
   for (size_t i = 0; i < pivot; i++) {
     temp[i] = NULL;
   }
@@ -115,9 +123,29 @@ increase_capacity(circular_queue* queue, const size_t capacity)
 }
 
 bool
-decrease_capacity(circular_queue* queue, const size_t capacity)
+decrease_capacity(circular_queue* queue,
+                  const size_t capacity,
+                  free_elem_fn free_elem)
 {
-  UNUSED(queue);
-  UNUSED(capacity);
+  assert(capacity < queue->capacity);
+  circular_queue* new_queue = circular_queue_init(capacity);
+
+  for (size_t i = 0; i < queue->count; i++) {
+    void* elem = circular_queue_push(new_queue, circular_queue_get(queue, i));
+    if (elem && free_elem) {
+      free_elem(elem);
+    }
+  }
+
+  free(queue->entries);
+  copy_queue(new_queue, queue);
   return true;
+}
+
+void
+copy_queue(circular_queue* src, circular_queue* dst)
+{
+  dst->entries = src->entries;
+  dst->count = src->count;
+  dst->capacity = src->capacity;
 }
