@@ -99,12 +99,6 @@ START_TEST(test_history_exp_invalid_event)
 }
 END_TEST
 
-START_TEST(test_history_exp_correct)
-{
-  ck_assert(false);
-}
-END_TEST
-
 Suite*
 make_history_suite()
 {
@@ -119,7 +113,6 @@ make_history_suite()
   tcase_add_test(tc, test_history_exp_found_neg);
   tcase_add_test(tc, test_history_exp_found_pos);
   tcase_add_test(tc, test_history_exp_invalid_event);
-  tcase_add_test(tc, test_history_exp_correct);
 
   return s;
 }

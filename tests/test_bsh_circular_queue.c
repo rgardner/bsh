@@ -78,7 +78,7 @@ START_TEST(test_cq_push_above_capacity)
   circular_queue* norm = circular_queue_init(capacity);
   ck_assert_ptr_not_null(norm);
   for (size_t i = 0; i < elems_to_add; i++) {
-    char* dyn_elem;
+    char* dyn_elem = NULL;
     ck_assert_int_ge(asprintf(&dyn_elem, "e%zu", i), 0);
     char* old = circular_queue_push(norm, dyn_elem);
     if (i > capacity) {
@@ -92,7 +92,7 @@ START_TEST(test_cq_push_above_capacity)
   }
 
   for (size_t i = elems_to_add - capacity; i < elems_to_add; i++) {
-    char* expected;
+    char* expected = NULL;
     ck_assert_int_ge(asprintf(&expected, "e%zu", i), 0);
     char* actual = circular_queue_get(norm, i);
     ck_assert_str_eq(actual, expected);
@@ -118,7 +118,7 @@ START_TEST(test_cq_increase_capacity)
   circular_queue* queue1 = circular_queue_init(5);
   ck_assert_ptr_not_null(queue1);
   for (int i = 0; i < 5; i++) {
-    char* elem;
+    char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     ck_assert_ptr_null(circular_queue_push(queue1, elem));
   }
@@ -127,7 +127,7 @@ START_TEST(test_cq_increase_capacity)
 
   // verify set capacity does not affect queue get
   for (int i = 0; i < 5; i++) {
-    char* expected;
+    char* expected = NULL;
     ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
     char* actual = circular_queue_get(queue1, i);
     ck_assert_str_eq(actual, expected);
@@ -135,13 +135,13 @@ START_TEST(test_cq_increase_capacity)
   }
 
   for (int i = 5; i < 10; i++) {
-    char* elem;
+    char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     ck_assert_ptr_null(circular_queue_push(queue1, elem));
   }
 
   for (int i = 0; i < 10; i++) {
-    char* expected;
+    char* expected = NULL;
     ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
     char* actual = circular_queue_get(queue1, i);
     ck_assert_str_eq(actual, expected);
@@ -154,7 +154,7 @@ START_TEST(test_cq_increase_capacity)
   circular_queue* queue2 = circular_queue_init(10);
   ck_assert_ptr_not_null(queue2);
   for (int i = 0; i < 15; i++) {
-    char* elem;
+    char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     char* old = circular_queue_push(queue2, elem);
     if (old) {
@@ -164,7 +164,7 @@ START_TEST(test_cq_increase_capacity)
 
   ck_assert(circular_queue_set_capacity(queue2, 15, NULL));
   for (int i = 0; i < 5; i++) {
-    char* elem;
+    char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i + 15), 0);
     ck_assert_ptr_null(circular_queue_push(queue2, elem));
   }
@@ -174,7 +174,7 @@ START_TEST(test_cq_increase_capacity)
     if (i < 5) {
       ck_assert_ptr_null(actual);
     } else {
-      char* expected;
+      char* expected = NULL;
       ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
       ck_assert_str_eq(actual, expected);
       free(expected);
@@ -237,7 +237,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
   circular_queue* queue_noroll_loss2 = circular_queue_init(5);
   ck_assert_ptr_not_null(queue_noroll_loss2);
   for (int i = 0; i < 5; i++) {
-    char* elem;
+    char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, elem));
   }
@@ -248,7 +248,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
     if (i < 2) {
       ck_assert_ptr_null(actual);
     } else {
-      char* expected;
+      char* expected = NULL;
       ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
       ck_assert_str_eq(actual, expected);
       free(expected);
@@ -261,7 +261,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
   circular_queue* queue_roll_loss = circular_queue_init(5);
   ck_assert_ptr_not_null(queue_roll_loss);
   for (int i = 0; i < 7; i++) {
-    char* elem;
+    char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     char* old = circular_queue_push(queue_roll_loss, elem);
     if (old) {
@@ -275,7 +275,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
     if (i < 4) {
       ck_assert_ptr_null(actual);
     } else {
-      char* expected;
+      char* expected = NULL;
       ck_assert_int_ge(asprintf(&expected, "elem%zu", i), 0);
       ck_assert_str_eq(actual, expected);
       free(expected);
