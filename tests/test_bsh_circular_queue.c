@@ -11,8 +11,8 @@ void
 circular_queue_free_helper(circular_queue* queue)
 {
   for (size_t i = 0; i < queue->capacity; i++) {
-    void* elem;
-    if (!(elem = circular_queue_get(queue, i))) {
+    void* elem = circular_queue_get(queue, i);
+    if (elem) {
       free(elem);
     }
   }
@@ -23,11 +23,11 @@ circular_queue_free_helper(circular_queue* queue)
 START_TEST(test_cq_init_free)
 {
   circular_queue* queue_normal = circular_queue_init(10);
-  ck_assert(queue_normal);
+  ck_assert_ptr_not_null(queue_normal);
   circular_queue_free(queue_normal);
 
   circular_queue* queue_one = circular_queue_init(1);
-  ck_assert(queue_one);
+  ck_assert_ptr_not_null(queue_one);
   circular_queue_free(queue_one);
 }
 END_TEST
@@ -36,9 +36,9 @@ START_TEST(test_cq_push_one)
 {
   circular_queue* queue = circular_queue_init(10);
   void* elem = "0th element";
-  ck_assert_ptr_eq(NULL, circular_queue_push(queue, elem));
+  ck_assert_ptr_null(circular_queue_push(queue, elem));
   void* retval = circular_queue_get(queue, 0);
-  ck_assert_ptr_eq(retval, elem);
+  ck_assert_ptr_eq(elem, retval);
   circular_queue_free(queue);
 }
 END_TEST
@@ -47,52 +47,56 @@ START_TEST(test_cq_push_above_capacity)
 {
   // 1 capacity: push is in-place swap
   circular_queue* queue1 = circular_queue_init(1);
+  ck_assert_ptr_not_null(queue1);
   void* elem = "count0";
-  circular_queue_push(queue1, elem);
-  void* ret = circular_queue_get(queue1, 0);
-  ck_assert_ptr_eq(ret, elem);
+  ck_assert_ptr_null(circular_queue_push(queue1, elem));
+  void* retval = circular_queue_get(queue1, 0);
+  ck_assert_ptr_eq(retval, elem);
 
   void* another_elem = "count1";
-  circular_queue_push(queue1, another_elem);
-  ret = circular_queue_get(queue1, 1);
-  ck_assert_ptr_eq(ret, another_elem);
+  ck_assert_ptr_not_null(circular_queue_push(queue1, another_elem));
+  retval = circular_queue_get(queue1, 1);
+  ck_assert_ptr_eq(retval, another_elem);
   circular_queue_free(queue1);
 
   // 2 capacity: simple to reason about
   circular_queue* queue2 = circular_queue_init(2);
-  circular_queue_push(queue2, "count0");
-  circular_queue_push(queue2, "count1");
-  ck_assert(circular_queue_get(queue2, 0));
-  ck_assert(circular_queue_get(queue2, 1));
-  circular_queue_push(queue2, "count2");
-  ck_assert(!circular_queue_get(queue2, 0));
-  ck_assert(circular_queue_get(queue2, 1));
-  ck_assert(circular_queue_get(queue2, 2));
+  ck_assert_ptr_not_null(queue2);
+  ck_assert_ptr_null(circular_queue_push(queue2, "count0"));
+  ck_assert_ptr_null(circular_queue_push(queue2, "count1"));
+  ck_assert_ptr_not_null(circular_queue_get(queue2, 0));
+  ck_assert_ptr_not_null(circular_queue_get(queue2, 1));
+  ck_assert_ptr_not_null(circular_queue_push(queue2, "count2"));
+  ck_assert_ptr_null(circular_queue_get(queue2, 0));
+  ck_assert_ptr_not_null(circular_queue_get(queue2, 1));
+  ck_assert_ptr_not_null(circular_queue_get(queue2, 2));
   circular_queue_free(queue2);
 
   // N capacity: normal case
-  size_t capacity = 10;
-  size_t elems_to_add = 100;
+  const size_t capacity = 10;
+  const size_t elems_to_add = 100;
   circular_queue* norm = circular_queue_init(capacity);
+  ck_assert_ptr_not_null(norm);
   for (size_t i = 0; i < elems_to_add; i++) {
     char* dyn_elem;
-    asprintf(&dyn_elem, "e%zu", i);
+    ck_assert_int_ge(asprintf(&dyn_elem, "e%zu", i), 0);
     char* old = circular_queue_push(norm, dyn_elem);
-    if (old) {
+    if (i > capacity) {
+      ck_assert_ptr_not_null(old);
       free(old);
     }
   }
 
   for (size_t i = 0; i < elems_to_add - capacity; i++) {
-    ck_assert(!(circular_queue_get(norm, i)));
+    ck_assert_ptr_null(circular_queue_get(norm, i));
   }
 
   for (size_t i = elems_to_add - capacity; i < elems_to_add; i++) {
-    char* computed;
-    asprintf(&computed, "e%zu", i);
+    char* expected;
+    ck_assert_int_ge(asprintf(&expected, "e%zu", i), 0);
     char* actual = circular_queue_get(norm, i);
-    ck_assert_str_eq(actual, computed);
-    free(computed);
+    ck_assert_str_eq(actual, expected);
+    free(expected);
   }
 
   circular_queue_free_helper(norm);
@@ -102,7 +106,8 @@ END_TEST
 START_TEST(test_cq_get)
 {
   circular_queue* queue1 = circular_queue_init(1);
-  ck_assert(!circular_queue_get(queue1, 0));
+  ck_assert_ptr_not_null(queue1);
+  ck_assert_ptr_null(circular_queue_get(queue1, 0));
   circular_queue_free(queue1);
 }
 END_TEST
@@ -111,22 +116,33 @@ START_TEST(test_cq_increase_capacity)
 {
   // increase capacity without re-ordering
   circular_queue* queue1 = circular_queue_init(5);
+  ck_assert_ptr_not_null(queue1);
   for (int i = 0; i < 5; i++) {
     char* elem;
-    asprintf(&elem, "elem%d", i);
-    ck_assert(!circular_queue_push(queue1, elem));
+    ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
+    ck_assert_ptr_null(circular_queue_push(queue1, elem));
   }
 
-  circular_queue_set_capacity(queue1, 10, NULL);
+  ck_assert(circular_queue_set_capacity(queue1, 10, NULL));
+
+  // verify set capacity does not affect queue get
+  for (int i = 0; i < 5; i++) {
+    char* expected;
+    ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
+    char* actual = circular_queue_get(queue1, i);
+    ck_assert_str_eq(actual, expected);
+    free(expected);
+  }
+
   for (int i = 5; i < 10; i++) {
     char* elem;
-    asprintf(&elem, "elem%d", i);
+    ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     circular_queue_push(queue1, elem);
   }
 
   for (int i = 0; i < 10; i++) {
     char* expected;
-    asprintf(&expected, "elem%d", i);
+    ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
     char* actual = circular_queue_get(queue1, i);
     ck_assert_str_eq(actual, expected);
     free(expected);
@@ -136,31 +152,32 @@ START_TEST(test_cq_increase_capacity)
 
   // increase capacity with reordering
   circular_queue* queue2 = circular_queue_init(10);
+  ck_assert_ptr_not_null(queue2);
   for (int i = 0; i < 15; i++) {
     char* elem;
-    asprintf(&elem, "elem%d", i);
+    ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
     char* old = circular_queue_push(queue2, elem);
     if (old) {
       free(old);
     }
   }
 
-  circular_queue_set_capacity(queue2, 15, NULL);
+  ck_assert(circular_queue_set_capacity(queue2, 15, NULL));
   for (int i = 0; i < 5; i++) {
     char* elem;
-    asprintf(&elem, "elem%d", i + 15);
-    circular_queue_push(queue2, elem);
+    ck_assert_int_ge(asprintf(&elem, "elem%d", i + 15), 0);
+    ck_assert_ptr_null(circular_queue_push(queue2, elem));
   }
 
   for (int i = 0; i < 20; i++) {
     char* actual = circular_queue_get(queue2, i);
     if (i < 5) {
-      ck_assert(!actual);
+      ck_assert_ptr_null(actual);
     } else {
-      char* check;
-      asprintf(&check, "elem%d", i);
-      ck_assert_str_eq(actual, check);
-      free(check);
+      char* expected;
+      ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
+      ck_assert_str_eq(actual, expected);
+      free(expected);
     }
   }
 
