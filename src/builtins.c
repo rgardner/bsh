@@ -25,6 +25,7 @@
 // Function prototypes.
 static char* cd(int, char**);
 static void history_wrapper(int, char**);
+static void history_stifle_wrapper(const char*);
 static int dirs(int, char**);
 static int popd(int, char**);
 static int pushd(int, char**);
@@ -36,12 +37,12 @@ static int which_print_matches(char*, const char*);
 struct Stack* directory_stack;
 
 void
-builtins_init()
+builtins_init(const size_t history_capacity)
 {
   aliases_init();
   jobs_init();
   directory_stack = stack_init();
-  history_init();
+  history_init(history_capacity);
 }
 
 /** Print helpful information. */
@@ -192,6 +193,16 @@ cd(const int argc, char** argv)
 static void
 history_wrapper(const int argc, char** argv)
 {
+  if (!history_enabled()) {
+    if (argc == 3 && strncmp(argv[1], "-s", strlen("-s")) == 0) {
+      history_stifle_wrapper(argv[2]);
+      return;
+    }
+
+    fprintf(stderr, "-bsh: history is disabled. Enable by unstifling history.\n");
+    return;
+  }
+
   if (argc == 1) {
     history_print_all();
   } else if (argc == 2) {
@@ -202,15 +213,23 @@ history_wrapper(const int argc, char** argv)
     }
 
     history_print(n_last_entries);
-   } else {
-    if (strncmp(argv[1], "-s", strlen("-s")) == 0) {
-      const long hist_capacity = strtol(argv[2], NULL, 10 /*base*/);
-      history_stifle(hist_capacity);
-      return;
-    }
-
+  } else if (argc == 3 && strncmp(argv[1], "-s", strlen("-s")) == 0) {
+    history_stifle_wrapper(argv[2]);
+  } else {
     help(HISTORY);
   }
+}
+
+static void
+history_stifle_wrapper(const char* arg)
+{
+  const long hist_capacity = strtol(arg, NULL, 10 /*base*/);
+  if (hist_capacity < 0) {
+    fprintf(stderr, "-bsh: history: %ld: invalid option\n", hist_capacity);
+    return;
+  }
+
+  history_stifle(hist_capacity);
 }
 
 static void

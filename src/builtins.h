@@ -28,7 +28,7 @@ enum BuiltinCommands
 };
 
 /* Initialize all data structures for builtin commands. */
-void builtins_init();
+void builtins_init(size_t history_capacity);
 
 /* Print help about a specific builtin command. */
 void help(const int command);

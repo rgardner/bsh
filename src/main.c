@@ -24,6 +24,7 @@
 
 #define MAX_PROMPT_LENGTH 1024
 #define COMMAND_NOT_FOUND_EXIT_CODE 127
+static const size_t c_default_history_capacity = 10;
 
 pid_t shell_pgid;
 struct termios shell_tmodes;
@@ -206,7 +207,7 @@ main(int argc, char** argv)
 
   // Initialization
   shell_init();
-  builtins_init();
+  builtins_init(c_default_history_capacity);
 
   if (signal(SIGCHLD, handle_sigchld) == SIG_ERR) {
     err(EXIT_FAILURE, NULL);

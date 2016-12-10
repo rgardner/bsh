@@ -33,9 +33,11 @@ static int parse_command(const char*, int*);
 struct hist_state g_state;
 
 void
-history_init()
+history_init(const size_t capacity)
 {
-  g_state.queue = circular_queue_init(HISTSIZE);
+  if (capacity > 0) {
+    g_state.queue = circular_queue_init(capacity);
+  }
 }
 
 void
@@ -49,6 +51,7 @@ history_free()
   }
 
   circular_queue_free(g_state.queue);
+  g_state.queue = NULL;
 }
 
 static void
@@ -70,6 +73,12 @@ history_free_entry(struct hist_entry* histent)
   histdata_t data = histent->data;
   free(histent);
   return data;
+}
+
+bool
+history_enabled()
+{
+  return g_state.queue != NULL;
 }
 
 /** Parse history event from history command.
@@ -115,6 +124,11 @@ history_exp(const char* string, char** output)
     return result;
   }
 
+  if (!history_enabled()) {
+    fprintf(stderr, "-bsh: history is disabled. Enable by unstifling history.\n");
+    return -1;
+  }
+
   size_t pos = 0;
   if (command == 0) {
     fprintf(stderr, "-bsh: %s: event not found\n", string);
@@ -148,6 +162,10 @@ history_exp(const char* string, char** output)
 void
 history_add(const char* string)
 {
+  if (!history_enabled()) {
+    return;
+  }
+
   struct hist_entry* entry = malloc(sizeof(struct hist_entry));
   if (!entry) {
     return;
@@ -167,9 +185,19 @@ history_add(const char* string)
 }
 
 void
-history_stifle(const int max)
+history_stifle(const size_t max)
 {
-  circular_queue_set_capacity(g_state.queue, max, history_free_entry_and_data);
+  if (history_enabled()) {
+    if (max > 0) {
+      circular_queue_set_capacity(g_state.queue, max, history_free_entry_and_data);
+    } else {
+      history_free();
+    }
+  } else {
+    if (max > 0) {
+      history_init(max);
+    }
+  }
 }
 
 void
@@ -181,6 +209,8 @@ history_print_all()
 void
 history_print(const size_t n_last_entries)
 {
+  assert(history_enabled());
+
   // because the capacity can change, there may be fewer than max_stored_entries
   // in the queue (e.g. [a] -> [b] -> [_ b _]. The count is 2 but there is only
   // 1 stored entry)
