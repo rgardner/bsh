@@ -193,7 +193,7 @@ static void
 history_wrapper(const int argc, char** argv)
 {
   if (argc == 1) {
-    history_print(history_length);
+    history_print_all();
   } else if (argc == 2) {
     const long n_last_entries = strtol(argv[1], NULL, 10 /*base*/);
     if (n_last_entries < 0) {

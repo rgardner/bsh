@@ -29,9 +29,6 @@ static void history_free_entry_and_data(void*);
 static histdata_t history_free_entry(HIST_ENTRY*);
 static int parse_command(const char*, int*);
 
-// Public global variables
-int history_length;
-
 // Private global variables
 HISTORY_STATE state;
 
@@ -39,7 +36,6 @@ void
 history_init()
 {
   state.queue = circular_queue_init(HISTSIZE);
-  history_length = 0;
 }
 
 void
@@ -168,14 +164,18 @@ history_add(const char* string)
   if (removed) {
     history_free_entry_and_data(removed);
   }
-
-  history_length++;
 }
 
 void
 history_stifle(const int max)
 {
   circular_queue_set_capacity(state.queue, max, history_free_entry_and_data);
+}
+
+void
+history_print_all()
+{
+  history_print(state.queue->count);
 }
 
 void

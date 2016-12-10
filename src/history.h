@@ -17,9 +17,6 @@
 /** Default maximum number of history entries. */
 #define HISTSIZE 10
 
-/** The number of entries currently stored in the history list. */
-extern int history_length;
-
 /** Initialize alias data structures.
  *
  *  @note Must be called before other history functions can be used.
@@ -47,7 +44,10 @@ void history_add(const char* string);
 /** Stifle the history list, remembering only the last max entries. */
 void history_stifle(int max);
 
-/** Print history list. */
+/** Print all entries in history list. */
+void history_print_all();
+
+/** Print n_last_entries in history list. */
 void history_print(size_t n_last_entries);
 
 /** Print history usage string. */

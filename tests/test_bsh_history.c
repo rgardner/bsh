@@ -21,15 +21,15 @@ history_teardown(void)
 
 START_TEST(test_history_add)
 {
-  ck_assert_int_eq(history_length, 0);
   history_add("command");
-  ck_assert_int_eq(history_length, 1);
+  char* actual = NULL;
+  ck_assert_int_eq(history_exp("!1", &actual), 1);
+  ck_assert_str_eq(actual, "command");
 }
 END_TEST
 
 START_TEST(test_history_add_rollover)
 {
-  ck_assert_int_eq(history_length, 0);
   for (int i = 0; i < HISTSIZE; i++) {
     char* s = NULL;
     ck_assert_int_ge(asprintf(&s, "command%d", i + 1), 0);
