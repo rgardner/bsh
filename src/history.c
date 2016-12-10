@@ -11,57 +11,57 @@
 
 typedef void* histdata_t;
 
-typedef struct _hist_entry
+struct hist_entry
 {
   char* line;
   int timestamp;
   histdata_t data;
-} HIST_ENTRY;
+};
 
-/** A structure used to pass around the current state of the history. */
-typedef struct _hist_state
+/** A structure used to pass around the current global state of the history. */
+struct hist_state
 {
   circular_queue* queue;
-} HISTORY_STATE;
+};
 
 // Function prototypes
 static void history_free_entry_and_data(void*);
-static histdata_t history_free_entry(HIST_ENTRY*);
+static histdata_t history_free_entry(struct hist_entry*);
 static int parse_command(const char*, int*);
 
 // Private global variables
-HISTORY_STATE state;
+struct hist_state g_state;
 
 void
 history_init()
 {
-  state.queue = circular_queue_init(HISTSIZE);
+  g_state.queue = circular_queue_init(HISTSIZE);
 }
 
 void
 history_free()
 {
-  for (size_t i = 0; i < state.queue->capacity; i++) {
-    HIST_ENTRY* entry = state.queue->entries[i];
+  for (size_t i = 0; i < g_state.queue->capacity; i++) {
+    struct hist_entry* entry = g_state.queue->entries[i];
     if (entry) {
       history_free_entry_and_data(entry);
     }
   }
 
-  circular_queue_free(state.queue);
+  circular_queue_free(g_state.queue);
 }
 
 static void
 history_free_entry_and_data(void* elem)
 {
-  histdata_t* data = history_free_entry((HIST_ENTRY*)elem);
+  histdata_t* data = history_free_entry((struct hist_entry*)elem);
   if (data) {
     free(data);
   }
 }
 
 static histdata_t
-history_free_entry(HIST_ENTRY* histent)
+history_free_entry(struct hist_entry* histent)
 {
   if (histent->line) {
     free(histent->line);
@@ -121,18 +121,18 @@ history_exp(const char* string, char** output)
     return -1;
   } else if (command < 0) {
     const size_t pos_command = -command;
-    if (pos_command > state.queue->count) {
+    if (pos_command > g_state.queue->count) {
       fprintf(stderr, "-bsh: %s: event not found\n", string);
       return -1;
     }
 
-    pos = state.queue->count - pos_command;
+    pos = g_state.queue->count - pos_command;
   } else {
     // !1 is the 0th history entry
     pos = command - 1;
   }
 
-  HIST_ENTRY* entry = circular_queue_get(state.queue, pos);
+  struct hist_entry* entry = circular_queue_get(g_state.queue, pos);
   if (!entry) {
     fprintf(stderr, "-bsh: %s: event not found\n", string);
     return -1;
@@ -148,7 +148,7 @@ history_exp(const char* string, char** output)
 void
 history_add(const char* string)
 {
-  HIST_ENTRY* entry = malloc(sizeof(HIST_ENTRY));
+  struct hist_entry* entry = malloc(sizeof(struct hist_entry));
   if (!entry) {
     return;
   }
@@ -158,9 +158,9 @@ history_add(const char* string)
     return;
   }
 
-  entry->timestamp = state.queue->count + 1;
+  entry->timestamp = g_state.queue->count + 1;
   entry->data = NULL;
-  HIST_ENTRY* removed = circular_queue_push(state.queue, entry);
+  struct hist_entry* removed = circular_queue_push(g_state.queue, entry);
   if (removed) {
     history_free_entry_and_data(removed);
   }
@@ -169,28 +169,28 @@ history_add(const char* string)
 void
 history_stifle(const int max)
 {
-  circular_queue_set_capacity(state.queue, max, history_free_entry_and_data);
+  circular_queue_set_capacity(g_state.queue, max, history_free_entry_and_data);
 }
 
 void
 history_print_all()
 {
-  history_print(state.queue->count);
+  history_print(g_state.queue->count);
 }
 
 void
 history_print(const size_t n_last_entries)
 {
-  const size_t num_stored_entries = min(state.queue->count, state.queue->capacity);
-  size_t start_pos = state.queue->count;
+  const size_t num_stored_entries = min(g_state.queue->count, g_state.queue->capacity);
+  size_t start_pos = g_state.queue->count;
   if (n_last_entries < num_stored_entries) {
     start_pos -= n_last_entries;
   } else {
     start_pos -= num_stored_entries;
   }
 
-  for (size_t pos = start_pos; pos < state.queue->count; pos++) {
-    HIST_ENTRY* entry = circular_queue_get(state.queue, pos);
+  for (size_t pos = start_pos; pos < g_state.queue->count; pos++) {
+    struct hist_entry* entry = circular_queue_get(g_state.queue, pos);
     assert(entry);
     printf("\t%d\t%s\n", entry->timestamp, entry->line);
   }
