@@ -181,17 +181,24 @@ history_print_all()
 void
 history_print(const size_t n_last_entries)
 {
-  const size_t num_stored_entries = min(g_state.queue->count, g_state.queue->capacity);
+  // because the capacity can change, there may be fewer than max_stored_entries
+  // in the queue (e.g. [a] -> [b] -> [_ b _]. The count is 2 but there is only
+  // 1 stored entry)
+  const size_t max_stored_entries = min(g_state.queue->count, g_state.queue->capacity);
   size_t start_pos = g_state.queue->count;
-  if (n_last_entries < num_stored_entries) {
+  if (n_last_entries < max_stored_entries) {
     start_pos -= n_last_entries;
   } else {
-    start_pos -= num_stored_entries;
+    start_pos -= max_stored_entries;
   }
 
   for (size_t pos = start_pos; pos < g_state.queue->count; pos++) {
     struct hist_entry* entry = circular_queue_get(g_state.queue, pos);
-    assert(entry);
+    // skip NULL entries if there are fewer than max_stored_entries in queue
+    if (!entry) {
+      continue;
+    }
+
     printf("\t%d\t%s\n", entry->timestamp, entry->line);
   }
 }

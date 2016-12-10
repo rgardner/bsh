@@ -96,27 +96,18 @@ increase_capacity(circular_queue* queue, const size_t capacity)
 {
   assert(capacity > queue->capacity);
 
-  void** temp = malloc(capacity * MEMBER_SIZE(circular_queue, entries));
-  if (!temp) {
+  void** new_entries = calloc(capacity, MEMBER_SIZE(circular_queue, entries));
+  if (!new_entries) {
     return false;
   }
 
-  // zero-fill front to preserve circular_queue_get() ordering
-  const size_t pivot = queue->count % queue->capacity;
-  for (size_t i = 0; i < pivot; i++) {
-    temp[i] = NULL;
-  }
-
-  for (size_t i = pivot; i < queue->capacity; i++) {
-    temp[i] = queue->entries[i];
-  }
-
-  for (size_t i = 0, j = queue->capacity; i < pivot; i++, j++) {
-    temp[j] = queue->entries[i];
+  const size_t num_filled = min(queue->count, queue->capacity);
+  for (size_t pos = queue->count - num_filled; pos < queue->count; pos++) {
+    new_entries[pos % capacity] = queue->entries[pos % queue->capacity];
   }
 
   free(queue->entries);
-  queue->entries = temp;
+  queue->entries = new_entries;
   queue->capacity = capacity;
   return true;
 }

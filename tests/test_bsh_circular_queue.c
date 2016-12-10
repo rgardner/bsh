@@ -137,7 +137,7 @@ START_TEST(test_cq_increase_capacity)
   for (int i = 5; i < 10; i++) {
     char* elem;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
-    circular_queue_push(queue1, elem);
+    ck_assert_ptr_null(circular_queue_push(queue1, elem));
   }
 
   for (int i = 0; i < 10; i++) {
@@ -182,6 +182,19 @@ START_TEST(test_cq_increase_capacity)
   }
 
   circular_queue_free_helper(queue2);
+}
+END_TEST
+
+START_TEST(test_cq_increase_capacity_correct_slots)
+{
+  circular_queue* queue = circular_queue_init(1);
+  ck_assert_ptr_not_null(queue);
+  ck_assert_ptr_null(circular_queue_push(queue, "elem0"));
+  ck_assert_ptr_not_null(circular_queue_push(queue, "elem1"));
+  ck_assert(circular_queue_set_capacity(queue, 3, NULL));
+  ck_assert_str_eq(queue->entries[1], "elem1");
+  ck_assert_ptr_null(queue->entries[0]);
+  ck_assert_ptr_null(queue->entries[2]);
 }
 END_TEST
 
@@ -285,6 +298,7 @@ make_circular_queue_suite()
   tcase_add_test(tc, test_cq_push_above_capacity);
   tcase_add_test(tc, test_cq_get);
   tcase_add_test(tc, test_cq_increase_capacity);
+  tcase_add_test(tc, test_cq_increase_capacity_correct_slots);
   tcase_add_test(tc, test_cq_decrease_capacity_rollover);
   tcase_add_test(tc, test_cq_decrease_capacity_no_rollover);
 
