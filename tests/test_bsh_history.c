@@ -1,5 +1,7 @@
 #include "../src/history.h"
 #include "test_bsh.h"
+#include "test_utils.h"
+
 #include <check.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -30,35 +32,36 @@ START_TEST(test_history_add_rollover)
   ck_assert_int_eq(history_length, 0);
   for (int i = 0; i < HISTSIZE; i++) {
     ck_assert(history_length < history_max_entries);
-    char* s;
-    asprintf(&s, "command%d", i + 1);
+    char* s = NULL;
+    ck_assert_int_ge(asprintf(&s, "command%d", i + 1), 0);
     history_add(s);
     free(s);
   }
 
-  ck_assert(history_length == history_max_entries);
-
+  ck_assert_int_eq(history_length, history_max_entries);
   history_add("overflow");
-  ck_assert(history_length == history_max_entries);
+  ck_assert_int_eq(history_length, history_max_entries);
 
-  char* expansion;
+  char* expansion = NULL;
   const int his_res = history_exp("!1", &expansion);
   ck_assert_int_eq(his_res, -1);
+  ck_assert_ptr_null(expansion);
 }
 END_TEST
 
 START_TEST(test_history_exp_not_found)
 {
-  char* expansion;
+  char* expansion = NULL;
   const int his_res = history_exp("!1", &expansion);
   ck_assert_int_eq(his_res, -1);
+  ck_assert_ptr_null(expansion);
 }
 END_TEST
 
 START_TEST(test_history_exp_found_pos)
 {
   history_add("command1");
-  char* expansion;
+  char* expansion = NULL;
   const int his_res = history_exp("!1", &expansion);
   ck_assert_int_eq(his_res, 1);
   ck_assert_str_eq(expansion, "command1");
@@ -69,20 +72,20 @@ END_TEST
 START_TEST(test_history_exp_found_neg)
 {
   history_add("command1");
-  char* expansion;
+  char* expansion = NULL;
   const int his_res = history_exp("!-1", &expansion);
   ck_assert_int_eq(his_res, 1);
   ck_assert_str_eq(expansion, "command1");
   free(expansion);
 
   history_add("command2");
-  char* expansion2;
+  char* expansion2 = NULL;
   const int his_res2 = history_exp("!-1", &expansion2);
   ck_assert_int_eq(his_res2, 1);
   ck_assert_str_eq(expansion2, "command2");
   free(expansion2);
 
-  char* expansion3;
+  char* expansion3 = NULL;
   const int his_res3 = history_exp("!-2", &expansion3);
   ck_assert_int_eq(his_res3, 1);
   ck_assert_str_eq(expansion2, "command1");
@@ -92,9 +95,10 @@ END_TEST
 
 START_TEST(test_history_exp_invalid_event)
 {
-  char* expansion;
+  char* expansion = NULL;
   const int his_res = history_exp("!invalid", &expansion);
   ck_assert_int_eq(his_res, -1);
+  ck_assert_ptr_null(expansion);
 }
 END_TEST
 
