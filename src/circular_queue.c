@@ -33,9 +33,17 @@ circular_queue_init(const size_t capacity)
 }
 
 void
-circular_queue_free(circular_queue* queue)
+circular_queue_free(circular_queue* queue, free_elem_fn free_elem)
 {
   if (queue->entries) {
+    if (free_elem) {
+      for (size_t i = 0; i < queue->capacity; i++) {
+        if (queue->entries[i]) {
+          free_elem(queue->entries[i]);
+        }
+      }
+    }
+
     free(queue->entries);
   }
 

@@ -7,28 +7,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void
-circular_queue_free_helper(circular_queue* queue)
-{
-  for (size_t i = 0; i < queue->capacity; i++) {
-    void* elem = circular_queue_get(queue, i);
-    if (elem) {
-      free(elem);
-    }
-  }
-
-  circular_queue_free(queue);
-}
-
 START_TEST(test_cq_init_free)
 {
   circular_queue* queue_normal = circular_queue_init(10);
   ck_assert_ptr_not_null(queue_normal);
-  circular_queue_free(queue_normal);
+  circular_queue_free(queue_normal, NULL);
 
   circular_queue* queue_one = circular_queue_init(1);
   ck_assert_ptr_not_null(queue_one);
-  circular_queue_free(queue_one);
+  circular_queue_free(queue_one, NULL);
 }
 END_TEST
 
@@ -39,7 +26,7 @@ START_TEST(test_cq_push_one)
   ck_assert_ptr_null(circular_queue_push(queue, elem));
   void* retval = circular_queue_get(queue, 0);
   ck_assert_ptr_eq(elem, retval);
-  circular_queue_free(queue);
+  circular_queue_free(queue, NULL);
 }
 END_TEST
 
@@ -57,7 +44,7 @@ START_TEST(test_cq_push_above_capacity)
   ck_assert_ptr_not_null(circular_queue_push(queue1, another_elem));
   retval = circular_queue_get(queue1, 1);
   ck_assert_ptr_eq(retval, another_elem);
-  circular_queue_free(queue1);
+  circular_queue_free(queue1, NULL);
 
   // 2 capacity: simple to reason about
   circular_queue* queue2 = circular_queue_init(2);
@@ -70,7 +57,7 @@ START_TEST(test_cq_push_above_capacity)
   ck_assert_ptr_null(circular_queue_get(queue2, 0));
   ck_assert_ptr_not_null(circular_queue_get(queue2, 1));
   ck_assert_ptr_not_null(circular_queue_get(queue2, 2));
-  circular_queue_free(queue2);
+  circular_queue_free(queue2, NULL);
 
   // N capacity: normal case
   const size_t capacity = 10;
@@ -99,7 +86,7 @@ START_TEST(test_cq_push_above_capacity)
     free(expected);
   }
 
-  circular_queue_free_helper(norm);
+  circular_queue_free(norm, free);
 }
 END_TEST
 
@@ -108,7 +95,7 @@ START_TEST(test_cq_get)
   circular_queue* queue1 = circular_queue_init(1);
   ck_assert_ptr_not_null(queue1);
   ck_assert_ptr_null(circular_queue_get(queue1, 0));
-  circular_queue_free(queue1);
+  circular_queue_free(queue1, NULL);
 }
 END_TEST
 
@@ -148,7 +135,7 @@ START_TEST(test_cq_increase_capacity)
     free(expected);
   }
 
-  circular_queue_free_helper(queue1);
+  circular_queue_free(queue1, free);
 
   // increase capacity with reordering
   circular_queue* queue2 = circular_queue_init(10);
@@ -181,7 +168,7 @@ START_TEST(test_cq_increase_capacity)
     }
   }
 
-  circular_queue_free_helper(queue2);
+  circular_queue_free(queue2, free);
 }
 END_TEST
 
@@ -208,7 +195,7 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
   ck_assert(circular_queue_set_capacity(queue_roll_noloss, 3, NULL));
   ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 0), "elem0");
   ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 1), "elem1");
-  circular_queue_free(queue_roll_noloss);
+  circular_queue_free(queue_roll_noloss, NULL);
 
   // decrease non-rollover with loss
   circular_queue* queue_noroll_loss = circular_queue_init(2);
@@ -218,7 +205,7 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
   ck_assert(circular_queue_set_capacity(queue_noroll_loss, 1, NULL));
   ck_assert_ptr_null(circular_queue_get(queue_noroll_loss, 0));
   ck_assert_str_eq(circular_queue_get(queue_noroll_loss, 1), "elem1");
-  circular_queue_free(queue_noroll_loss);
+  circular_queue_free(queue_noroll_loss, NULL);
 
   // decrease non-rollover with larger loss
   circular_queue* queue_noroll_loss2 = circular_queue_init(5);
@@ -228,7 +215,7 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
   ck_assert(circular_queue_set_capacity(queue_noroll_loss2, 1, NULL));
   ck_assert_ptr_null(circular_queue_get(queue_noroll_loss2, 0));
   ck_assert_str_eq(circular_queue_get(queue_noroll_loss2, 1), "elem1");
-  circular_queue_free(queue_noroll_loss2);
+  circular_queue_free(queue_noroll_loss2, NULL);
 }
 END_TEST
 
@@ -255,7 +242,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
     }
   }
 
-  circular_queue_free_helper(queue_noroll_loss2);
+  circular_queue_free(queue_noroll_loss2, free);
 
   // decrease rollover with loss
   circular_queue* queue_roll_loss = circular_queue_init(5);
@@ -282,7 +269,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
     }
   }
 
-  circular_queue_free_helper(queue_roll_loss);
+  circular_queue_free(queue_roll_loss, free);
 }
 END_TEST
 

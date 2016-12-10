@@ -43,14 +43,7 @@ history_init(const size_t capacity)
 void
 history_free()
 {
-  for (size_t i = 0; i < g_state.queue->capacity; i++) {
-    struct hist_entry* entry = g_state.queue->entries[i];
-    if (entry) {
-      history_free_entry_and_data(entry);
-    }
-  }
-
-  circular_queue_free(g_state.queue);
+  circular_queue_free(g_state.queue, history_free_entry_and_data);
   g_state.queue = NULL;
 }
 
