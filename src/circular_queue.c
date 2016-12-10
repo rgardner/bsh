@@ -134,11 +134,11 @@ decrease_capacity(circular_queue* queue,
     return false;
   }
 
-  const size_t num_filled = (queue->count < queue->capacity) ? queue->count : queue->capacity;
-  const size_t num_excess_elems = (num_filled > capacity) ? num_filled - capacity : 0;
+  const size_t num_filled = min(queue->count, queue->capacity);
+  const size_t num_excess_elems = safe_sub(num_filled, capacity, 0);
   size_t old_pos = 0;
   if (num_excess_elems > 0) {
-    old_pos = queue->count - queue->capacity;
+    old_pos = safe_sub(queue->count, queue->capacity, 0);
     if (free_elem) {
       for (size_t i = 0; i < num_excess_elems; i++, old_pos++) {
         free_elem(queue->entries[old_pos % queue->capacity]);

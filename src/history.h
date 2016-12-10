@@ -12,17 +12,13 @@
 #ifndef HISTORY_H
 #define HISTORY_H
 
+#include <stddef.h>  // size_t
+
 /** Default maximum number of history entries. */
 #define HISTSIZE 10
 
 /** The number of entries currently stored in the history list. */
 extern int history_length;
-
-/** Maximum number of history entries.
- *
- * @see history_stifle
- */
-extern int history_max_entries;
 
 /** Initialize alias data structures.
  *
@@ -52,7 +48,7 @@ void history_add(const char* string);
 void history_stifle(int max);
 
 /** Print history list. */
-void history_print(int num);
+void history_print(size_t n_last_entries);
 
 /** Print history usage string. */
 void history_help();

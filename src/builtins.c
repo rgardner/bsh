@@ -195,15 +195,21 @@ history_wrapper(const int argc, char** argv)
   if (argc == 1) {
     history_print(history_length);
   } else if (argc == 2) {
-    const int num = atoi(argv[1]);
-    history_print(num);
-  } else {
-    if (strncmp(argv[1], "-s", strlen("-s")) == 0) {
-      const int hist_sz = atoi(argv[2]);
-      history_stifle(hist_sz);
-    } else {
-      help(HISTORY);
+    const long n_last_entries = strtol(argv[1], NULL, 10 /*base*/);
+    if (n_last_entries < 0) {
+      fprintf(stderr, "-bsh: history: %ld: invalid option\n", n_last_entries);
+      return;
     }
+
+    history_print(n_last_entries);
+   } else {
+    if (strncmp(argv[1], "-s", strlen("-s")) == 0) {
+      const long hist_capacity = strtol(argv[2], NULL, 10 /*base*/);
+      history_stifle(hist_capacity);
+      return;
+    }
+
+    help(HISTORY);
   }
 }
 

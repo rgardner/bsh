@@ -206,6 +206,16 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
   ck_assert_ptr_null(circular_queue_get(queue_noroll_loss, 0));
   ck_assert_str_eq(circular_queue_get(queue_noroll_loss, 1), "elem1");
   circular_queue_free(queue_noroll_loss);
+
+  // decrease non-rollover with larger loss
+  circular_queue* queue_noroll_loss2 = circular_queue_init(5);
+  ck_assert_ptr_not_null(queue_noroll_loss2);
+  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, "elem0"));
+  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, "elem1"));
+  ck_assert(circular_queue_set_capacity(queue_noroll_loss2, 1, NULL));
+  ck_assert_ptr_null(circular_queue_get(queue_noroll_loss2, 0));
+  ck_assert_str_eq(circular_queue_get(queue_noroll_loss2, 1), "elem1");
+  circular_queue_free(queue_noroll_loss2);
 }
 END_TEST
 

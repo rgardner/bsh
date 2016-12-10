@@ -31,16 +31,13 @@ START_TEST(test_history_add_rollover)
 {
   ck_assert_int_eq(history_length, 0);
   for (int i = 0; i < HISTSIZE; i++) {
-    ck_assert(history_length < history_max_entries);
     char* s = NULL;
     ck_assert_int_ge(asprintf(&s, "command%d", i + 1), 0);
     history_add(s);
     free(s);
   }
 
-  ck_assert_int_eq(history_length, history_max_entries);
   history_add("overflow");
-  ck_assert_int_eq(history_length, history_max_entries);
 
   char* expansion = NULL;
   const int his_res = history_exp("!1", &expansion);
@@ -108,18 +105,6 @@ START_TEST(test_history_exp_correct)
 }
 END_TEST
 
-START_TEST(test_history_stifle_increase)
-{
-  ck_assert(false);
-}
-END_TEST
-
-START_TEST(test_history_stifle_decrease)
-{
-  ck_assert(false);
-}
-END_TEST
-
 Suite*
 make_history_suite()
 {
@@ -135,8 +120,6 @@ make_history_suite()
   tcase_add_test(tc, test_history_exp_found_pos);
   tcase_add_test(tc, test_history_exp_invalid_event);
   tcase_add_test(tc, test_history_exp_correct);
-  tcase_add_test(tc, test_history_stifle_increase);
-  tcase_add_test(tc, test_history_stifle_decrease);
 
   return s;
 }

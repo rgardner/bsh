@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "circular_queue.h"
+#include "util.h"
 
 typedef void* histdata_t;
 
@@ -24,12 +25,12 @@ typedef struct _hist_state
 } HISTORY_STATE;
 
 // Function prototypes
-static void history_free_elem(void* elem);
-histdata_t free_hist_entry(HIST_ENTRY*);
+static void history_free_entry_and_data(void*);
+static histdata_t history_free_entry(HIST_ENTRY*);
+static int parse_command(const char*, int*);
 
 // Public global variables
 int history_length;
-int history_max_entries;
 
 // Private global variables
 HISTORY_STATE state;
@@ -39,23 +40,40 @@ history_init()
 {
   state.queue = circular_queue_init(HISTSIZE);
   history_length = 0;
-  history_max_entries = HISTSIZE;
 }
 
 void
 history_free()
 {
   for (size_t i = 0; i < state.queue->capacity; i++) {
-    HIST_ENTRY* e = state.queue->entries[i];
-    if (e) {
-      void* data = free_hist_entry(e);
-      if (data) {
-        free(data);
-      }
+    HIST_ENTRY* entry = state.queue->entries[i];
+    if (entry) {
+      history_free_entry_and_data(entry);
     }
   }
 
   circular_queue_free(state.queue);
+}
+
+static void
+history_free_entry_and_data(void* elem)
+{
+  histdata_t* data = history_free_entry((HIST_ENTRY*)elem);
+  if (data) {
+    free(data);
+  }
+}
+
+static histdata_t
+history_free_entry(HIST_ENTRY* histent)
+{
+  if (histent->line) {
+    free(histent->line);
+  }
+
+  histdata_t data = histent->data;
+  free(histent);
+  return data;
 }
 
 /** Parse history event from history command.
@@ -134,69 +152,46 @@ history_exp(const char* string, char** output)
 void
 history_add(const char* string)
 {
-  if (state.queue->count < state.queue->capacity) {
-    history_length++;
+  HIST_ENTRY* entry = malloc(sizeof(HIST_ENTRY));
+  if (!entry) {
+    return;
   }
 
-  HIST_ENTRY* entry = malloc(sizeof(HIST_ENTRY));
   entry->line = strdup(string);
+  if (!(entry->line)) {
+    return;
+  }
+
   entry->timestamp = state.queue->count + 1;
   entry->data = NULL;
   HIST_ENTRY* removed = circular_queue_push(state.queue, entry);
   if (removed) {
-    void* data = free_hist_entry(removed);
-    if (data) {
-      free(data);
-    }
+    history_free_entry_and_data(removed);
   }
+
+  history_length++;
 }
 
 void
 history_stifle(const int max)
 {
-  circular_queue_set_capacity(state.queue, max, history_free_elem);
-}
-
-static void
-history_free_elem(void* elem)
-{
-  HIST_ENTRY* entry = elem;
-  histdata_t* data = free_hist_entry(entry);
-  if (data) {
-    free(data);
-  }
-}
-
-histdata_t
-free_hist_entry(HIST_ENTRY* histent)
-{
-  if (histent->line) {
-    free(histent->line);
-  }
-
-  histdata_t data = histent->data;
-  free(histent);
-  return data;
+  circular_queue_set_capacity(state.queue, max, history_free_entry_and_data);
 }
 
 void
-history_print(const int num)
+history_print(const size_t n_last_entries)
 {
-  const int start = state.queue->count % state.queue->capacity;
-  for (int i = start; i < num; i++) {
-    HIST_ENTRY* entry = state.queue->entries[i];
-    if (!entry) {
-      return;
-    }
-
-    printf("\t%d\t%s\n", entry->timestamp, entry->line);
+  const size_t num_stored_entries = min(state.queue->count, state.queue->capacity);
+  size_t start_pos = state.queue->count;
+  if (n_last_entries < num_stored_entries) {
+    start_pos -= n_last_entries;
+  } else {
+    start_pos -= num_stored_entries;
   }
 
-  for (int i = 0; (i < start) && (i < num); i++) {
-    HIST_ENTRY* entry = state.queue->entries[i];
-    if (!entry) {
-      continue;
-    }
+  for (size_t pos = start_pos; pos < state.queue->count; pos++) {
+    HIST_ENTRY* entry = circular_queue_get(state.queue, pos);
+    assert(entry);
     printf("\t%d\t%s\n", entry->timestamp, entry->line);
   }
 }

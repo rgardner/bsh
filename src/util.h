@@ -23,4 +23,7 @@
  *  @return New length of s.
  */
 size_t trim_right(char* s);
+
+size_t min(size_t a, size_t b);
+size_t safe_sub(size_t lhs, size_t rhs, size_t default_value);
 #endif
