@@ -1,5 +1,6 @@
 #include "../src/circular_queue.h"
 #include "test_bsh.h"
+#include "test_utils.h"
 
 #include <check.h>
 #include <stdbool.h>
@@ -171,8 +172,9 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
 {
   // decrease non-rollover queue without loss
   circular_queue* queue_roll_noloss = circular_queue_init(5);
-  circular_queue_push(queue_roll_noloss, "elem0");
-  circular_queue_push(queue_roll_noloss, "elem1");
+  ck_assert_ptr_not_null(queue_roll_noloss);
+  ck_assert_ptr_null(circular_queue_push(queue_roll_noloss, "elem0"));
+  ck_assert_ptr_null(circular_queue_push(queue_roll_noloss, "elem1"));
   ck_assert(circular_queue_set_capacity(queue_roll_noloss, 3, NULL));
   ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 0), "elem0");
   ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 1), "elem1");
@@ -180,10 +182,11 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
 
   // decrease non-rollover with loss
   circular_queue* queue_noroll_loss = circular_queue_init(2);
-  circular_queue_push(queue_noroll_loss, "elem0");
-  circular_queue_push(queue_noroll_loss, "elem1");
+  ck_assert_ptr_not_null(queue_noroll_loss);
+  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss, "elem0"));
+  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss, "elem1"));
   ck_assert(circular_queue_set_capacity(queue_noroll_loss, 1, NULL));
-  ck_assert(!circular_queue_get(queue_noroll_loss, 0));
+  ck_assert_ptr_null(circular_queue_get(queue_noroll_loss, 0));
   ck_assert_str_eq(circular_queue_get(queue_noroll_loss, 1), "elem1");
   circular_queue_free(queue_noroll_loss);
 }
@@ -192,20 +195,21 @@ END_TEST
 START_TEST(test_cq_decrease_capacity_rollover)
 {
   circular_queue* queue_noroll_loss2 = circular_queue_init(5);
+  ck_assert_ptr_not_null(queue_noroll_loss2);
   for (int i = 0; i < 5; i++) {
     char* elem;
-    asprintf(&elem, "elem%d", i);
-    circular_queue_push(queue_noroll_loss2, elem);
+    ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
+    ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, elem));
   }
 
   ck_assert(circular_queue_set_capacity(queue_noroll_loss2, 3, free));
   for (int i = 0; i < 5; i++) {
     char* actual = circular_queue_get(queue_noroll_loss2, i);
     if (i < 2) {
-      ck_assert(!actual);
+      ck_assert_ptr_null(actual);
     } else {
       char* expected;
-      asprintf(&expected, "elem%d", i);
+      ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
       ck_assert_str_eq(actual, expected);
       free(expected);
     }
@@ -215,11 +219,12 @@ START_TEST(test_cq_decrease_capacity_rollover)
 
   // decrease rollover with loss
   circular_queue* queue_roll_loss = circular_queue_init(5);
+  ck_assert_ptr_not_null(queue_roll_loss);
   for (int i = 0; i < 7; i++) {
     char* elem;
-    asprintf(&elem, "elem%d", i);
-    char* old;
-    if ((old = circular_queue_push(queue_roll_loss, elem))) {
+    ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
+    char* old = circular_queue_push(queue_roll_loss, elem);
+    if (old) {
       free(old);
     }
   }
@@ -228,12 +233,12 @@ START_TEST(test_cq_decrease_capacity_rollover)
   for (size_t i = 0; i < queue_roll_loss->count; i++) {
     char* actual = circular_queue_get(queue_roll_loss, i);
     if (i < 4) {
-      ck_assert(!actual);
+      ck_assert_ptr_null(actual);
     } else {
-      char* check;
-      asprintf(&check, "elem%zu", i);
-      ck_assert_str_eq(actual, check);
-      free(check);
+      char* expected;
+      ck_assert_int_ge(asprintf(&expected, "elem%zu", i), 0);
+      ck_assert_str_eq(actual, expected);
+      free(expected);
     }
   }
 

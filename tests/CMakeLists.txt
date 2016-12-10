@@ -22,6 +22,7 @@ set(TEST_BSH_SOURCES
 )
 set(TEST_BSH_HEADERS
   test_bsh.h
+  test_utils.h
 )
 add_executable(check_bsh ${TEST_BSH_HEADERS} ${TEST_BSH_SOURCES})
 target_link_libraries(check_bsh bsh ${CMAKE_THREAD_LIBS_INIT} ${CHECK_LIBRARIES})

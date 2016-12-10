@@ -11,7 +11,6 @@ bool increase_capacity(circular_queue* queue, size_t capacity);
 bool decrease_capacity(circular_queue* queue,
                        size_t capacity,
                        free_elem_fn free_elem);
-void copy_queue(circular_queue* src, circular_queue* dst);
 
 circular_queue*
 circular_queue_init(const size_t capacity)
@@ -128,24 +127,33 @@ decrease_capacity(circular_queue* queue,
                   free_elem_fn free_elem)
 {
   assert(capacity < queue->capacity);
-  circular_queue* new_queue = circular_queue_init(capacity);
+  assert(capacity > 0);
 
-  for (size_t i = 0; i < queue->count; i++) {
-    void* elem = circular_queue_push(new_queue, circular_queue_get(queue, i));
-    if (elem && free_elem) {
-      free_elem(elem);
+  void** new_entries = malloc(capacity * MEMBER_SIZE(circular_queue, entries));
+  if (!new_entries) {
+    return false;
+  }
+
+  const size_t num_filled = (queue->count < queue->capacity) ? queue->count : queue->capacity;
+  const size_t num_excess_elems = (num_filled > capacity) ? num_filled - capacity : 0;
+  size_t old_pos = 0;
+  if (num_excess_elems > 0) {
+    old_pos = queue->count - queue->capacity;
+    if (free_elem) {
+      for (size_t i = 0; i < num_excess_elems; i++, old_pos++) {
+        free_elem(queue->entries[old_pos % queue->capacity]);
+      }
+    } else {
+      old_pos += num_excess_elems;
     }
   }
 
-  free(queue->entries);
-  copy_queue(new_queue, queue);
-  return true;
-}
+  for (size_t i = 0, new_pos = old_pos; i < capacity; i++, new_pos++, old_pos++) {
+    new_entries[new_pos % capacity] = queue->entries[old_pos % queue->capacity];
+  }
 
-void
-copy_queue(circular_queue* src, circular_queue* dst)
-{
-  dst->entries = src->entries;
-  dst->count = src->count;
-  dst->capacity = src->capacity;
+  free(queue->entries);
+  queue->entries = new_entries;
+  queue->capacity = capacity;
+  return true;
 }
