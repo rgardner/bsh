@@ -7,11 +7,7 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __linux__
-#include <bsd/string.h>
-#else
 #include <string.h>
-#endif
 
 #include "alias.h"
 #include "bg_jobs.h"
@@ -23,7 +19,7 @@
 #include "util.h"
 
 // Function prototypes.
-static char* cd(int, char**);
+static void cd(int, char**);
 static void history_wrapper(int, char**);
 static void history_stifle_wrapper(const char*);
 static int dirs(int, char**);
@@ -47,46 +43,47 @@ builtins_init(const size_t history_capacity)
 
 /** Print helpful information. */
 void
-help(int command)
+help(const enum BuiltinCommands cmd)
 {
-  if (command == ALIAS) {
+  if (cmd == ALIAS) {
     alias_help();
-  } else if (command == BG) {
+  } else if (cmd == BG) {
     bg_help();
-  } else if (command == CD) {
+  } else if (cmd == CD) {
     printf(
-      "usage: cd <directory>\n\n"
-      "change the working directory to <directory>.\n"
-      "<directory> can be an absolute or relative path.\n");
-  } else if (command == DIRS) {
+      "usage: cd [dir]\n\n"
+      "Change the working directory to DIR. The default DIR is the value of "
+      "the HOME shell variable.\n\n"
+      "DIR can be an absolute or relative path.\n");
+  } else if (cmd == DIRS) {
     printf(
       "usage: dirs\n\n"
       "list directories on the directory stack.\n");
-  } else if (command == EXIT) {
+  } else if (cmd == EXIT) {
     printf(
       "usage: exit\n\n"
       "terminate the shell process unless there are background processes.\n");
-  } else if (command == FG) {
+  } else if (cmd == FG) {
     fg_help();
-  } else if (command == HELP) {
+  } else if (cmd == HELP) {
     printf(
       "bsh: a simple alternative to every other shell.\n"
       "usage: bsh\n\n"
-      "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
-      "use `help <command>` to learn more about a specific command.\n");
-  } else if (command == HISTORY) {
+      "builtin cmds: bg, cd, exit, fg, help, history, jobs, kill\n"
+      "use `help <cmd>` to learn more about a specific cmd.\n");
+  } else if (cmd == HISTORY) {
     history_help();
-  } else if (command == JOBS) {
+  } else if (cmd == JOBS) {
     jobs_help();
-  } else if (command == KILL) {
+  } else if (cmd == KILL) {
     printf(
       "usage: kill %%num\n\n"
       "terminate the process numbered `num` in the list of background "
       "processes return by `jobs` (by sending it SIGKILL).\n");
-  } else if (command == POPD) {
-  } else if (command == UNALIAS) {
+  } else if (cmd == POPD) {
+  } else if (cmd == UNALIAS) {
     unalias_help();
-  } else if (command == WHICH) {
+  } else if (cmd == WHICH) {
     printf("usage: which program ...\n");
   }
 }
@@ -149,45 +146,37 @@ execute_builtin_command(const enum BuiltinCommands command, process cmd)
   }
 }
 
-static char*
+static void
 cd(const int argc, char** argv)
 {
   char* dir = NULL;
 
   if (argc == 1 || (strlen(argv[1]) == 1 && *argv[1] == '~')) {
-    /* Destination is home directory. */
     if (!(dir = getenv("HOME"))) {
-      warnx("-bsh: cd: HOME not set");
-      return NULL;
+      warnx("cd: HOME not set");
+      return;
     }
   } else if (strlen(argv[1]) == 1 && *argv[1] == '-') {
-    /* Destination is previous working directory. */
     if (!(dir = getenv("OLDPWD"))) {
-      warnx("-bsh: cd: OLDPWD not set");
-      return NULL;
+      warnx("cd: OLDPWD not set");
+      return;
     }
   } else {
-    /* Destination is the argument to cd. */
-    const size_t dirsize = (strlen(argv[1]) + 1) * sizeof(char);
-    if (!(dir = malloc(dirsize))) {
-      err(1, "malloc");
-    }
-    strlcpy(dir, argv[1], dirsize);
+    dir = argv[1];
   }
 
-  char* cwd = NULL;
-  if (!(cwd = getcwd(NULL, 0))) {
-    warnx("unable to obtain current working directory.");
-  }
+  // ignore failure, cwd is optional
+  char* cwd = getcwd(NULL, 0);
 
   if (chdir(dir) < 0) {
-    warnx("-bsh cd: %s: No such file or directory", dir);
-    return NULL;
+    warn("cd: %s", dir);
+    return;
   }
 
-  if (cwd) setenv("OLDPWD", cwd, 1);
-
-  return dir;
+  if (cwd) {
+    UNUSED(setenv("OLDPWD", cwd, 1));
+    free(cwd);
+  }
 }
 
 static void
