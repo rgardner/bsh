@@ -166,7 +166,6 @@ history_add(const char* string)
 
   entry->line = strdup(string);
   if (!(entry->line)) {
-    free(entry);
     return;
   }
 
