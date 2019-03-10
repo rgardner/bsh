@@ -74,6 +74,21 @@ cmake --build . --target doc
 # open doc/html/index.html
 ```
 
+## Tests
+
+bsh has a collection of unit tests and uses the [Check][check] unit testing
+framework.
+
+To run the unit tests:
+
+```sh
+mkdir -p && cd build
+cmake .. && make
+build/bin/check_bsh
+```
+
+[check]: https://libcheck.github.io/check/
+
 ## Contributing
 
 This project uses [ClangFormat][ClangFormat].
