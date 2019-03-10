@@ -196,7 +196,7 @@ START_TEST(test_cq_increase_capacity_correct_slots)
   bsh_assert_ptr_null(queue->entries[0]);
   bsh_assert_ptr_null(queue->entries[2]);
 
-  circular_queue_free(queue, NULL); 
+  circular_queue_free(queue, NULL);
 }
 END_TEST
 
