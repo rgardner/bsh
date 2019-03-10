@@ -74,6 +74,12 @@ cmake --build . --target doc
 # open doc/html/index.html
 ```
 
+## Contributing
+
+This project uses [ClangFormat][ClangFormat].
+
+[ClangFormat]: https://clang.llvm.org/docs/ClangFormat.html
+
 ## Dependencies Explained
 
 **CMake** is the build system used for this project. Originally, this started as
