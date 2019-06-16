@@ -91,9 +91,9 @@ build/bin/check_bsh
 
 ## Contributing
 
-This project uses [ClangFormat][ClangFormat].
+This project uses [ClangFormat][clangformat].
 
-[ClangFormat]: https://clang.llvm.org/docs/ClangFormat.html
+[clangformat]: https://clang.llvm.org/docs/ClangFormat.html
 
 ## Dependencies Explained
 
