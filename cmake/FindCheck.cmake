@@ -88,6 +88,12 @@ if(Check_FOUND AND NOT TARGET Check::Check)
                                    "${Check_LIBRARY}"
                                    INTERFACE_COMPILE_OPTIONS
                                    "${PC_Check_CFLAGS_OTHER}"
+                                   INTERFACE_LINK_LIBRARIES
+                                   "${PC_Check_LINK_LIBRARIES}"
+                                   INTERFACE_LINK_OPTIONS
+                                   "${PC_Check_LDFLAGS}"
+                                   INTERFACE_LINK_OPTIONS
+                                   "${PC_Check_LDFLAGS_OTHER}"
                                    INTERFACE_INCLUDE_DIRECTORIES
                                    "${Check_INCLUDE_DIR}")
 endif()

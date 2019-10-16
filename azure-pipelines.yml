@@ -32,11 +32,9 @@ strategy:
     linux:
       imageName: "ubuntu-latest"
       cmakeGenerator: "Ninja"
-      cmakeCXX: "g++-8"
     mac:
       imageName: "macos-latest"
       cmakeGenerator: "Xcode"
-      cmakeCXX: ""
 
 pool:
   vmImage: $(imageName)
@@ -44,7 +42,7 @@ pool:
 steps:
   - bash: |
       set -euo pipefail
-      sudo apt install check g++-8 libbsd-dev libreadline-dev ninja-build pkg-config
+      sudo apt install check libbsd-dev libreadline-dev ninja-build pkg-config
     condition: eq(variables['Agent.OS'], 'Linux')
     displayName: "Install Linux-specific build dependencies"
 
@@ -62,7 +60,6 @@ steps:
       cmake --build . --config Debug
     env:
       GENERATOR: $(cmakeGenerator)
-      CXX: $(cmakeCXX)
     displayName: "Build project"
 
   - script: |
