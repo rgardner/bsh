@@ -1,11 +1,12 @@
-#include "../src/history.h"
-#include "test_bsh.h"
-#include "test_utils.h"
+#include "history.h"
 
 #include <check.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "test_bsh.h"
+#include "test_utils.h"
 
 static const size_t c_default_history_capacity = 10;
 
@@ -45,7 +46,7 @@ START_TEST(test_history_add_rollover)
 
   char* expansion = NULL;
   ck_assert_int_eq(history_exp("!1", &expansion), -1);
-  ck_assert_ptr_null(expansion);
+  bsh_assert_ptr_null(expansion);
 }
 END_TEST
 
@@ -53,7 +54,7 @@ START_TEST(test_history_exp_not_found)
 {
   char* expansion = NULL;
   ck_assert_int_eq(history_exp("!1", &expansion), -1);
-  ck_assert_ptr_null(expansion);
+  bsh_assert_ptr_null(expansion);
 }
 END_TEST
 
@@ -92,7 +93,7 @@ START_TEST(test_history_exp_invalid_event)
 {
   char* expansion = NULL;
   ck_assert_int_eq(history_exp("!invalid", &expansion), -1);
-  ck_assert_ptr_null(expansion);
+  bsh_assert_ptr_null(expansion);
 }
 END_TEST
 
@@ -102,7 +103,7 @@ START_TEST(test_history_disabled)
   history_add("command");
   char* expansion = NULL;
   ck_assert_int_eq(history_exp("!1", &expansion), -1);
-  ck_assert_ptr_null(expansion);
+  bsh_assert_ptr_null(expansion);
 }
 END_TEST
 

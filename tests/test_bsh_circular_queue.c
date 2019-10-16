@@ -1,11 +1,12 @@
-#include "../src/circular_queue.h"
-#include "test_bsh.h"
-#include "test_utils.h"
+#include "circular_queue.h"
 
 #include <check.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "test_bsh.h"
+#include "test_utils.h"
 
 START_TEST(test_cq_init_free)
 {
@@ -23,7 +24,7 @@ START_TEST(test_cq_push_one)
 {
   circular_queue* queue = circular_queue_init(10);
   void* elem = "0th element";
-  ck_assert_ptr_null(circular_queue_push(queue, elem));
+  bsh_assert_ptr_null(circular_queue_push(queue, elem));
   void* retval = circular_queue_get(queue, 0);
   ck_assert_ptr_eq(elem, retval);
   circular_queue_free(queue, NULL);
@@ -36,7 +37,7 @@ START_TEST(test_cq_push_above_capacity)
   circular_queue* queue1 = circular_queue_init(1);
   bsh_assert_ptr_not_null(queue1);
   void* elem = "count0";
-  ck_assert_ptr_null(circular_queue_push(queue1, elem));
+  bsh_assert_ptr_null(circular_queue_push(queue1, elem));
   void* retval = circular_queue_get(queue1, 0);
   ck_assert_ptr_eq(retval, elem);
 
@@ -49,12 +50,12 @@ START_TEST(test_cq_push_above_capacity)
   // 2 capacity: simple to reason about
   circular_queue* queue2 = circular_queue_init(2);
   bsh_assert_ptr_not_null(queue2);
-  ck_assert_ptr_null(circular_queue_push(queue2, "count0"));
-  ck_assert_ptr_null(circular_queue_push(queue2, "count1"));
+  bsh_assert_ptr_null(circular_queue_push(queue2, "count0"));
+  bsh_assert_ptr_null(circular_queue_push(queue2, "count1"));
   bsh_assert_ptr_not_null(circular_queue_get(queue2, 0));
   bsh_assert_ptr_not_null(circular_queue_get(queue2, 1));
   bsh_assert_ptr_not_null(circular_queue_push(queue2, "count2"));
-  ck_assert_ptr_null(circular_queue_get(queue2, 0));
+  bsh_assert_ptr_null(circular_queue_get(queue2, 0));
   bsh_assert_ptr_not_null(circular_queue_get(queue2, 1));
   bsh_assert_ptr_not_null(circular_queue_get(queue2, 2));
   circular_queue_free(queue2, NULL);
@@ -75,7 +76,7 @@ START_TEST(test_cq_push_above_capacity)
   }
 
   for (size_t i = 0; i < elems_to_add - capacity; i++) {
-    ck_assert_ptr_null(circular_queue_get(norm, i));
+    bsh_assert_ptr_null(circular_queue_get(norm, i));
   }
 
   for (size_t i = elems_to_add - capacity; i < elems_to_add; i++) {
@@ -94,7 +95,7 @@ START_TEST(test_cq_get)
 {
   circular_queue* queue1 = circular_queue_init(1);
   bsh_assert_ptr_not_null(queue1);
-  ck_assert_ptr_null(circular_queue_get(queue1, 0));
+  bsh_assert_ptr_null(circular_queue_get(queue1, 0));
   circular_queue_free(queue1, NULL);
 }
 END_TEST
@@ -107,7 +108,7 @@ START_TEST(test_cq_increase_capacity)
   for (int i = 0; i < 5; i++) {
     char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
-    ck_assert_ptr_null(circular_queue_push(queue1, elem));
+    bsh_assert_ptr_null(circular_queue_push(queue1, elem));
   }
 
   ck_assert(circular_queue_set_capacity(queue1, 10, NULL));
@@ -124,7 +125,7 @@ START_TEST(test_cq_increase_capacity)
   for (int i = 5; i < 10; i++) {
     char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
-    ck_assert_ptr_null(circular_queue_push(queue1, elem));
+    bsh_assert_ptr_null(circular_queue_push(queue1, elem));
   }
 
   for (int i = 0; i < 10; i++) {
@@ -153,13 +154,13 @@ START_TEST(test_cq_increase_capacity)
   for (int i = 0; i < 5; i++) {
     char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i + 15), 0);
-    ck_assert_ptr_null(circular_queue_push(queue2, elem));
+    bsh_assert_ptr_null(circular_queue_push(queue2, elem));
   }
 
   for (int i = 0; i < 20; i++) {
     char* actual = circular_queue_get(queue2, i);
     if (i < 5) {
-      ck_assert_ptr_null(actual);
+      bsh_assert_ptr_null(actual);
     } else {
       char* expected = NULL;
       ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
@@ -176,12 +177,12 @@ START_TEST(test_cq_increase_capacity_correct_slots)
 {
   circular_queue* queue = circular_queue_init(1);
   bsh_assert_ptr_not_null(queue);
-  ck_assert_ptr_null(circular_queue_push(queue, "elem0"));
+  bsh_assert_ptr_null(circular_queue_push(queue, "elem0"));
   bsh_assert_ptr_not_null(circular_queue_push(queue, "elem1"));
   ck_assert(circular_queue_set_capacity(queue, 3, NULL));
   ck_assert_str_eq(queue->entries[1], "elem1");
-  ck_assert_ptr_null(queue->entries[0]);
-  ck_assert_ptr_null(queue->entries[2]);
+  bsh_assert_ptr_null(queue->entries[0]);
+  bsh_assert_ptr_null(queue->entries[2]);
 }
 END_TEST
 
@@ -190,8 +191,8 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
   // decrease non-rollover queue without loss
   circular_queue* queue_roll_noloss = circular_queue_init(5);
   bsh_assert_ptr_not_null(queue_roll_noloss);
-  ck_assert_ptr_null(circular_queue_push(queue_roll_noloss, "elem0"));
-  ck_assert_ptr_null(circular_queue_push(queue_roll_noloss, "elem1"));
+  bsh_assert_ptr_null(circular_queue_push(queue_roll_noloss, "elem0"));
+  bsh_assert_ptr_null(circular_queue_push(queue_roll_noloss, "elem1"));
   ck_assert(circular_queue_set_capacity(queue_roll_noloss, 3, NULL));
   ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 0), "elem0");
   ck_assert_str_eq(circular_queue_get(queue_roll_noloss, 1), "elem1");
@@ -200,20 +201,20 @@ START_TEST(test_cq_decrease_capacity_no_rollover)
   // decrease non-rollover with loss
   circular_queue* queue_noroll_loss = circular_queue_init(2);
   bsh_assert_ptr_not_null(queue_noroll_loss);
-  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss, "elem0"));
-  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss, "elem1"));
+  bsh_assert_ptr_null(circular_queue_push(queue_noroll_loss, "elem0"));
+  bsh_assert_ptr_null(circular_queue_push(queue_noroll_loss, "elem1"));
   ck_assert(circular_queue_set_capacity(queue_noroll_loss, 1, NULL));
-  ck_assert_ptr_null(circular_queue_get(queue_noroll_loss, 0));
+  bsh_assert_ptr_null(circular_queue_get(queue_noroll_loss, 0));
   ck_assert_str_eq(circular_queue_get(queue_noroll_loss, 1), "elem1");
   circular_queue_free(queue_noroll_loss, NULL);
 
   // decrease non-rollover with larger loss
   circular_queue* queue_noroll_loss2 = circular_queue_init(5);
   bsh_assert_ptr_not_null(queue_noroll_loss2);
-  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, "elem0"));
-  ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, "elem1"));
+  bsh_assert_ptr_null(circular_queue_push(queue_noroll_loss2, "elem0"));
+  bsh_assert_ptr_null(circular_queue_push(queue_noroll_loss2, "elem1"));
   ck_assert(circular_queue_set_capacity(queue_noroll_loss2, 1, NULL));
-  ck_assert_ptr_null(circular_queue_get(queue_noroll_loss2, 0));
+  bsh_assert_ptr_null(circular_queue_get(queue_noroll_loss2, 0));
   ck_assert_str_eq(circular_queue_get(queue_noroll_loss2, 1), "elem1");
   circular_queue_free(queue_noroll_loss2, NULL);
 }
@@ -226,14 +227,14 @@ START_TEST(test_cq_decrease_capacity_rollover)
   for (int i = 0; i < 5; i++) {
     char* elem = NULL;
     ck_assert_int_ge(asprintf(&elem, "elem%d", i), 0);
-    ck_assert_ptr_null(circular_queue_push(queue_noroll_loss2, elem));
+    bsh_assert_ptr_null(circular_queue_push(queue_noroll_loss2, elem));
   }
 
   ck_assert(circular_queue_set_capacity(queue_noroll_loss2, 3, free));
   for (int i = 0; i < 5; i++) {
     char* actual = circular_queue_get(queue_noroll_loss2, i);
     if (i < 2) {
-      ck_assert_ptr_null(actual);
+      bsh_assert_ptr_null(actual);
     } else {
       char* expected = NULL;
       ck_assert_int_ge(asprintf(&expected, "elem%d", i), 0);
@@ -260,7 +261,7 @@ START_TEST(test_cq_decrease_capacity_rollover)
   for (size_t i = 0; i < queue_roll_loss->count; i++) {
     char* actual = circular_queue_get(queue_roll_loss, i);
     if (i < 4) {
-      ck_assert_ptr_null(actual);
+      bsh_assert_ptr_null(actual);
     } else {
       char* expected = NULL;
       ck_assert_int_ge(asprintf(&expected, "elem%zu", i), 0);
