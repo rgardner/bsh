@@ -44,7 +44,7 @@ pool:
 steps:
   - bash: |
       set -euo pipefail
-      sudo apt install check libbsd-dev
+      sudo apt install check g++-8 libbsd-dev ninja-build
     condition: eq(variables['Agent.OS'], 'Linux')
     displayName: "Install Linux-specific build dependencies"
 
@@ -66,6 +66,7 @@ steps:
     displayName: "Build project"
 
   - script: |
+      set -euo pipefail
       cd build
       cmake --build . --config Debug --target runTests
     displayName: "Run tests"
