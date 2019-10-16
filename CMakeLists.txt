@@ -3,16 +3,19 @@ project(bsh C)
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
-###############################################################################
+#
 # Set build features
 set(CMAKE_BUILD_TYPE Debug)
 
-###############################################################################
+#
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Werror -Wunreachable-code -Wformat=2 -DUNIX")
+set(
+  CMAKE_C_FLAGS
+  "${CMAKE_C_FLAGS} -std=gnu99 -Wall -Wextra -Werror -Wunreachable-code -Wformat=2 -DUNIX"
+  )
 set(CMAKE_C_FLAGS_DEBUG "-g -DDEBUG")
 
 find_package(Readline REQUIRED)
@@ -22,8 +25,15 @@ if(UNIX AND NOT APPLE)
   include_directories(${BSD_INCLUDE_DIR})
 endif(UNIX AND NOT APPLE)
 
-###############################################################################
+#
 # Subdirectories
 add_subdirectory(doc)
 add_subdirectory(src)
 add_subdirectory(tests)
+
+# =============================
+# Custom Targets
+# =============================
+
+# NOTE: This shows a warning because the tests print to stderr
+add_custom_target(runTests COMMAND check_bsh DEPENDS check_bsh)
