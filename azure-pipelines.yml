@@ -1,0 +1,71 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - "*"
+    exclude:
+      - .clang-format
+      - CONTRIBUTING.md
+      - README.md
+
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - "*"
+    exclude:
+      - .clang-format
+      - CONTRIBUTING.md
+      - README.md
+
+strategy:
+  matrix:
+    linux:
+      imageName: "ubuntu-latest"
+      cmakeGenerator: "Ninja"
+      cmakeCXX: "g++-8"
+    mac:
+      imageName: "macos-latest"
+      cmakeGenerator: "Xcode"
+      cmakeCXX: ""
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+  - bash: |
+      set -euo pipefail
+      sudo apt install check libbsd-dev
+    condition: eq(variables['Agent.OS'], 'Linux')
+    displayName: "Install Linux-specific build dependencies"
+
+  - bash: |
+      set -euo pipefail
+      brew install check
+    condition: eq(variables['Agent.OS'], 'Darwin')
+    displayName: "Install macOS-specific build dependencies"
+
+  - bash: |
+      set -euo pipefail
+      mkdir -p build
+      cd build
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Debug ..
+      cmake --build . --config Debug
+    env:
+      GENERATOR: $(cmakeGenerator)
+      CXX: $(cmakeCXX)
+    displayName: "Build project"
+
+  - script: |
+      cd build
+      cmake --build . --config Debug --target runTests
+    displayName: "Run tests"
