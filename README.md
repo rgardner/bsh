@@ -1,10 +1,10 @@
 # bsh
 
-[![Build Status](https://travis-ci.org/rgardner/bsh.svg?branch=master)](https://travis-ci.org/rgardner/bsh)
+[![Build Status](https://dev.azure.com/rgardner/opensource/_apis/build/status/rgardner.bsh?branchName=master)](https://dev.azure.com/rgardner/opensource/_build/latest?definitionId=4&branchName=master)
 
 Bob's finally coming out of his shell.
 
-```
+```txt
 bsh             __
     ___        |  "---.
   ."   ". -o)  |      |
@@ -16,51 +16,63 @@ Welcome to Bob shell.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more info on running the test suite,
 contributing to the project, and improving the documentation.
 
-
 ## Installation
 
 macOS and Ubuntu are currently supported and tested. This project requires
 [CMake](https://cmake.org/) version 2.8 or higher to build.
 
+macOS:
+
 ```sh
-$ # macOS
-$ brew install cmake
-$ # Ubuntu
-$ sudo apt-get install cmake libbsd-dev libreadline-dev pkg-config
+brew install cmake
+```
+
+Ubuntu:
+
+```sh
+sudo apt-get install cmake libbsd-dev libreadline-dev pkg-config
 ```
 
 After these dependencies are installed:
 
 ```sh
-$ git clone https://github.com/rgardner/bsh
-$ cd bsh
-$ mkdir build && cd build
-$ cmake .. && make
-$ bin/bsh
+git clone https://github.com/rgardner/bsh
+cd bsh
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
+# Build
+cmake --build .
+# Run
+cmake --build . --target run
 ```
-
 
 ## Documentation
 
 [Doxygen](http://www.stack.nl/~dimitri/doxygen/index.html) is required to
 build documentation:
 
+macOS:
+
 ```sh
-$ # macOS
-$ brew install doxygen
-$ # Ubuntu
-$ sudo apt-get install doxygen
+brew install doxygen
+```
+
+Ubuntu:
+
+```sh
+sudo apt-get install doxygen
 ```
 
 To generate the documentation:
 
 ```sh
-$ mkdir -p build && cd build
-$ cmake ..
-$ make doc
-$ open doc/html/index.html
+mkdir -p build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
+cmake --build . --target doc
+# open doc/html/index.html
 ```
-
 
 ## Dependencies Explained
 
@@ -88,17 +100,16 @@ using a JavaDoc-like style, which `doxygen` uses to create HTML and PDFs.
 **check** is the unit-testing framework chosen for this project. It is one of
 the most popular C unit-testing frameworks and works well with `cmake`.
 
-
-## Feature Roadmap
+## Feature Road Map
 
 1. ~~write the parser~~
-  - ~~http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html~~
+   - ~~http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html~~
 2. ~~basic shell support~~
-  - ~~http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html~~
+   - ~~http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html~~
 3. ~~Extra history features~~
-  - ~~`history -s num` and `history num`~~
+   - ~~`history -s num` and `history num`~~
 4. ~~`which`~~
-  - ~~http://www.opensource.apple.com/source/shell_cmds/shell_cmds-170/which/which.c~~
+   - ~~http://www.opensource.apple.com/source/shell_cmds/shell_cmds-170/which/which.c~~
 5. ~~`dirs, pushd, popd`~~
 6. ~~`alias`~~
 7. `pipe`
@@ -112,20 +123,18 @@ the most popular C unit-testing frameworks and works well with `cmake`.
 15. terminal support
 16. port to Windows
 
-
 ## Resources
 
 These resources have been invaluable to me while working on this project:
 
 1. Cornell CS414 Summer 2004 by Jeanna Matthews
-  - ["Parse.c" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html)
-  - ["Writing Your Own Shell" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html)
+   - ["Parse.c" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/parse.html)
+   - ["Writing Your Own Shell" assignment](http://www.cs.cornell.edu/Courses/cs414/2004su/homework/shell/shell.html)
 2. [GNU History Library](http://cnswww.cns.cwru.edu/php/chet/readline/history.html)
 3. [Bash source code](https://ftp.gnu.org/gnu/bash/)
 4. [Implementing a Job Control Shell](http://www.gnu.org/software/libc/manual/html_node/Implementing-a-Shell.html#Implementing-a-Shell)
 5. [The C Programming Language, 2nd
    Edition](http://smile.amazon.com/dp/0131103628/ref=cm_sw_r_tw_dp_.lqevb1B3CJ24)
-
 
 ## Credit
 
