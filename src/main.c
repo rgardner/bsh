@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef __linux__
+#include <bsd/stdlib.h>  // reallocf
 #include <bsd/string.h>
 #else
 #include <string.h>
