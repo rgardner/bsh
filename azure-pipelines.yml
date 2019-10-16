@@ -44,7 +44,7 @@ pool:
 steps:
   - bash: |
       set -euo pipefail
-      sudo apt install check g++-8 libbsd-dev ninja-build
+      sudo apt install check g++-8 libbsd-dev libreadline-dev ninja-build pkg-config
     condition: eq(variables['Agent.OS'], 'Linux')
     displayName: "Install Linux-specific build dependencies"
 
