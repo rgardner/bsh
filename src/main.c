@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef __linux__
+#include <bsd/stdlib.h>  // reallocf
 #include <bsd/string.h>
 #else
 #include <string.h>
@@ -148,7 +149,7 @@ launch_job(job* j, const bool foreground)
   }
 
   // set up piping
-  pid_t pid;
+  pid_t pid = 0;
   int infile = j->infile;
   int pipefd[2];
   for (process* p = j->first_process; p; p = p->next) {
@@ -256,7 +257,7 @@ main(int argc, char** argv)
           continue;
         }
 
-        size_t check = strlcpy(cmd_line, expansion, newsz) + 1;
+        const size_t check __attribute__((unused)) = strlcpy(cmd_line, expansion, newsz) + 1;
         assert(check == newsz);
       }
 
@@ -284,7 +285,7 @@ main(int argc, char** argv)
       cmd->command = expansion;
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     print_info(info);
 #endif
 

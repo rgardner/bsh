@@ -18,6 +18,10 @@
  */
 #define MEMBER_SIZE(type, member) (sizeof(((type*)0)->member))
 
+/** Gets the number of elements in the stack buffer. */
+#define BSH_ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+#define BSH_ARRAY_SSIZE(arr) ((ptrdiff_t)BSH_ARRAY_SIZE(arr))
+
 /** Remove trailing whitespace.
  *
  *  @return New length of s.

@@ -3,39 +3,29 @@
 This document serves as a style-guide and reference to help ensure consistency
 in the project.
 
-
 ## Testing
 
-To run the test suite, you need the [Check](http://check.sourceforge.net/) unit
-testing framework. You can find more info on downloading / setting it up on
-their [install page](http://check.sourceforge.net/web/install.html), but the
-short of it is:
-
-```sh
-$ # macOS
-$ brew install check
-$ # Ubuntu
-$ sudo apt-get install check
-```
+Bsh uses the [Check](http://check.sourceforge.net/) unit testing framework.
+Check is automatically downloaded at build time if needed via CMake's
+`FetchContent` module.
 
 You can run the test suite by:
 
 ```sh
-$ mkdir -p build && cd build
-$ cmake .. && make
-$ bin/check_bsh
+mkdir -p build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
+cmake --build . --target runTests # build and run
 ```
-
 
 ## Making Changes
 
 - no compiler warnings
 - contants are in all caps and are prefixed with `BSH_`
-- include guards are fully qualified, swapping / and . for _
+- include guards are fully qualified, swapping / and . for \_
 - initialize pointers to NULL
 - check for null pointer with `if (ptr)` instead of `if (ptr == NULL)`
 - global variables should be prefixed with `g_`
-
 
 ## Documentation
 
@@ -47,7 +37,6 @@ $ bin/check_bsh
 - use @bug and preferably link to GH issue
 - add examples with @code
 - use @param, @param[in], @param[out], @param[in, out]
-
 
 ## References
 

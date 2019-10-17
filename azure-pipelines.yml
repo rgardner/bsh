@@ -1,0 +1,73 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - "*"
+    exclude:
+      - .clang-format
+      - CONTRIBUTING.md
+      - README.md
+
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - "*"
+    exclude:
+      - .clang-format
+      - CONTRIBUTING.md
+      - README.md
+
+strategy:
+  matrix:
+    linux:
+      imageName: "ubuntu-latest"
+      cmakeGenerator: "Ninja"
+    mac:
+      imageName: "macos-latest"
+      cmakeGenerator: "Xcode"
+
+pool:
+  vmImage: $(imageName)
+
+steps:
+  - bash: |
+      set -euo pipefail
+      sudo apt install libbsd-dev libreadline-dev ninja-build pkg-config
+    condition: eq(variables['Agent.OS'], 'Linux')
+    displayName: "Install Linux-specific build dependencies"
+
+  - bash: |
+      set -euo pipefail
+      mkdir -p build/debug
+      pushd build/debug
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Debug ../..
+      cmake --build . --config Debug
+      popd
+
+      mkdir -p build/release
+      pushd build/release
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Release ../..
+      cmake --build . --config Release
+    env:
+      GENERATOR: $(cmakeGenerator)
+    displayName: "Build project"
+
+  - script: |
+      set -euo pipefail
+      pushd build/debug
+      cmake --build . --config Debug --target runTests
+      popd
+
+      pushd build/release
+      cmake --build . --config Debug --target runTests
+    displayName: "Run tests"
