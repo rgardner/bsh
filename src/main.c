@@ -257,7 +257,7 @@ main(int argc, char** argv)
           continue;
         }
 
-        size_t check = strlcpy(cmd_line, expansion, newsz) + 1;
+        const size_t check __attribute__((unused)) = strlcpy(cmd_line, expansion, newsz) + 1;
         assert(check == newsz);
       }
 
