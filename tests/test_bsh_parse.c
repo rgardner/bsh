@@ -1,9 +1,13 @@
-#include "../src/parse.h"
-#include "test_bsh.h"
-#include <check.h>
+#include "parse.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "check.h"
+#include "util.h"
+
+#include "test_bsh.h"
 
 void
 parse_setup(void)
@@ -31,10 +35,12 @@ END_TEST
 
 START_TEST(test_parse_command_too_long)
 {
-  char command[MAXLINE];
-  for (int i = 0; i <= MAXLINE; i++) {
+  char command[MAXLINE + 10];
+  for (int i = 0; i < BSH_ARRAY_SSIZE(command); i++) {
     command[i] = 'x';
   }
+  command[BSH_ARRAY_SIZE(command) - 1] = '\0';
+
   struct ParseInfo* p = parse(command);
   ck_assert(p == NULL);
 }
@@ -42,12 +48,11 @@ END_TEST
 
 START_TEST(test_parse_files_too_long)
 {
-  const int length = FILE_MAX_SIZE + 2;  // max_size, one char past, NULL
-  char file[length];
-  for (int i = 0; i < length; i++) {
+  char file[FILE_MAX_SIZE + 2]; // max_size, one char past, NULL
+  for (int i = 0; i < BSH_ARRAY_SSIZE(file); i++) {
     file[i] = 'x';
   }
-  file[length - 1] = '\0';
+  file[BSH_ARRAY_SIZE(file) - 1] = '\0';
 
   char cmd[MAXLINE] = "command < ";
   strcat(cmd, file);
