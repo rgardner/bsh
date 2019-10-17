@@ -285,7 +285,7 @@ main(int argc, char** argv)
       cmd->command = expansion;
     }
 
-#ifdef DEBUG
+#ifndef NDEBUG
     print_info(info);
 #endif
 

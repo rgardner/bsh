@@ -1,43 +1,43 @@
 set(LIB_SOURCES
-  alias.c
-  bg_jobs.c
-  builtins.c
-  circular_queue.c
-  history.c
-  linked_list.c
-  job.c
-  node.c
-  parse.c
-  stack.c
-  util.c
-)
+    alias.c
+    bg_jobs.c
+    builtins.c
+    circular_queue.c
+    history.c
+    linked_list.c
+    job.c
+    node.c
+    parse.c
+    stack.c
+    util.c)
 
-set(MAIN_SOURCES
-  main.c
-)
+set(MAIN_SOURCES main.c)
 
 set(HEADERS
-  ${CONFIG_HEADERS}
-  alias.h
-  bg_jobs.h
-  builtins.h
-  circular_queue.h
-  dbg.h
-  history.h
-  linked_list.h
-  job.h
-  node.h
-  parse.h
-  stack.h
-  util.h
-)
+    ${CONFIG_HEADERS}
+    alias.h
+    bg_jobs.h
+    builtins.h
+    circular_queue.h
+    dbg.h
+    history.h
+    linked_list.h
+    job.h
+    node.h
+    parse.h
+    stack.h
+    util.h)
 
-add_library(bsh STATIC ${LIB_SOURCES} ${HEADERS})
+add_library(bshLib STATIC ${LIB_SOURCES} ${HEADERS})
+target_compile_options(bshLib PRIVATE ${BSH_C_FLAGS_COMMON})
 
-add_executable(bsh-bin ${HEADERS} ${MAIN_SOURCES})
+add_executable(bshBin ${HEADERS} ${MAIN_SOURCES})
+target_compile_options(bshBin PRIVATE ${BSH_C_FLAGS_COMMON})
+
 if(APPLE)
-  target_link_libraries(bsh-bin bsh ${READLINE_LIBRARIES})
+  target_link_libraries(bshBin bshLib ${READLINE_LIBRARIES})
 else(UNIX)
-  target_link_libraries(bsh-bin bsh ${READLINE_LIBRARIES} ${BSD_LIBRARY})
-endif(APPLE)
-set_target_properties(bsh-bin PROPERTIES OUTPUT_NAME bsh)
+  target_link_libraries(bshBin bshLib ${READLINE_LIBRARIES} ${BSD_LIBRARY})
+endif()
+
+set_target_properties(bshBin PROPERTIES OUTPUT_NAME bsh)

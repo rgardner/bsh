@@ -114,7 +114,7 @@ unalias(const int argc, char** argv)
   if (strcmp(argv[1], "-a") == 0) {
     for (Node* curr = aliases->head; curr; curr = curr->next) {
       Alias* al = curr->data;
-      bool success = alias_remove(al->name);
+      const bool success __attribute__((unused))= alias_remove(al->name);
       assert(success);
     }
 

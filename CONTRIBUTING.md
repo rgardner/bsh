@@ -5,22 +5,9 @@ in the project.
 
 ## Testing
 
-To run the test suite, you need the [Check](http://check.sourceforge.net/) unit
-testing framework. You can find more info on downloading / setting it up on
-their [install page](http://check.sourceforge.net/web/install.html), but the
-short of it is:
-
-macOS:
-
-```sh
-brew install check
-```
-
-Ubuntu:
-
-```sh
-sudo apt-get install check
-```
+Bsh uses the [Check](http://check.sourceforge.net/) unit testing framework.
+Check is automatically downloaded at build time if needed via CMake's
+`FetchContent` module.
 
 You can run the test suite by:
 
@@ -28,7 +15,7 @@ You can run the test suite by:
 mkdir -p build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
-cmake --build . --target runTests
+cmake --build . --target runTests # build and run
 ```
 
 ## Making Changes

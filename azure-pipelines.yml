@@ -42,28 +42,32 @@ pool:
 steps:
   - bash: |
       set -euo pipefail
-      sudo apt install check libbsd-dev libreadline-dev ninja-build pkg-config
+      sudo apt install libbsd-dev libreadline-dev ninja-build pkg-config
     condition: eq(variables['Agent.OS'], 'Linux')
     displayName: "Install Linux-specific build dependencies"
 
   - bash: |
       set -euo pipefail
-      brew install check
-    condition: eq(variables['Agent.OS'], 'Darwin')
-    displayName: "Install macOS-specific build dependencies"
-
-  - bash: |
-      set -euo pipefail
-      mkdir -p build
-      cd build
+      mkdir -p build/debug
+      pushd build/debug
       cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Debug ..
       cmake --build . --config Debug
+      popd
+
+      mkdir -p build/release
+      pushd build/release
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Release ..
+      cmake --build . --config Release
     env:
       GENERATOR: $(cmakeGenerator)
     displayName: "Build project"
 
   - script: |
       set -euo pipefail
-      cd build
+      pushd build/debug
+      cmake --build . --config Debug --target runTests
+      popd
+
+      pushd build/release
       cmake --build . --config Debug --target runTests
     displayName: "Run tests"

@@ -1,4 +1,3 @@
-find_package(Check REQUIRED)
 find_package(Threads)
 
 set(bshTestSources
@@ -13,14 +12,17 @@ set(bshTestSources
 
 set(bshTestHeaders test_bsh.h test_utils.h)
 
-add_executable(check_bsh ${bshTestHeaders} ${bshTestSources})
+add_executable(bshUnitTests ${bshTestHeaders} ${bshTestSources})
+target_compile_options(bshUnitTests PRIVATE ${BSH_C_FLAGS_COMMON})
 
 if(UNIX AND NOT APPLE)
-  target_compile_definitions(check_bsh PUBLIC _GNU_SOURCE)
+  target_compile_definitions(bshUnitTests PUBLIC _GNU_SOURCE)
 endif()
 
-target_include_directories(check_bsh
-                           PRIVATE ${PROJECT_SOURCE_DIR}/src
-                                   ${CHECK_INCLUDE_DIRS})
+include(FetchContent)
+fetchcontent_getproperties(check)
+target_include_directories(bshUnitTests
+                           PRIVATE ${PROJECT_SOURCE_DIR}/src ${check_BINARY_DIR}
+                                   ${check_BINARY_DIR}/src)
 
-target_link_libraries(check_bsh bsh Check::Check Threads::Threads)
+target_link_libraries(bshUnitTests bshLib check Threads::Threads)
