@@ -149,7 +149,7 @@ launch_job(job* j, const bool foreground)
   }
 
   // set up piping
-  pid_t pid;
+  pid_t pid = 0;
   int infile = j->infile;
   int pipefd[2];
   for (process* p = j->first_process; p; p = p->next) {
