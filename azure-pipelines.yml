@@ -50,13 +50,13 @@ steps:
       set -euo pipefail
       mkdir -p build/debug
       pushd build/debug
-      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Debug ..
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Debug ../..
       cmake --build . --config Debug
       popd
 
       mkdir -p build/release
       pushd build/release
-      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Release ..
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Release ../..
       cmake --build . --config Release
     env:
       GENERATOR: $(cmakeGenerator)
