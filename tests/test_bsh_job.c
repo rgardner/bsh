@@ -1,8 +1,12 @@
-#include "../src/job.h"
-#include "../src/parse.h"
-#include <check.h>
+#include "job.h"
+
 #include <stdlib.h>
 #include <termios.h>
+
+#include "parse.h"
+#include "check.h"
+
+#include "test_utils.h"
 
 struct termios tmodes;
 job* j;
@@ -40,7 +44,8 @@ make_job_suite(void)
 
   suite_add_tcase(s, tc);
   tcase_add_checked_fixture(tc, job_setup, job_teardown);
-  tcase_add_test(tc, test_job_init);
+
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_job_init, "https://github.com/rgardner/bsh/issues/16");
 
   return s;
 }

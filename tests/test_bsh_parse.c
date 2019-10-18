@@ -8,6 +8,7 @@
 #include "util.h"
 
 #include "test_bsh.h"
+#include "test_utils.h"
 
 void
 parse_setup(void)
@@ -140,11 +141,11 @@ make_parse_suite(void)
   tcase_add_test(tc, test_parse_blanks);
   tcase_add_test(tc, test_parse_command_too_long);
   tcase_add_test(tc, test_parse_files_too_long);
-  tcase_add_test(tc, test_parse_normal);
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_parse_normal, "https://github.com/rgardner/bsh/issues/16");
   tcase_add_test(tc, test_parse_file_redirection);
   tcase_add_test(tc, test_parse_background);
-  tcase_add_test(tc, test_parse_piping);
-  tcase_add_test(tc, test_parse_variables);
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_parse_piping, "https://github.com/rgardner/bsh/issues/16");
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_parse_variables, "https://github.com/rgardner/bsh/issues/16");
   tcase_add_test(tc, test_parse_free_null);
   tcase_add_test(tc, test_parse_print_null);
 
