@@ -11,8 +11,7 @@ alias_setup()
 
 void
 alias_teardown()
-{
-}
+{}
 
 START_TEST(test_alias_add_expand)
 {
@@ -93,14 +92,22 @@ END_TEST
 
 START_TEST(test_unalias_remove_all)
 {
+  // Arrange
   char* argv_alias[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv_alias), 0);
 
   char* argv_alias2[] = { "alias", "harry=echo" };
   ck_assert_int_eq(alias(2, argv_alias2), 0);
 
+  // Act
   char* argv[] = { "unalias", "-a" };
-  ck_assert_int_eq(unalias(2, argv), 0);
+  const int unalias_result = unalias(2, argv);
+
+  // Assert
+  ck_assert_int_eq(unalias_result, c_bsh_alias_error_success);
+  char* expanded = NULL;
+  ck_assert_int_eq(alias_exp("bob", &expanded), 0);
+  ck_assert_int_eq(alias_exp("harry", &expanded), 0);
 }
 END_TEST
 

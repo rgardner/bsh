@@ -1,6 +1,7 @@
 #include "alias.h"
 
 #include <assert.h>
+#include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,7 @@
 #else
 #include <string.h>
 #endif
+#include <sysexits.h>
 
 #include "linked_list.h"
 
@@ -22,16 +24,20 @@ typedef struct
 // Global variables
 struct LinkedList* aliases;
 
-// Function prototypes
-static Alias* alias_init(const char* const name, const char* const value);
-static void alias_free(Alias* a);
-static bool alias_add(const char* const name,
-                      const char* const value,
-                      bool overwrite);
-static bool alias_remove(const char* name);
-static void alias_insert_sorted(Alias* a);
-static Alias* alias_search(const char* name);
-static void aliases_print();
+// Forward declarations
+
+static void
+alias_free(Alias* a);
+static bool
+alias_add(const char* const name, const char* const value, bool overwrite);
+static bool
+alias_remove(const char* name);
+static void
+alias_insert_sorted(Alias* a);
+static Alias*
+alias_search(const char* name);
+static void
+aliases_print();
 
 void
 aliases_init()
@@ -39,21 +45,33 @@ aliases_init()
   aliases = ll_init();
 }
 
-/** Initialize a new alias.
+/**
+ * Initializes a new alias.
  *
- *  @param name This is copied.
- *  @param value This is copied.
- *  @return Heap allocated alias.
+ * @param name This is copied.
+ * @param value This is copied.
+ * @return Heap allocated alias. Prints an error message to stderr and returns
+ *         NULL on error.
  */
 static Alias*
-alias_init(const char* const name, const char* const value)
+alias_init(const char* name, const char* value)
 {
-  const char* const name_h = strdup(name);
-  char* value_h = strdup(value);
-  Alias al = {.name = name_h, .value = value_h };
+  const char* const name_copy = strdup(name);
+  if (!name_copy) goto error;
+
+  char* const value_copy = strdup(value);
+  if (!value_copy) goto error;
+
   Alias* alias = malloc(sizeof(Alias));
-  memcpy(alias, &al, sizeof(Alias));
+  if (!alias) goto error;
+
+  alias->name = name_copy;
+  alias->value = value_copy;
   return alias;
+
+error:
+  err(EX_OSERR, NULL);
+  return NULL;
 }
 
 int
@@ -107,18 +125,18 @@ unalias(const int argc, char** argv)
 {
   if (argc == 1) {
     unalias_help();
-    return 2;
+    return c_bsh_alias_error_usage;
   }
 
   // remove all aliases
   if (strcmp(argv[1], "-a") == 0) {
-    for (Node* curr = aliases->head; curr; curr = curr->next) {
-      Alias* al = curr->data;
-      const bool success __attribute__((unused)) = alias_remove(al->name);
-      assert(success);
+    while (aliases->head) {
+      Alias* alias = ll_remove(aliases);
+      assert(alias);
+      alias_free(alias);
     }
 
-    return 0;
+    return c_bsh_alias_error_success;
   }
 
   bool all_found = true;
@@ -157,14 +175,14 @@ alias_exp(const char* string, char** output)
   return 1;
 }
 
-/** Add name->value mapping.
+/**
+ * Adds name to value mapping.
  *
- *  @param name Name of alias. This is copied.
- *  @param value The command to run when the alias is entered. This is copied.
- *  @param overwrite Should the value be overwritten if an alias already exists.
- *  @return
- *  true if an alias was inserted/updated;
- *  false if overwrite was true and the alias already existed.
+ * @param name Name of alias. This is copied.
+ * @param value The command to run when the alias is entered. This is copied.
+ * @param overwrite Should the value be overwritten if an alias already exists.
+ * @return true if an alias was inserted/updated; false if overwrite was true
+ * and the alias already existed.
  */
 static bool
 alias_add(const char* const name, const char* const value, bool overwrite)
@@ -187,6 +205,8 @@ alias_add(const char* const name, const char* const value, bool overwrite)
   }
 
   Alias* new = alias_init(name, value);
+  if (!new) return false;
+
   alias_insert_sorted(new);
   return true;
 }
