@@ -6,10 +6,14 @@
 #include <string.h>
 #include <unistd.h>
 
-/* Function prototypes. */
-void init_process(process*, const struct Command);
-void process_free(process*);
-void job_free(job*);
+// Forward declarations
+
+enum bsh_job_error
+init_process(process*, const struct Command);
+void
+process_free(process*);
+void
+job_free(job*);
 
 /* The active jobs are linked into a list. This is its head. */
 job* first_job = NULL;
@@ -50,26 +54,44 @@ job_is_completed(job* j)
   return 1;
 }
 
-void
+enum bsh_job_error
 init_process(process* p, const struct Command cmd)
 {
-  p->next = NULL;
-  p->argc = cmd.VarNum + 1;  // command, *args
+  process temp;
+  temp.next = NULL;
+  temp.argc = 0;
 
-  p->argv = malloc((p->argc + 1) * sizeof(char*));  // command, *args, NULL
-  p->argv[0] = strdup(cmd.command);
+  temp.argv = malloc((cmd.VarNum + 1) * sizeof(char*));  // command, *args
+  if (!temp.argv) goto error;
+
+  temp.argv[0] = strdup(cmd.command);
+  if (!temp.argv[0]) goto error;
+  temp.argc++;
+
   for (int i = 0; i < cmd.VarNum; i++) {
-    p->argv[i + 1] = strdup(cmd.VarList[i]);
+    temp.argv[i + 1] = strdup(cmd.VarList[i]);
+    if (!temp.argv[i + 1]) goto error;
+    temp.argc++;
   }
-  p->argv[p->argc] = NULL;
 
-  p->pid = 0;
-  p->completed = false;
-  p->stopped = false;
-  p->status = 0;
+  temp.pid = 0;
+  temp.completed = false;
+  temp.stopped = false;
+  temp.status = 0;
+
+  *p = temp;
+  return c_bsh_job_error_success;
+
+error:
+  for (int i = 0; i < temp.argc; i++) {
+    free(temp.argv[i]);
+  }
+
+  free(p->argv);
+  return c_bsh_job_error_general;
 }
 
-void
+enum bsh_job_error
 init_job(job* j,
          const struct ParseInfo* info,
          pid_t pgid,
@@ -83,7 +105,10 @@ init_job(job* j,
   process* prev = NULL;
   for (int i = 0; i <= info->pipeNum; i++) {
     process* p = malloc(sizeof(process));
-    init_process(p, info->CommArray[i]);
+    if (!p) goto error;
+    if (init_process(p, info->CommArray[i]) != c_bsh_job_error_success)
+      goto error;
+
     if (j->first_process && prev) {
       prev->next = p;
     } else {
@@ -109,6 +134,12 @@ init_job(job* j,
   }
 
   j->errfile = STDERR_FILENO;
+
+  return c_bsh_job_error_success;
+
+error:
+  job_free(j);
+  return c_bsh_job_error_general;
 }
 
 void
@@ -126,9 +157,15 @@ process_free(process* p)
 void
 job_free(job* j)
 {
-  free(j->command);
-  for (process* p = j->first_process; p; p = p->next) {
-    process_free(p);
+  job* curr = j;
+  while (curr) {
+    free(curr->command);
+    for (process* p = curr->first_process; p; p = p->next) {
+      process_free(p);
+    }
+    job* next = curr->next;
+    free(curr);
+    curr = next;
   }
 }
 
