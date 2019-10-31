@@ -23,6 +23,9 @@ enum bsh_alias_error
 void
 aliases_init();
 
+void
+aliases_deinit();
+
 /** The alias builtin command that prints existing aliases and creates new ones.
  *
  *  @code{.sh}
@@ -46,6 +49,8 @@ alias_help();
  */
 int
 unalias(int argc, char** argv);
+
+void unalias_all();
 
 /** Print unalias usage and exit. */
 void

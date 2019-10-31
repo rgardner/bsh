@@ -41,7 +41,7 @@ START_TEST(test_parse_command_too_long)
   command[BSH_ARRAY_SIZE(command) - 1] = '\0';
 
   struct ParseInfo* p = parse(command);
-  ck_assert(p == NULL);
+  bsh_assert_ptr_null(p);
 }
 END_TEST
 

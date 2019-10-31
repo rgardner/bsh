@@ -1,7 +1,9 @@
-#include "../src/alias.h"
+#include "alias.h"
 
 #include <check.h>
 #include <stdlib.h>
+
+#include "test_utils.h"
 
 void
 alias_setup()
@@ -11,7 +13,9 @@ alias_setup()
 
 void
 alias_teardown()
-{}
+{
+  aliases_deinit();
+}
 
 START_TEST(test_alias_add_expand)
 {
@@ -21,6 +25,8 @@ START_TEST(test_alias_add_expand)
   char* expansion;
   ck_assert_int_eq(alias_exp("bob", &expansion), 1);
   ck_assert_str_eq(expansion, "echo");
+
+  unalias_all();
   free(expansion);
 }
 END_TEST
@@ -35,17 +41,20 @@ START_TEST(test_alias_print_several)
 
   char* argv_print[] = { "alias", "bob", "harry" };
   ck_assert_int_eq(alias(3, argv_print), 0);
+
+  unalias_all();
 }
 END_TEST
 
 START_TEST(test_alias_print_some_do_not_exist)
 {
-
   char* argv[] = { "alias", "bob=echo" };
   ck_assert_int_eq(alias(2, argv), 0);
 
   char* argv_print[] = { "alias", "bob", "harry" };
   ck_assert_int_ne(alias(3, argv_print), 0);
+
+  unalias_all();
 }
 END_TEST
 
@@ -59,6 +68,8 @@ START_TEST(test_alias_print_all)
 
   char* argv_print[] = { "alias" };
   ck_assert_int_eq(alias(1, argv_print), 0);
+
+  unalias_all();
 }
 END_TEST
 
@@ -80,6 +91,8 @@ START_TEST(test_unalias_exists)
   char* expansion;
   alias_exp("bob", &expansion);
   ck_assert(!expansion);
+
+  unalias_all();
 }
 END_TEST
 
@@ -108,6 +121,8 @@ START_TEST(test_unalias_remove_all)
   char* expanded = NULL;
   ck_assert_int_eq(alias_exp("bob", &expanded), 0);
   ck_assert_int_eq(alias_exp("harry", &expanded), 0);
+
+  unalias_all();
 }
 END_TEST
 
@@ -115,7 +130,7 @@ START_TEST(test_alias_expand_does_not_exist)
 {
   char* expansion = NULL;
   ck_assert_int_eq(alias_exp("alias", &expansion), 0);
-  ck_assert(!expansion);
+  bsh_assert_ptr_null(expansion);
 }
 END_TEST
 

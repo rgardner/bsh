@@ -45,6 +45,12 @@ aliases_init()
   aliases = ll_init();
 }
 
+void
+aliases_deinit()
+{
+  ll_free(aliases);
+}
+
 /**
  * Initializes a new alias.
  *
@@ -130,12 +136,7 @@ unalias(const int argc, char** argv)
 
   // remove all aliases
   if (strcmp(argv[1], "-a") == 0) {
-    while (aliases->head) {
-      Alias* alias = ll_remove(aliases);
-      assert(alias);
-      alias_free(alias);
-    }
-
+    unalias_all();
     return c_bsh_alias_error_success;
   }
 
@@ -148,6 +149,14 @@ unalias(const int argc, char** argv)
   }
 
   return all_found ? 0 : 1;
+}
+
+void unalias_all() {
+  while (aliases->head) {
+    Alias* alias = ll_remove(aliases);
+    assert(alias);
+    alias_free(alias);
+  }
 }
 
 void

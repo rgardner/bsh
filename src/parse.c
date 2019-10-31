@@ -19,6 +19,14 @@
 size_t
 copy_substring(char*, const char*, int, int);
 
+void free_command(const struct Command* command) {
+  if (!command) return;
+  free(command->command);
+  for (int i = 0; i < command->VarNum; i++) {
+    free(command->VarList[i]);
+  }
+}
+
 void
 init_info(struct ParseInfo* p)
 {
@@ -125,6 +133,7 @@ parse(const char* cmdline)
   return result;
 
 error:
+  free_command(&cmd);
   free_info(result);
   return NULL;
 }
@@ -140,8 +149,10 @@ copy_substring(char* dest, const char* src, const int begin, const int limit)
   int end = begin;
   for (; !isspace(src[end]) && src[end] != '\n' && src[end] != '\0'; end++)
     ;
+
   if (end - begin > limit)
     return SIZE_MAX;  // length of string to copy too large
+
   strncpy(dest, src + begin, end - begin);
   dest[end] = '\0';
   return end - 1;
@@ -177,12 +188,9 @@ free_info(const struct ParseInfo* info)
 {
   if (!info) return;
 
-  for (int i = 0; i < info->pipeNum; i++) {
-    const struct Command cmd = info->CommArray[i];
-    if (cmd.command) free(cmd.command);
-    for (int i = 0; i < cmd.VarNum; i++) {
-      if (cmd.VarList[i]) free(cmd.VarList[i]);
-    }
+  for (int i = 0; i <= info->pipeNum; i++) {
+    free_command(&(info->CommArray[i]));
   }
+
   free((void*)info);
 }

@@ -44,7 +44,7 @@ circular_queue* circular_queue_init(size_t capacity);
  *    }
  *  }
  *  circular_queue_free(queue, NULL);
- *  @endcodek
+ *  @endcode
  */
 void circular_queue_free(circular_queue* queue, free_elem_fn free_elem);
 

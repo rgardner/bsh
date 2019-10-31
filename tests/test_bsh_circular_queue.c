@@ -187,6 +187,7 @@ END_TEST
 START_TEST(test_cq_increase_capacity_correct_slots)
 {
   circular_queue* queue = circular_queue_init(1);
+
   bsh_assert_ptr_not_null(queue);
   bsh_assert_ptr_null(circular_queue_push(queue, "elem0"));
   bsh_assert_ptr_not_null(circular_queue_push(queue, "elem1"));
@@ -194,6 +195,8 @@ START_TEST(test_cq_increase_capacity_correct_slots)
   ck_assert_str_eq(queue->entries[1], "elem1");
   bsh_assert_ptr_null(queue->entries[0]);
   bsh_assert_ptr_null(queue->entries[2]);
+
+  circular_queue_free(queue, NULL); 
 }
 END_TEST
 
