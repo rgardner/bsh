@@ -12,13 +12,11 @@
 
 void
 parse_setup(void)
-{
-}
+{}
 
 void
 parse_teardown(void)
-{
-}
+{}
 
 START_TEST(test_parse_empty)
 {
@@ -49,7 +47,7 @@ END_TEST
 
 START_TEST(test_parse_files_too_long)
 {
-  char file[FILE_MAX_SIZE + 2]; // max_size, one char past, NULL
+  char file[FILE_MAX_SIZE + 2];  // max_size, one char past, NULL
   for (int i = 0; i < BSH_ARRAY_SSIZE(file); i++) {
     file[i] = 'x';
   }
@@ -66,6 +64,7 @@ END_TEST
 START_TEST(test_parse_normal)
 {
   struct ParseInfo* p = parse("command");
+  bsh_assert_ptr_not_null(p);
   ck_assert(p->hasInputRedirection == false);
   ck_assert(p->hasOutputRedirection == false);
   ck_assert(p->runInBackground == false);
@@ -73,43 +72,52 @@ START_TEST(test_parse_normal)
   ck_assert_int_eq(p->pipeNum, 0);
   ck_assert_str_eq(p->inFile, "");
   ck_assert_str_eq(p->outFile, "");
+  free_info(p);
 }
 END_TEST
 
 START_TEST(test_parse_file_redirection)
 {
   struct ParseInfo* p = parse("echo <infile >outfile");
+  bsh_assert_ptr_not_null(p);
   ck_assert(p->hasInputRedirection);
   ck_assert(p->hasOutputRedirection);
   ck_assert_str_eq(p->inFile, "infile");
   ck_assert_str_eq(p->outFile, "outfile");
+  free_info(p);
 }
 END_TEST
 
 START_TEST(test_parse_background)
 {
   struct ParseInfo* p = parse("long_running_task &");
+  bsh_assert_ptr_not_null(p);
   ck_assert(p->runInBackground);
+  free_info(p);
 }
 END_TEST
 
 START_TEST(test_parse_piping)
 {
   struct ParseInfo* p = parse("command1 | command2 | command3");
+  bsh_assert_ptr_not_null(p);
   ck_assert_int_eq(p->pipeNum, 2);
   ck_assert_str_eq(p->CommArray[0].command, "command1");
   ck_assert_str_eq(p->CommArray[1].command, "command2");
   ck_assert_str_eq(p->CommArray[2].command, "command3");
+  free_info(p);
 }
 END_TEST
 
 START_TEST(test_parse_variables)
 {
   struct ParseInfo* p = parse("command var1 var2 var3");
+  bsh_assert_ptr_not_null(p);
   ck_assert_int_eq(p->CommArray[0].VarNum, 3);
   ck_assert_str_eq(p->CommArray[0].VarList[0], "var1");
   ck_assert_str_eq(p->CommArray[0].VarList[1], "var2");
   ck_assert_str_eq(p->CommArray[0].VarList[2], "var3");
+  free_info(p);
 }
 END_TEST
 
@@ -141,11 +149,14 @@ make_parse_suite(void)
   tcase_add_test(tc, test_parse_blanks);
   tcase_add_test(tc, test_parse_command_too_long);
   tcase_add_test(tc, test_parse_files_too_long);
-  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_parse_normal, "https://github.com/rgardner/bsh/issues/16");
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(
+    tc, test_parse_normal, "https://github.com/rgardner/bsh/issues/16");
   tcase_add_test(tc, test_parse_file_redirection);
   tcase_add_test(tc, test_parse_background);
-  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_parse_piping, "https://github.com/rgardner/bsh/issues/16");
-  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(tc, test_parse_variables, "https://github.com/rgardner/bsh/issues/16");
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(
+    tc, test_parse_piping, "https://github.com/rgardner/bsh/issues/16");
+  BSH_TEST_ADD_TEST_DISABLED_ON_LINUX(
+    tc, test_parse_variables, "https://github.com/rgardner/bsh/issues/16");
   tcase_add_test(tc, test_parse_free_null);
   tcase_add_test(tc, test_parse_print_null);
 
