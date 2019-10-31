@@ -1,0 +1,10 @@
+!README.md
+*.md
+.DS_Store
+.clang-format
+.git
+.github
+.gitignore
+.vscode
+azure-pipelines.yml
+build

@@ -3,6 +3,22 @@
 This document serves as a style-guide and reference to help ensure consistency
 in the project.
 
+## Building
+
+### Linux in Docker
+
+Use the provided `docker/linux/Dockerfile` to create a Linux container capable
+of building `bsh`. Inside that container, you can use cmake, etc.
+
+```sh
+make build-docker-linux
+make run-docker-linux
+# You are now inside the container
+mkdir -p build/linux/Debug && cd build/linux/Debug
+cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Debug ../../..
+cmake --build . --target runTests
+```
+
 ## Testing
 
 Bsh uses the [Check](http://check.sourceforge.net/) unit testing framework.
@@ -26,6 +42,8 @@ cmake --build . --target runTests # build and run
 - initialize pointers to NULL
 - check for null pointer with `if (ptr)` instead of `if (ptr == NULL)`
 - global variables should be prefixed with `g_`
+- constants in global scope should be prefixed with `c_`
+- struct variables should not use a prefix
 
 ## Documentation
 
