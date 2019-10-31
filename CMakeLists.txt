@@ -7,6 +7,7 @@ project(bsh VERSION 0.1.0 DESCRIPTION "Bash-like shell" LANGUAGES C)
 # =============================
 # Project-wide setup
 # =============================
+option(BSH_USE_VALGRIND "Run tests with Valgrind" OFF)
 option(BSH_ENABLE_WERROR "Enable all warnings as errors" ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
@@ -76,5 +77,13 @@ endif()
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR AND BUILD_TESTING)
   add_subdirectory(tests)
 
-  add_custom_target(runTests COMMAND bshUnitTests DEPENDS bshUnitTests)
+  if(BSH_USE_VALGRIND)
+    add_custom_target(runTests
+                      COMMAND CK_FORK=no valgrind
+                              --error-exitcode=1
+                              --leak-check=full $<TARGET_FILE:bshUnitTests>
+                      DEPENDS bshUnitTests)
+  else()
+    add_custom_target(runTests COMMAND bshUnitTests DEPENDS bshUnitTests)
+  endif()
 endif()

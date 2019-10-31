@@ -8,4 +8,5 @@ RUN apt-get --yes update && apt-get install --yes --no-install-recommends \
         libreadline-dev \
         ninja-build \
         pkg-config \
+        valgrind \
         && rm -rf /var/lib/apt/lists/*
