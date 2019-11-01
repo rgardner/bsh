@@ -275,14 +275,13 @@ main(int argc, char** argv)
     // Expand aliases in info commands.
     for (int i = 0; i <= info->pipeNum; i++) {
       struct Command* const cmd = &info->CommArray[i];
-      char* expansion;
+      char* expansion = NULL;
       if (alias_exp(cmd->command, &expansion) <= 0) {
         continue;
       }
 
       // replace command with alias expansion
-      free(cmd->command);
-      cmd->command = expansion;
+      strcpy(cmd->command, expansion);
     }
 
 #ifndef NDEBUG
@@ -291,7 +290,7 @@ main(int argc, char** argv)
 
     // com contains the info. of the command before the first "|"
     const struct Command* cmd = &info->CommArray[0];
-    if (!cmd || !cmd->command) {
+    if (!cmd || cmd->command[0] == '\0') {
       free_info(info);
       continue;
     }
