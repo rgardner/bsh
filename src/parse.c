@@ -7,8 +7,8 @@
 
 #include "parse.h"
 
-#include <err.h>
 #include <ctype.h>
+#include <err.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,9 +19,10 @@
 size_t
 copy_substring(char*, const char*, int, int);
 
-void free_command(const struct Command* command) {
+void
+free_command(const struct Command* command)
+{
   if (!command) return;
-  free(command->command);
   for (int i = 0; i < command->VarNum; i++) {
     free(command->VarList[i]);
   }
@@ -58,7 +59,7 @@ parse(const char* cmdline)
   if (!result) goto error;
   init_info(result);
 
-  struct Command cmd = { .command = NULL,
+  struct Command cmd = { .command = { '\0' },
                          .VarList = { NULL },
                          .VarNum = 0 };
 
@@ -66,10 +67,7 @@ parse(const char* cmdline)
     // command1 < infile | command > outfile &
     if (isspace(cmdline[i])) continue;
 
-    if (!cmd.command) {
-      cmd.command = malloc(MAXLINE * sizeof(char));
-      if (!cmd.command) goto error;
-
+    if (cmd.command[0] == '\0') {
       i = copy_substring(cmd.command, cmdline, i, MAXLINE);
       if (i == SIZE_MAX) {
         fprintf(stderr,
@@ -108,11 +106,13 @@ parse(const char* cmdline)
         result->pipeNum++;
 
         // Reset cmd
-        cmd.command = NULL;
+        memset(cmd.command, 0, sizeof(cmd.command));
         memset(cmd.VarList, 0, sizeof(cmd.VarList));
         cmd.VarNum = 0;
       } else if (!isspace(cmdline[i])) {
-        char* arg = malloc(MAXLINE * sizeof(char));
+        // Use calloc to zero-initialize entire argument. Enables easy
+        // strcmp comparison.
+        char* arg = calloc(MAXLINE, sizeof(char));
         if (!arg) goto error;
 
         i = copy_substring(arg, cmdline, i, MAXLINE);
