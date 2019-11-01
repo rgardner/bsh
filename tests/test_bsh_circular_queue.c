@@ -31,7 +31,7 @@ START_TEST(test_cq_push_one)
 }
 END_TEST
 
-START_TEST(test_cq_push_above_capacity)
+START_TEST(test_cq_push_above_capacity_when_capacity_is_one)
 {
   // 1 capacity: push is in-place swap
   circular_queue* queue1 = circular_queue_init(1);
@@ -46,7 +46,11 @@ START_TEST(test_cq_push_above_capacity)
   retval = circular_queue_get(queue1, 1);
   ck_assert_ptr_eq(retval, another_elem);
   circular_queue_free(queue1, NULL);
+}
+END_TEST
 
+START_TEST(test_cq_push_above_capacity_when_capacity_is_two)
+{
   // 2 capacity: simple to reason about
   circular_queue* queue2 = circular_queue_init(2);
   bsh_assert_ptr_not_null(queue2);
@@ -59,19 +63,26 @@ START_TEST(test_cq_push_above_capacity)
   bsh_assert_ptr_not_null(circular_queue_get(queue2, 1));
   bsh_assert_ptr_not_null(circular_queue_get(queue2, 2));
   circular_queue_free(queue2, NULL);
+}
+END_TEST
 
-  // N capacity: normal case
+START_TEST(test_cq_push_above_capacity_when_capacity_is_n)
+{
   const size_t capacity = 10;
   const size_t elems_to_add = 100;
+
   circular_queue* norm = circular_queue_init(capacity);
   bsh_assert_ptr_not_null(norm);
+
   for (size_t i = 0; i < elems_to_add; i++) {
     char* dyn_elem = NULL;
     ck_assert_int_ge(asprintf(&dyn_elem, "e%zu", i), 0);
     char* old = circular_queue_push(norm, dyn_elem);
-    if (i > capacity) {
+    if (i >= capacity) {
       bsh_assert_ptr_not_null(old);
       free(old);
+    } else {
+      ck_assert_ptr_null(old);
     }
   }
 
@@ -176,6 +187,7 @@ END_TEST
 START_TEST(test_cq_increase_capacity_correct_slots)
 {
   circular_queue* queue = circular_queue_init(1);
+
   bsh_assert_ptr_not_null(queue);
   bsh_assert_ptr_null(circular_queue_push(queue, "elem0"));
   bsh_assert_ptr_not_null(circular_queue_push(queue, "elem1"));
@@ -183,6 +195,8 @@ START_TEST(test_cq_increase_capacity_correct_slots)
   ck_assert_str_eq(queue->entries[1], "elem1");
   bsh_assert_ptr_null(queue->entries[0]);
   bsh_assert_ptr_null(queue->entries[2]);
+
+  circular_queue_free(queue, NULL); 
 }
 END_TEST
 
@@ -283,7 +297,9 @@ make_circular_queue_suite()
 
   tcase_add_test(tc, test_cq_init_free);
   tcase_add_test(tc, test_cq_push_one);
-  tcase_add_test(tc, test_cq_push_above_capacity);
+  tcase_add_test(tc, test_cq_push_above_capacity_when_capacity_is_one);
+  tcase_add_test(tc, test_cq_push_above_capacity_when_capacity_is_two);
+  tcase_add_test(tc, test_cq_push_above_capacity_when_capacity_is_n);
   tcase_add_test(tc, test_cq_get);
   tcase_add_test(tc, test_cq_increase_capacity);
   tcase_add_test(tc, test_cq_increase_capacity_correct_slots);

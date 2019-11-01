@@ -30,6 +30,7 @@ START_TEST(test_history_add)
   char* actual = NULL;
   ck_assert_int_eq(history_exp("!1", &actual), 1);
   ck_assert_str_eq(actual, "command");
+  free(actual);
 }
 END_TEST
 

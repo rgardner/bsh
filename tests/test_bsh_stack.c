@@ -1,7 +1,10 @@
-#include "../src/stack.h"
-#include "test_bsh.h"
+#include "stack.h"
+
 #include <check.h>
 #include <stdlib.h>
+
+#include "test_bsh.h"
+#include "test_utils.h"
 
 static char data[1024] = "element 1";
 static struct Stack* s;
@@ -27,9 +30,12 @@ END_TEST
 START_TEST(test_push_normal)
 {
   char* elem = strndup(data, sizeof(char) * strlen(data));
+  bsh_assert_ptr_not_null(elem);
+
   stack_push(s, elem);
   ck_assert_msg(stack_peak(s) == elem,
                 "element should be on the top of the stack");
+
   free(elem);
 }
 END_TEST
@@ -37,9 +43,12 @@ END_TEST
 START_TEST(test_pop_normal)
 {
   char* elem = strndup(data, strlen(data));
+  bsh_assert_ptr_not_null(elem);
+
   stack_push(s, elem);
   char* other = stack_pop(s);
   ck_assert_msg(elem == other, "pop should remove an element");
+
   free(elem);
 }
 END_TEST

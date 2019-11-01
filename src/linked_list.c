@@ -40,6 +40,7 @@ ll_add(struct LinkedList* list, const int index, const void* element)
   int i;
   for (i = 0; (i < index) && (current->next); i++)
     current = current->next;
+
   if (current->next) new->next = current->next->next;
   current->next = new;
   return i;
@@ -85,7 +86,8 @@ ll_remove(struct LinkedList* list)
 
   list->head = n->next;
   list->size--;
-  return n->data;
+
+  return node_free(n);
 }
 
 int

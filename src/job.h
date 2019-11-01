@@ -6,6 +6,12 @@
 #include <termios.h>
 #include <unistd.h>
 
+enum bsh_job_error
+{
+  c_bsh_job_error_success = 0,
+  c_bsh_job_error_general = 1,
+};
+
 /* A process is a single process.  */
 typedef struct process
 {
@@ -30,11 +36,15 @@ typedef struct job
   int infile, outfile, errfile; /* standard i/o channels */
 } job;
 
-void process_free(process*);
+void
+process_free(process*);
 
-void init_job(job*, const struct ParseInfo*, pid_t, struct termios);
+enum bsh_job_error
+init_job(job*, const struct ParseInfo*, pid_t, struct termios);
 
-void job_free(job*);
+void
+job_free(job*);
 
-void job_print(job*);
+void
+job_print(job*);
 #endif
