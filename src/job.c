@@ -101,6 +101,7 @@ init_job(job* j,
   j->next = NULL;
   /* TODO: use original command entered here, not stored in info. */
   j->command = NULL;
+  j->first_process = NULL;
 
   process* prev = NULL;
   for (int i = 0; i <= info->pipeNum; i++) {
@@ -145,28 +146,33 @@ error:
 void
 process_free(process* p)
 {
+  if (!p) return;
+
   for (int i = 0; i < p->argc; i++) {
     free(p->argv[i]);
+    p->argv[i] = NULL;
   }
 
-  for (process* next = p->next; next; next = next->next) {
-    process_free(next);
-  }
+  free(p->argv);
+  p->argv = NULL;
+
+  process_free(p->next);
+  free(p->next);
+  p->next = NULL;
 }
 
 void
 job_free(job* j)
 {
-  job* curr = j;
-  while (curr) {
-    free(curr->command);
-    for (process* p = curr->first_process; p; p = p->next) {
-      process_free(p);
-    }
-    job* next = curr->next;
-    free(curr);
-    curr = next;
-  }
+  if (!j) return;
+
+  free(j->command);
+  process_free(j->first_process);
+  free(j->first_process);
+  j->first_process = NULL;
+
+  job_free(j->next);
+  j->next = NULL;
 }
 
 void

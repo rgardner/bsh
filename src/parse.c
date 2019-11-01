@@ -23,6 +23,7 @@ void
 free_command(const struct Command* command)
 {
   if (!command) return;
+
   for (int i = 0; i < command->VarNum; i++) {
     free(command->VarList[i]);
   }
@@ -123,6 +124,7 @@ parse(const char* cmdline)
           free(arg);
           goto error;
         }
+
         cmd.VarList[cmd.VarNum] = arg;
         cmd.VarNum++;
       }
