@@ -12,8 +12,11 @@ trigger:
       - "*"
     exclude:
       - .clang-format
+      - .dockerignore
       - CONTRIBUTING.md
+      - Makefile
       - README.md
+      - docker
 
 pr:
   branches:
@@ -24,17 +27,22 @@ pr:
       - "*"
     exclude:
       - .clang-format
+      - .dockerignore
       - CONTRIBUTING.md
+      - Makefile
       - README.md
+      - docker
 
 strategy:
   matrix:
     linux:
       imageName: "ubuntu-latest"
       cmakeGenerator: "Ninja"
+      useValgrind: true
     mac:
       imageName: "macos-latest"
       cmakeGenerator: "Xcode"
+      useValgrind: false
 
 pool:
   vmImage: $(imageName)
@@ -42,7 +50,12 @@ pool:
 steps:
   - bash: |
       set -euo pipefail
-      sudo apt install libbsd-dev libreadline-dev ninja-build pkg-config
+      sudo apt-get install --yes --no-install-recommends \
+        libbsd-dev \
+        libreadline-dev \
+        ninja-build \
+        pkg-config \
+        valgrind
     condition: eq(variables['Agent.OS'], 'Linux')
     displayName: "Install Linux-specific build dependencies"
 
@@ -50,16 +63,17 @@ steps:
       set -euo pipefail
       mkdir -p build/debug
       pushd build/debug
-      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Debug ../..
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE:STRING=Debug -DBSH_USE_VALGRIND:BOOL="${USE_VALGRIND}" ../..
       cmake --build . --config Debug
       popd
 
       mkdir -p build/release
       pushd build/release
-      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE=Release ../..
+      cmake -G "${GENERATOR}" -DCMAKE_BUILD_TYPE:STRING=Release -DBSH_USE_VALGRIND:BOOL="${USE_VALGRIND}" ../..
       cmake --build . --config Release
     env:
       GENERATOR: $(cmakeGenerator)
+      USE_VALGRIND: $(useValgrind)
     displayName: "Build project"
 
   - script: |
