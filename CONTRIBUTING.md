@@ -14,9 +14,10 @@ of building `bsh`. Inside that container, you can use cmake, etc.
 make build-docker-linux
 make run-docker-linux
 # You are now inside the container
-mkdir -p build/linux/Debug && cd build/linux/Debug
+mkdir -p build/linux/Debug
+cd build/linux/Debug
 cmake -GNinja -DCMAKE_BUILD_TYPE:STRING=Debug ../../..
-cmake --build . --target runTests
+cmake --build . --config Debug --target runTests
 ```
 
 ## Testing
@@ -30,8 +31,8 @@ You can run the test suite by:
 ```sh
 mkdir -p build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
-cmake --build . --target runTests # build and run
+cmake -DCMAKE_BUILD_TYPE:STRING=Debug -GNinja ..
+cmake --build . --config Debug --target runTests # build and run
 ```
 
 ## Making Changes
@@ -44,6 +45,12 @@ cmake --build . --target runTests # build and run
 - global variables should be prefixed with `g_`
 - constants in global scope should be prefixed with `c_`
 - struct variables should not use a prefix
+
+### Code Formatting
+
+This project uses [ClangFormat][clangformat].
+
+[clangformat]: https://clang.llvm.org/docs/ClangFormat.html
 
 ## Documentation
 
