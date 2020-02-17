@@ -24,7 +24,14 @@ free_command(const struct Command* command)
 {
   if (!command) return;
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-unitialized"
+#endif
   for (int i = 0; i < command->VarNum; i++) {
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
     free(command->VarList[i]);
   }
 }
