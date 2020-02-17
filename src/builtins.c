@@ -1,17 +1,14 @@
 #include "builtins.h"
 
 #include <err.h>
+#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifdef __linux__
-#include <bsd/string.h>
-#else
 #include <string.h>
-#endif
 
 #include "alias.h"
 #include "bg_jobs.h"
@@ -23,15 +20,17 @@
 #include "util.h"
 
 // Function prototypes.
-static char* cd(int, char**);
-static void history_wrapper(int, char**);
-static void history_stifle_wrapper(const char*);
+static int cd(int, char**);
+static int history_wrapper(int, char**);
+static int history_stifle_wrapper(const char*);
+static int kill_wrapper(int, char**);
 static int dirs(int, char**);
 static int popd(int, char**);
 static int pushd(int, char**);
-static void which(int, char**);
+static int which(int, char**);
 static bool which_is_there(const char*);
 static int which_print_matches(char*, const char*);
+static int cd_try_save_cwd(const char* const);
 
 // Global variables
 struct Stack* directory_stack;
@@ -47,46 +46,49 @@ builtins_init(const size_t history_capacity)
 
 /** Print helpful information. */
 void
-help(int command)
+help(const enum BuiltinCommands cmd)
 {
-  if (command == ALIAS) {
+  if (cmd == ALIAS) {
     alias_help();
-  } else if (command == BG) {
+  } else if (cmd == BG) {
     bg_help();
-  } else if (command == CD) {
+  } else if (cmd == CD) {
     printf(
-      "usage: cd <directory>\n\n"
-      "change the working directory to <directory>.\n"
-      "<directory> can be an absolute or relative path.\n");
-  } else if (command == DIRS) {
+      "usage: cd [dir]\n\n"
+      "Change the working directory to DIR. The default DIR is the value of "
+      "the HOME shell variable.\n\n"
+      "DIR can be an absolute or relative path.\n");
+  } else if (cmd == DIRS) {
     printf(
       "usage: dirs\n\n"
-      "list directories on the directory stack.\n");
-  } else if (command == EXIT) {
+      "Display the list of currently remembered directories. Directories are "
+      "added to the stack with the `pushd` command and removed from the stack "
+      "using the `popd` command.\n");
+  } else if (cmd == EXIT) {
     printf(
       "usage: exit\n\n"
       "terminate the shell process unless there are background processes.\n");
-  } else if (command == FG) {
+  } else if (cmd == FG) {
     fg_help();
-  } else if (command == HELP) {
+  } else if (cmd == HELP) {
     printf(
       "bsh: a simple alternative to every other shell.\n"
       "usage: bsh\n\n"
-      "builtin commands: bg, cd, exit, fg, help, history, jobs, kill\n"
-      "use `help <command>` to learn more about a specific command.\n");
-  } else if (command == HISTORY) {
+      "builtin cmds: bg, cd, exit, fg, help, history, jobs, kill\n"
+      "use `help <cmd>` to learn more about a specific cmd.\n");
+  } else if (cmd == HISTORY) {
     history_help();
-  } else if (command == JOBS) {
+  } else if (cmd == JOBS) {
     jobs_help();
-  } else if (command == KILL) {
+  } else if (cmd == KILL) {
     printf(
       "usage: kill %%num\n\n"
       "terminate the process numbered `num` in the list of background "
       "processes return by `jobs` (by sending it SIGKILL).\n");
-  } else if (command == POPD) {
-  } else if (command == UNALIAS) {
+  } else if (cmd == POPD) {
+  } else if (cmd == UNALIAS) {
     unalias_help();
-  } else if (command == WHICH) {
+  } else if (cmd == WHICH) {
     printf("usage: which program ...\n");
   }
 }
@@ -130,14 +132,13 @@ execute_builtin_command(const enum BuiltinCommands command, process cmd)
     if (!has_bg_jobs()) {
       exit(EXIT_SUCCESS);
     }
-    printf("There are background processes.\n");
+    warnx("There are background processes.\n");
   } else if (command == HISTORY) {
     history_wrapper(cmd.argc, cmd.argv);
   } else if (command == JOBS) {
     print_running_jobs();
   } else if (command == KILL) {
-    pid_t pid = strtol(cmd.argv[1], (char**)NULL, 10);
-    kill(pid, SIGKILL);
+    kill_wrapper(cmd.argc, cmd.argv);
   } else if (command == POPD) {
     popd(cmd.argc, cmd.argv);
   } else if (command == PUSHD) {
@@ -149,108 +150,122 @@ execute_builtin_command(const enum BuiltinCommands command, process cmd)
   }
 }
 
-static char*
-cd(const int argc, char** argv)
+static int
+cd(const int argc, char** const argv)
 {
   char* dir = NULL;
-
   if (argc == 1 || (strlen(argv[1]) == 1 && *argv[1] == '~')) {
-    /* Destination is home directory. */
     if (!(dir = getenv("HOME"))) {
-      warnx("-bsh: cd: HOME not set");
-      return NULL;
+      warnx("cd: HOME not set");
+      return EXIT_FAILURE;
     }
   } else if (strlen(argv[1]) == 1 && *argv[1] == '-') {
-    /* Destination is previous working directory. */
     if (!(dir = getenv("OLDPWD"))) {
-      warnx("-bsh: cd: OLDPWD not set");
-      return NULL;
+      warnx("cd: OLDPWD not set");
+      return EXIT_FAILURE;
     }
   } else {
-    /* Destination is the argument to cd. */
-    const size_t dirsize = (strlen(argv[1]) + 1) * sizeof(char);
-    if (!(dir = malloc(dirsize))) {
-      err(1, "malloc");
-    }
-    strlcpy(dir, argv[1], dirsize);
+    dir = argv[1];
   }
 
-  char* cwd = NULL;
-  if (!(cwd = getcwd(NULL, 0))) {
-    warnx("unable to obtain current working directory.");
+  if (cd_try_save_cwd(dir) < 0) {
+    warn("cd: %s", dir);
+    return EXIT_FAILURE;
   }
 
-  if (chdir(dir) < 0) {
-    warnx("-bsh cd: %s: No such file or directory", dir);
-    return NULL;
-  }
-
-  if (cwd) setenv("OLDPWD", cwd, 1);
-
-  return dir;
+  return EXIT_SUCCESS;
 }
 
-static void
-history_wrapper(const int argc, char** argv)
+static int
+history_wrapper(const int argc, char** const argv)
 {
   if (!history_enabled()) {
-    if (argc == 3 && strncmp(argv[1], "-s", strlen("-s")) == 0) {
-      history_stifle_wrapper(argv[2]);
-      return;
+    if (argc == 3 && strcmp(argv[1], "-s") == 0) {
+      return history_stifle_wrapper(argv[2]);
     }
 
-    fprintf(stderr, "-bsh: history is disabled. Enable by unstifling history.\n");
-    return;
+    warnx("history: history is disabled. Enable by unstifling history");
+    return EXIT_FAILURE;
   }
 
   if (argc == 1) {
     history_print_all();
   } else if (argc == 2) {
+    errno = 0;
     const long n_last_entries = strtol(argv[1], NULL, 10 /*base*/);
-    if (n_last_entries < 0) {
-      fprintf(stderr, "-bsh: history: %ld: invalid option\n", n_last_entries);
-      return;
+    if (n_last_entries < 0 || (n_last_entries == 0 && errno == EINVAL)) {
+      warnx("history: %s: invalid option", argv[1]);
+      return EXIT_FAILURE;
     }
 
     history_print(n_last_entries);
-  } else if (argc == 3 && strncmp(argv[1], "-s", strlen("-s")) == 0) {
-    history_stifle_wrapper(argv[2]);
+  } else if (argc == 3 && strcmp(argv[1], "-s") == 0) {
+    return history_stifle_wrapper(argv[2]);
   } else {
     help(HISTORY);
   }
+
+  return EXIT_SUCCESS;
 }
 
-static void
-history_stifle_wrapper(const char* arg)
+static int
+history_stifle_wrapper(const char* const arg)
 {
+  errno = 0;
   const long hist_capacity = strtol(arg, NULL, 10 /*base*/);
-  if (hist_capacity < 0) {
-    fprintf(stderr, "-bsh: history: %ld: invalid option\n", hist_capacity);
-    return;
+  if (hist_capacity < 0 || (hist_capacity == 0 && errno == EINVAL)) {
+    warnx("history: %ld: invalid option", hist_capacity);
+    return EXIT_FAILURE;
   }
 
   history_stifle(hist_capacity);
+  return EXIT_SUCCESS;
 }
 
-static void
+static int
+kill_wrapper(const int argc, char** const argv)
+{
+  if (argc == 1) {
+    warnx("usage: kill [pid]");
+    return EXIT_FAILURE;
+  }
+
+  errno = 0;
+  pid_t pid = strtol(argv[1], NULL, 10 /*base*/);
+  if (pid < -1 || (pid == 0 && errno == EINVAL)) {
+    warnx("kill: %s: invalid option", argv[1]);
+    return EXIT_FAILURE;
+  }
+
+  if (kill(pid, SIGKILL) < 0) {
+    warn("kill: (%d)", pid);
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
+}
+
+static int
 which(const int argc, char** argv)
 {
-  if (argc == 0) {
-    printf("usage: which program ...\n");
-    return;
+  if (argc == 1) {
+    warnx("usage: which program ...");
+    return EXIT_FAILURE;
   }
+
   char* p = getenv("PATH");
   if (!p) {
-    fprintf(stderr, "-bsh: which: PATH not set\n");
-    return;
+    warnx("which: PATH not set");
+    return EXIT_FAILURE;
   }
-  size_t pathlen = strlen(p) + 1;
-  char* path = malloc(pathlen);
+
   for (int i = 1; i < argc; i++) {
-    memcpy(path, p, pathlen);
+    char* const path = strdup(p);
     if (strlen(argv[i]) >= FILE_MAX_SIZE) continue;
     which_print_matches(path, argv[i]);
   }
+
+  return EXIT_SUCCESS;
 }
 
 static bool
@@ -295,62 +310,87 @@ which_print_matches(char* path, const char* filename)
 }
 
 static int
-dirs(const int argc, char** argv)
+dirs(const int argc, char** const argv)
 {
   UNUSED(argc);
   UNUSED(argv);
 
-  size_t len = 1024;
-  char* cwd = malloc(len);
-  if (!getcwd(cwd, len)) {
-    fprintf(stderr, "Error. Could not obtain current working directory.\n");
-    free(cwd);
-    return -1;
+  char* const cwd = getcwd(NULL, 0);
+  if (!cwd) {
+    warnx("dirs: could not obtain current working directory");
+    return EXIT_FAILURE;
   }
+
   printf("%s", cwd);
-  int size = stack_size(directory_stack);
+  free(cwd);
+
+  const int size = stack_size(directory_stack);
   for (int i = 0; i < size; i++) {
-    char* dir = stack_get(directory_stack, i);
+    const char* const dir = stack_get(directory_stack, i);
     printf(" %s", dir);
   }
+
   printf("\n");
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 static int
-popd(const int argc, char** argv)
+popd(const int argc, char** const argv)
 {
   UNUSED(argc);
+  UNUSED(argv);
 
-  if (stack_empty(directory_stack)) {
-    printf("-bsh: popd: directory stack empty\n");
-    return -1;
+  char* const dir = stack_pop(directory_stack);
+  if (!dir) {
+    warnx("popd: directory stack empty");
+    return EXIT_FAILURE;
   }
 
-  char* dir = stack_pop(directory_stack);
-  const int new_argc = 1;
-  argv[0] = dir;
-  cd(new_argc, argv);
+  const bool succeeded = cd_try_save_cwd(dir) >= 0;
+  if (!succeeded) {
+    warnx("popd:");
+  }
+
   free(dir);
-  return 0;
+  return succeeded ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static int
-pushd(const int argc, char** argv)
+pushd(const int argc, char** const argv)
 {
-  if (argc < 1) {
-    printf("-bsh: pushd: no other directory\n");
+  if (argc == 1) {
+    warnx("pushd: no other directory");
+    return EXIT_FAILURE;
+  }
+
+  char* const cwd = getcwd(NULL, 0);
+  if (!cwd) {
+    warnx("pushd: could not obtain current working directory");
+    return EXIT_FAILURE;
+  }
+
+  stack_push(directory_stack, cwd);
+  if (cd_try_save_cwd(argv[1]) < 0) {
+    warnx("pushd: %s", argv[1]);
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
+}
+
+static int
+cd_try_save_cwd(const char* const dir)
+{
+  char* const cwd = getcwd(NULL, 0);
+  if (chdir(dir) < 0) {
+    if (cwd) free(cwd);
     return -1;
   }
 
-  size_t len = 1024;
-  char* cwd = malloc(len);
-  if (!getcwd(cwd, len)) {
-    fprintf(stderr, "Error. Could not obtain current working directory.\n");
-  } else {
-    stack_push(directory_stack, cwd);
+  if (cwd) {
+    UNUSED(setenv("OLDPWD", cwd, 1));
+    free(cwd);
   }
-  cd(argc, argv);
-  free(cwd);
+
   return 0;
 }

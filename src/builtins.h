@@ -27,15 +27,15 @@ enum BuiltinCommands
   WHICH
 };
 
-/* Initialize all data structures for builtin commands. */
+/** Initialize all data structures for builtin commands. */
 void builtins_init(size_t history_capacity);
 
-/* Print help about a specific builtin command. */
-void help(const int command);
+/** Print help about a specific builtin command. */
+void help(enum BuiltinCommands cmd);
 
-/* Return the enum that corresponds to cmd. */
+/** Return the enum that corresponds to cmd. */
 enum BuiltinCommands is_builtin_command(const char* cmd);
 
-/* Execute the builtin command in the same process as the caller. */
+/** Execute the builtin command in the same process as the caller. */
 void execute_builtin_command(const enum BuiltinCommands command, process cmd);
 #endif

@@ -19,7 +19,7 @@ contributing to the project, and improving the documentation.
 ## Installation
 
 macOS and Ubuntu are currently supported and tested. This project requires
-[CMake](https://cmake.org/) version 2.8 or higher to build.
+[CMake](https://cmake.org/) version 3.12 or higher to build.
 
 macOS:
 
@@ -42,9 +42,9 @@ mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug -GNinja ..
 # Build
-cmake --build .
+cmake --build . --config Debug
 # Run
-cmake --build . --target run
+src/bsh
 ```
 
 ## Documentation

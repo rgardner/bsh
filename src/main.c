@@ -3,11 +3,11 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
 #ifdef __linux__
 #include <bsd/stdlib.h>  // reallocf
 #include <bsd/string.h>
 #else
+#include <stdlib.h>
 #include <string.h>
 #endif
 #include <readline/readline.h>
@@ -257,7 +257,8 @@ main(int argc, char** argv)
           continue;
         }
 
-        const size_t check __attribute__((unused)) = strlcpy(cmd_line, expansion, newsz) + 1;
+        const size_t check __attribute__((unused)) =
+          strlcpy(cmd_line, expansion, newsz) + 1;
         assert(check == newsz);
       }
 

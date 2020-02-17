@@ -38,16 +38,15 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   add_compile_options(-fcolor-diagnostics)
 endif()
 
-set(BSH_C_FLAGS_COMMON
-    -Wall
-    -Wextra
-    -Werror
-    -Wunreachable-code
-    -Wformat=2
-    -DUNIX)
+set(BSH_C_FLAGS_COMMON -Wall -Wextra -Wunreachable-code -Wformat=2)
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  list(APPEND BSH_C_FLAGS_COMMON -Wno-maybe-uninitialized)
+endif()
 if(BSH_ENABLE_WERROR)
   list(APPEND BSH_C_FLAGS_COMMON -Werror)
 endif()
+
+set(BSH_C_DEFINES_COMMON UNIX)
 
 find_package(Readline REQUIRED)
 include_directories(${READLINE_INCLUDE_DIR})

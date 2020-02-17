@@ -14,6 +14,7 @@ set(bshTestHeaders test_bsh.h test_utils.h)
 
 add_executable(bshUnitTests ${bshTestHeaders} ${bshTestSources})
 target_compile_options(bshUnitTests PRIVATE ${BSH_C_FLAGS_COMMON})
+target_compile_definitions(bshUnitTests PRIVATE ${BSH_C_DEFINES_COMMON})
 
 if(UNIX AND NOT APPLE)
   target_compile_definitions(bshUnitTests PUBLIC _GNU_SOURCE)
