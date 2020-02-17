@@ -52,7 +52,7 @@ This project uses [ClangFormat][clangformat].
 
 [clangformat]: https://clang.llvm.org/docs/ClangFormat.html
 
-## Documentation
+### Writing Documentation
 
 - javadoc style comment
 - use @ style
@@ -62,6 +62,11 @@ This project uses [ClangFormat][clangformat].
 - use @bug and preferably link to GH issue
 - add examples with @code
 - use @param, @param[in], @param[out], @param[in, out]
+
+## Pull Requests
+
+Use the `automerge` label on your Pull Request to automatically merge the pull
+request when the status checks pass.
 
 ## References
 
