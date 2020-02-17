@@ -38,7 +38,12 @@ elseif("${CMAKE_C_COMPILER_ID}" MATCHES "Clang")
   add_compile_options(-fcolor-diagnostics)
 endif()
 
-set(BSH_C_FLAGS_COMMON -Wall -Wextra -Wunreachable-code -Wformat=2)
+set(BSH_C_FLAGS_COMMON
+    -Wall
+    -Wextra
+    -Wunreachable-code
+    -Wformat=2
+    -Wno-maybe-uninitialized)
 if(BSH_ENABLE_WERROR)
   list(APPEND BSH_C_FLAGS_COMMON -Werror)
 endif()
